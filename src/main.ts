@@ -5,10 +5,15 @@ import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
-import '@/styles/element/index.scss'
 import '@/styles/index.scss'
-import '@/styles/theme.scss'
 import { setupDirectives } from '@/directives'
+
+// 开发环境工具
+if (process.env.NODE_ENV === 'development') {
+  import('@/utils/dev-tools')
+  console.log('🚀 Vue应用启动完成 - 开发模式')
+  console.log('📋 标签页功能状态: 已启用')
+}
 
 const app = createApp(App)
 

@@ -2,17 +2,17 @@
   <div class="sidebar">
     <!-- Logo -->
     <div class="logo">
-      <span v-if="!sidebarCollapsed" class="logo-text">Admin System</span>
+      <span v-if="!sidebarCollapsed" class="logo-text">页面列表</span>
     </div>
-    
     <!-- 菜单 -->
     <el-menu
       :default-active="activeMenu"
       :collapse="sidebarCollapsed"
-      :unique-opened="true"
-      background-color="#304156"
-      text-color="#bfcbd9"
-      active-text-color="#409EFF"
+      :unique-opened="false"
+      :default-openeds="defaultOpeneds"
+      background-color="#ffffff"
+      text-color="#303133"
+      active-text-color="#333333"
       router
     >
       <template v-for="item in menuList" :key="item.path">
@@ -30,11 +30,17 @@ import SidebarItem from './SidebarItem.vue'
 
 const route = useRoute()
 const appStore = useAppStore()
-
 const sidebarCollapsed = computed(() => appStore.sidebarCollapsed)
 const activeMenu = computed(() => route.path)
 
-// 模拟菜单数据
+// 获取所有有子菜单的父菜单路径，用于默认展开
+const defaultOpeneds = computed(() => {
+  return menuList.value
+    .filter(item => item.children && item.children.length > 0)
+    .map(item => item.path)
+})
+
+// 菜单数据 (保留 icon 属性)
 const menuList = ref([
   {
     path: '/dashboard',
@@ -45,35 +51,119 @@ const menuList = ref([
     }
   },
   {
-    path: '/system',
-    name: 'System',
+    path: '/contact-application',
+    name: 'ContactApplication',
     meta: {
-      title: '系统管理',
-      icon: 'Setting'
+      title: '对接人申请界面',
+      icon: 'UserFilled'
     },
     children: [
       {
-        path: '/system/user',
-        name: 'SystemUser',
+        path: '/contact-application/pending-management',
+        name: 'PendingManagement',
         meta: {
-          title: '用户管理',
-          icon: 'User'
+          title: '挂单管理',
+          icon: 'Document'
         }
       },
       {
-        path: '/system/role',
-        name: 'SystemRole',
+        path: '/contact-application/pending-application',
+        name: 'PendingApplication',
         meta: {
-          title: '角色管理',
-          icon: 'UserFilled'
+          title: '挂单申请',
+          icon: 'Plus'
+        }
+      }
+    ]
+  },
+  {
+    path: '/hall-management',
+    name: 'HallManagement',
+    meta: {
+      title: '客堂管理界面',
+      icon: 'OfficeBuilding'
+    },
+    children: [
+      {
+        path: '/hall-management/pending-review',
+        name: 'PendingOrderReview',
+        meta: {
+          title: '挂单审核',
+          icon: 'Check'
         }
       },
       {
-        path: '/system/menu',
-        name: 'SystemMenu',
+        path: '/hall-management/renewal-review',
+        name: 'RenewalReview',
         meta: {
-          title: '菜单管理',
-          icon: 'Menu'
+          title: '续单审核',
+          icon: 'Refresh'
+        }
+      },
+      {
+        path: '/hall-management/check-in-registration',
+        name: 'CheckInRegistration',
+        meta: {
+          title: '入住登记',
+          icon: 'House'
+        }
+      },
+      {
+        path: '/hall-management/bed-change-application',
+        name: 'BedChangeApplication',
+        meta: {
+          title: '换床申请',
+          icon: 'Operation'
+        }
+      },
+      {
+        path: '/hall-management/cancel-confirmation',
+        name: 'CancelConfirmation',
+        meta: {
+          title: '退单确认',
+          icon: 'Close'
+        }
+      },
+      {
+        path: '/hall-management/evaluation-management',
+        name: 'EvaluationManagement',
+        meta: {
+          title: '评价管理',
+          icon: 'Star'
+        }
+      },
+      {
+        path: '/hall-management/pending-records',
+        name: 'PendingOrderQuery',
+        meta: {
+          title: '挂单记录',
+          icon: 'Document'
+        }
+      }
+    ]
+  },
+  {
+    path: '/accommodation-management',
+    name: 'AccommodationManagement',
+    meta: {
+      title: '住宿管理界面',
+      icon: 'School'
+    },
+    children: [
+      {
+        path: '/accommodation-management/room-bed-management',
+        name: 'RoomBedManagement',
+        meta: {
+          title: '房间及床位管理',
+          icon: 'List'
+        }
+      },
+      {
+        path: '/accommodation-management/room-bed-edit',
+        name: 'RoomBedEdit',
+        meta: {
+          title: '房间及床位编辑',
+          icon: 'Edit'
         }
       }
     ]
@@ -84,44 +174,148 @@ const menuList = ref([
 <style scoped lang="scss">
 .sidebar {
   height: 100%;
-  
+  background-color: #ffffff !important;
+  border-right: 1px solid #e6e8eb;
+
   .logo {
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #2b2f3a;
-    border-bottom: 1px solid #1f2d3d;
-    
+    background: #ffffff !important;
+    border-bottom: 1px solid #e6e8eb;
+
     .logo-img {
       width: 32px;
       height: 32px;
       margin-right: 8px;
     }
-    
+
     .logo-text {
-      color: #fff;
+      color: #303133;
       font-size: 16px;
       font-weight: bold;
     }
   }
-  
-  .el-menu {
+
+  :deep(.el-menu) {
+    background-color: #ffffff !important;
     border-right: none;
     height: calc(100vh - 60px);
     overflow-y: auto;
-    
+
+    // 主菜单项样式
+    .el-menu-item {
+      background-color: #ffffff !important;
+      color: #303133 !important;
+      border-bottom: 1px solid #f0f2f5;
+      height: auto;
+      min-height: 48px; // 减小高度
+      line-height: 1.2;
+      padding: 8px 20px; // 减小上下内边距
+
+      &:hover,
+      &.is-active {
+        // 统一悬停和选中状态的样式，并显式移除边框和阴影
+        background-color: rgb(228, 239, 255)!important; // #e6f7ff
+        color: #333333 !important; // #409EFF
+        border: none !important; // 显式移除边框
+        box-shadow: none !important; // 显式移除阴影
+        outline: none !important; // 显式移除焦点轮廓
+        position: relative;
+        &::before {
+          // 移除左侧蓝色竖条
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 0;
+          background-color: transparent;
+        }
+      }
+    }
+
+    // 子菜单样式
+    .el-sub-menu {
+      .el-sub-menu__title {
+        background-color: #ffffff !important;
+        color: #303133 !important;
+        border-bottom: 1px solid #f0f2f5;
+        height: auto;
+        min-height: 48px; // 减小高度
+        line-height: 1.2;
+        padding: 8px 20px; // 减小上下内边距
+
+        &:hover,
+        &.is-opened {
+          // 统一悬停和展开状态的样式
+          background-color: #fafbfc !important;
+          color: #333333 !important; // #409EFF
+        }
+      }
+
+      // 子菜单容器
+      .el-menu {
+        background-color: #fafbfc !important;
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible;
+
+        // 子菜单项
+        .el-menu-item {
+          background-color: #fafbfc !important;
+          color: #606266 !important;
+          padding-left: 20px !important; // 减小缩进
+          border-bottom: 1px solid #f0f2f5;
+          height: auto;
+          min-height: 40px; // 减小高度
+          line-height: 1.2;
+          padding-top: 6px; // 减小上下内边距
+          padding-bottom: 6px; // 减小上下内边距
+
+          &:hover,
+          &.is-active {
+            // 统一悬停和选中状态的样式，并显式移除边框和阴影
+            background-color: #e6f7ff!important; // #e6f7ff
+            color: #333333 !important; // #409EFF
+            border: none !important; // 显式移除边框
+            box-shadow: none !important; // 显式移除阴影
+            outline: none !important; // 显式移除焦点轮廓
+            position: relative;
+            &::before {
+              // 移除左侧蓝色竖条
+              content: '';
+              position: absolute;
+              left: 0;
+              top: 0;
+              bottom: 0;
+              width: 0;
+              background-color: transparent;
+            }
+          }
+        }
+      }
+    }
+
     &::-webkit-scrollbar {
-      width: 4px;
+      width: 6px;
     }
-    
+
     &::-webkit-scrollbar-track {
-      background: #304156;
+      background: transparent;
+      border-radius: 3px;
     }
-    
+
     &::-webkit-scrollbar-thumb {
-      background: #48576a;
-      border-radius: 2px;
+      background: #c0c4cc;
+      border-radius: 3px;
+      border: 1px solid #f5f7fa;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #909399;
+      }
     }
   }
 }

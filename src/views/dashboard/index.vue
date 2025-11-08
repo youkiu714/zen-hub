@@ -1,8 +1,8 @@
 <template>
   <div class="dashboard">
     <div class="dashboard-header">
-      <h1>欢迎使用 Vue3 Admin System</h1>
-      <p>这是一个基于 Vue3 + Element Plus + Vite 构建的后台管理系统</p>
+      <h1>欢迎使用 挂单申请系统</h1>
+      <!-- <p>这是一个基于 Vue3 + Element Plus + Vite 构建的后台管理系统</p> -->
     </div>
     
     <div class="dashboard-content">
@@ -29,7 +29,7 @@
               </div>
               <div class="stat-info">
                 <div class="stat-value">5,678</div>
-                <div class="stat-label">订单总数</div>
+                <div class="stat-label">床铺总数</div>
               </div>
             </div>
           </el-card>
@@ -43,7 +43,7 @@
               </div>
               <div class="stat-info">
                 <div class="stat-value">¥123,456</div>
-                <div class="stat-label">销售额</div>
+                <div class="stat-label">挂单总数</div>
               </div>
             </div>
           </el-card>
@@ -57,7 +57,7 @@
               </div>
               <div class="stat-info">
                 <div class="stat-value">89.5%</div>
-                <div class="stat-label">转化率</div>
+                <div class="stat-label">成功率</div>
               </div>
             </div>
           </el-card>
@@ -68,7 +68,7 @@
         <el-col :span="12">
           <el-card>
             <template #header>
-              <span>销售趋势</span>
+              <span>挂单人数趋势</span>
             </template>
             <div ref="chartRef" style="height: 300px;"></div>
           </el-card>
@@ -84,13 +84,13 @@
                 <el-icon><User /></el-icon>
                 用户管理
               </el-button>
-              <el-button type="success" @click="handleQuickAction('订单管理')">
+              <el-button type="success" @click="handleQuickAction('挂单管理')">
                 <el-icon><ShoppingBag /></el-icon>
-                订单管理
+                挂单管理
               </el-button>
-              <el-button type="warning" @click="handleQuickAction('商品管理')">
+              <el-button type="warning" @click="handleQuickAction('床铺管理')">
                 <el-icon><Goods /></el-icon>
-                商品管理
+                床铺管理
               </el-button>
               <el-button type="info" @click="handleQuickAction('系统设置')">
                 <el-icon><Setting /></el-icon>
@@ -122,7 +122,7 @@ const initChart = () => {
   
   const option = {
     title: {
-      text: '销售数据',
+      text: '挂单人数',
       left: 'center'
     },
     tooltip: {
@@ -137,7 +137,7 @@ const initChart = () => {
     },
     series: [
       {
-        name: '销售额',
+        name: '挂单人数',
         type: 'line',
         data: [120, 200, 150, 80, 70, 110],
         smooth: true,

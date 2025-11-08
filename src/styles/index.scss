@@ -1,3 +1,9 @@
+// 导入设计系统变量
+@import './variables.scss';
+
+// =====================================================
+// 全局重置样式
+// =====================================================
 * {
   margin: 0;
   padding: 0;
@@ -7,7 +13,13 @@
 html,
 body {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: $font-family-primary;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: $text-color-primary;
+  background-color: $bg-color-page;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
@@ -67,6 +79,149 @@ body {
   height: 100%;
 }
 
+// Vben Admin 风格容器类
+.page-container {
+  padding: $spacing-lg;
+  background-color: $bg-color-page;
+  min-height: 100vh;
+}
+
+// Vben Admin 风格侧边栏布局
+.layout-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: $sidebar-width;
+  background-color: $bg-color-sidebar;
+  z-index: $z-index-fixed;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  transition: $transition-base;
+
+  &.collapsed {
+    width: $sidebar-collapsed-width;
+  }
+
+  .sidebar-logo {
+    height: $header-height;
+    display: flex;
+    align-items: center;
+    padding: 0 $sidebar-padding;
+    border-bottom: 1px solid $border-color-lighter;
+    background-color: $bg-color;
+
+    .logo-img {
+      width: 32px;
+      height: 32px;
+      margin-right: $spacing-sm;
+    }
+
+    .logo-text {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-color-primary;
+      white-space: nowrap;
+      transition: $transition-base;
+    }
+  }
+
+  .sidebar-menu {
+    height: calc(100% - #{$header-height});
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: $sidebar-padding;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 2px;
+    }
+  }
+
+  &.collapsed .sidebar-logo .logo-text {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+// 主内容区域
+.layout-main {
+  margin-left: $sidebar-width;
+  min-height: 100vh;
+  background-color: $bg-color-page;
+  transition: $transition-base;
+
+  &.collapsed {
+    margin-left: $sidebar-collapsed-width;
+  }
+}
+
+.page-content {
+  background-color: $bg-color;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-light;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-md;
+  border-bottom: 1px solid $border-color-lighter;
+
+  .title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $text-color-primary;
+  }
+}
+
+// Vben Admin 风格网格布局
+.grid-container {
+  display: grid;
+  gap: $spacing-lg;
+}
+
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+// Vben Admin 风格状态卡片
+.stat-card {
+  background: $bg-color;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-base;
+  transition: $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+
+  .stat-value {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    color: $text-color-primary;
+    margin-bottom: $spacing-xs;
+  }
+
+  .stat-label {
+    font-size: $font-size-sm;
+    color: $text-color-secondary;
+  }
+}
+
 // 动画
 .fade-enter-active,
 .fade-leave-active {
@@ -91,7 +246,223 @@ body {
   transform: translateX(100%);
 }
 
-// Element Plus 自定义样式
+// Vben Admin 风格卡片样式
+.el-card {
+  border-radius: $card-border-radius;
+  box-shadow: $card-shadow;
+  border: none;
+
+  .el-card__header {
+    border-bottom: $card-header-border;
+    padding: $spacing-md $card-padding;
+    background-color: $card-bg;
+    font-weight: $font-weight-medium;
+    color: $text-color-primary;
+  }
+
+  .el-card__body {
+    padding: $card-padding;
+    background-color: $card-bg;
+  }
+}
+
+// Vben Admin 风格按钮样式
+.el-button {
+  border-radius: $border-radius-base;
+  font-weight: $font-weight-normal;
+  transition: $transition-base;
+
+  &.el-button--primary {
+    background-color: $primary-color;
+    border-color: $primary-color;
+
+    &:hover {
+      background-color: $primary-light;
+      border-color: $primary-light;
+    }
+
+    &:active {
+      background-color: $primary-dark;
+      border-color: $primary-dark;
+    }
+  }
+}
+
+// Vben Admin 风格输入框样式
+.el-input {
+  .el-input__wrapper {
+    border-radius: $border-radius-base;
+    transition: $transition-base;
+
+    &:hover {
+      box-shadow: 0 0 0 1px $primary-color;
+    }
+  }
+
+  &.is-focus .el-input__wrapper {
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+}
+
+// Vben Admin 风格表格样式
+.el-table {
+  border-radius: $border-radius-base;
+  overflow: hidden;
+
+  th {
+    background-color: $bg-color-page;
+    font-weight: $font-weight-medium;
+  }
+
+  .el-table__row {
+    &:hover {
+      background-color: rgba($primary-color, 0.04);
+    }
+  }
+}
+
+// Vben Admin 风格侧边栏菜单样式
+.el-menu {
+  border-right: none;
+  background-color: $bg-color-sidebar;
+  padding: $spacing-xs; // 减少整体内边距
+
+  .el-menu-item {
+    border-radius: $border-radius-md;
+    margin: $spacing-xs 0;
+    transition: $transition-base;
+    background-color: $bg-color;
+    height: 48px;
+    line-height: 48px;
+    box-shadow: none; // 正常状态无阴影
+    position: relative;
+
+    // 调整菜单项内边距，让文字更贴近边缘
+    &.el-menu-item {
+      padding-left: $spacing-md !important;
+      padding-right: $spacing-md !important;
+    }
+
+    &:hover {
+      background-color: $bg-color;
+      color: $primary-color;
+      box-shadow: $shadow-base; // 悬浮时轻微阴影
+      transform: translateY(-1px);
+    }
+
+    &.is-active {
+      background-color: $primary-color;
+      color: white;
+      box-shadow: $shadow-md; // 选中状态更明显阴影
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 24px;
+        background-color: white;
+        border-radius: 0 2px 2px 0;
+      }
+
+      &:hover {
+        box-shadow: $shadow-lg; // 悬浮在选中项上时阴影更明显
+      }
+    }
+
+    .el-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: $spacing-sm;
+    }
+  }
+
+  .el-sub-menu {
+    .el-sub-menu__title {
+      border-radius: $border-radius-md;
+      margin: $spacing-xs 0;
+      transition: $transition-base;
+      background-color: $bg-color;
+      height: 48px;
+      line-height: 48px;
+      box-shadow: none; // 正常状态无阴影
+
+      // 调整子菜单标题内边距
+      padding-left: $spacing-md !important;
+      padding-right: $spacing-md !important;
+
+      &:hover {
+        background-color: $bg-color;
+        color: $primary-color;
+        box-shadow: $shadow-base; // 悬浮时轻微阴影
+        transform: translateY(-1px);
+      }
+
+      .el-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: $spacing-sm;
+      }
+    }
+
+    .el-menu {
+      background-color: transparent;
+      padding: $spacing-xs 0;
+
+      .el-menu-item {
+        margin-left: $spacing-md; // 适度缩进
+        margin-right: $spacing-xs; // 减少右边距离
+        background-color: rgba(255, 255, 255, 0.8);
+        height: 40px;
+        line-height: 40px;
+        font-size: $font-size-sm;
+        box-shadow: none; // 正常状态无阴影
+
+        // 调整子菜单项内边距
+        padding-left: $spacing-md !important;
+        padding-right: $spacing-md !important;
+
+        &.is-active {
+          background-color: rgba($primary-color, 0.1);
+          color: $primary-color;
+          box-shadow: $shadow-light; // 选中状态轻微阴影
+
+          &::before {
+            display: none;
+          }
+
+          &:hover {
+            box-shadow: $shadow-base; // 悬浮在选中项上时阴影更明显
+          }
+        }
+
+        &:hover {
+          background-color: rgba($primary-color, 0.08);
+          color: $primary-color;
+          box-shadow: $shadow-light; // 悬浮时轻微阴影
+          transform: translateY(-1px);
+        }
+      }
+    }
+  }
+}
+
+// 侧边栏收起状态样式
+.el-menu--collapse {
+  .el-menu-item,
+  .el-sub-menu .el-sub-menu__title {
+    padding: 0 $spacing-sm !important;
+    text-align: center;
+  }
+
+  .el-sub-menu .el-menu {
+    display: none;
+  }
+}
+
+// Element Plus 原有自定义样式
 .el-menu--horizontal .el-menu-item {
   border-bottom: none !important;
 }

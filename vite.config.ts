@@ -14,7 +14,7 @@ export default defineConfig({
       imports: ['vue', 'vue-router', 'pinia'],
       dts: true
     }),
-    Components({ 
+    Components({
       resolvers: [ElementPlusResolver()],
       dts: true
     })
@@ -24,19 +24,20 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
-//   css: {
-//     preprocessorOptions: {
-//       scss: {
-//         additionalData: '@use "@/styles/element/tokens.scss" as *;'
-//       }
-//     }
-//   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@use "@/styles/element/index.scss" as *;`
+      }
+    }
+  },
   server: {
+    host: '0.0.0.0',
     port: 3000,
     open: true,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
+      '/api': {  // http://localhost:8080
+        target: 'http://localhost:8080', // http://49.232.241.94:8080/lodging/api/applications?pageNo=1&pageSize=10
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

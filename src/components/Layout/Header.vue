@@ -141,6 +141,7 @@ const handleCommand = async (command: string) => {
     .collapse-btn {
       font-size: 18px;
       color: #333;
+      margin-left: 10px;
     }
   }
   

@@ -34,7 +34,7 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     const { code, message, data } = response.data
     
-    if (code === 200) {
+    if (code === 0) { // 200
       return data
     } else {
       ElMessage.error(message || '请求失败')
