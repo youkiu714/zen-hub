@@ -44,7 +44,7 @@ export function setupRouterGuards(router: Router) {
     if (token) {
       if (to.path === '/login') {
         // 已登录，重定向到首页
-        next({ path: '/' })
+        // next({ path: '/' })
         NProgress.done()
       } else {
         // 检查是否有用户信息
@@ -55,7 +55,7 @@ export function setupRouterGuards(router: Router) {
           } catch (error) {
             // 获取用户信息失败，清除 token 并重定向到登录页
             userStore.resetState()
-            next(`/login?redirect=${to.path}`)
+            // next(`/login?redirect=${to.path}`)
             NProgress.done()
           }
         } else {
@@ -67,7 +67,7 @@ export function setupRouterGuards(router: Router) {
       if (whiteList.includes(to.path)) {
         next()
       } else {
-        next(`/login?redirect=${to.path}`)
+        // next(`/login?redirect=${to.path}`)
         NProgress.done()
       }
     }

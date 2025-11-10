@@ -19,9 +19,9 @@
         </div>
 
         <!-- 面包屑 -->
-        <div v-if="showBreadcrumb" class="breadcrumb-container">
+        <!-- <div v-if="showBreadcrumb" class="breadcrumb-container">
           <Breadcrumb />
-        </div>
+        </div> -->
 
         <!-- 主内容 -->
         <el-main class="main">

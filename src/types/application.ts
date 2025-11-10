@@ -53,7 +53,7 @@ export enum ApplicationStatus {
 export interface StatusTag {
   value: ApplicationStatus;
   label: string;
-  type: 'success' | 'info' | 'warning' | 'danger' | 'primary';
+  type: 'success' | 'default' | 'warning' | 'danger' | 'primary';
   icon: string;
 }
 

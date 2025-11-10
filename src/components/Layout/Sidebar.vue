@@ -2,7 +2,7 @@
   <div class="sidebar">
     <!-- Logo -->
     <div class="logo">
-      <span v-if="!sidebarCollapsed" class="logo-text">页面列表</span>
+      <span v-if="!sidebarCollapsed" class="logo-text">挂单管理系统</span>
     </div>
     <!-- 菜单 -->
     <el-menu
@@ -11,8 +11,8 @@
       :unique-opened="false"
       :default-openeds="defaultOpeneds"
       background-color="#ffffff"
-      text-color="#303133"
-      active-text-color="#333333"
+      text-color="#1a1c1f"
+      active-text-color="#326bfb"
       router
     >
       <template v-for="item in menuList" :key="item.path">
@@ -36,20 +36,20 @@ const activeMenu = computed(() => route.path)
 // 获取所有有子菜单的父菜单路径，用于默认展开
 const defaultOpeneds = computed(() => {
   return menuList.value
-    .filter(item => item.children && item.children.length > 0)
-    .map(item => item.path)
+    .filter((item) => item.children && item.children.length > 0)
+    .map((item) => item.path)
 })
 
 // 菜单数据 (保留 icon 属性)
 const menuList = ref([
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    meta: {
-      title: '首页',
-      icon: 'House'
-    }
-  },
+//   {
+//     path: '/dashboard',
+//     name: 'Dashboard',
+//     meta: {
+//       title: '首页',
+//       icon: 'House'
+//     }
+//   },
   {
     path: '/contact-application',
     name: 'ContactApplication',
@@ -176,6 +176,7 @@ const menuList = ref([
   height: 100%;
   background-color: #ffffff !important;
   border-right: 1px solid #e6e8eb;
+  box-sizing: border-box;
 
   .logo {
     height: 60px;
@@ -183,7 +184,7 @@ const menuList = ref([
     align-items: center;
     justify-content: center;
     background: #ffffff !important;
-    border-bottom: 1px solid #e6e8eb;
+    // border-bottom: 1px solid #e6e8eb;
 
     .logo-img {
       width: 32px;
@@ -198,41 +199,41 @@ const menuList = ref([
     }
   }
 
+  :deep(.el-menu--collapse) {
+    width: auto !important;
+    .el-sub-menu__title {
+      display: flex;
+      justify-content: center;
+      padding: 0;
+    }
+  }
+  :deep(.el-menu-tooltip__trigger) {
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
   :deep(.el-menu) {
     background-color: #ffffff !important;
     border-right: none;
-    height: calc(100vh - 60px);
+    // height: calc(100vh - 60px);
     overflow-y: auto;
 
     // 主菜单项样式
     .el-menu-item {
       background-color: #ffffff !important;
       color: #303133 !important;
-      border-bottom: 1px solid #f0f2f5;
+      font-weight: 600;
       height: auto;
       min-height: 48px; // 减小高度
       line-height: 1.2;
       padding: 8px 20px; // 减小上下内边距
+      box-shadow: none;
+      transform: none;
 
       &:hover,
       &.is-active {
-        // 统一悬停和选中状态的样式，并显式移除边框和阴影
-        background-color: rgb(228, 239, 255)!important; // #e6f7ff
-        color: #333333 !important; // #409EFF
-        border: none !important; // 显式移除边框
-        box-shadow: none !important; // 显式移除阴影
-        outline: none !important; // 显式移除焦点轮廓
-        position: relative;
-        &::before {
-          // 移除左侧蓝色竖条
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          width: 0;
-          background-color: transparent;
-        }
+        color: #409eff !important; // #409EFF
+        box-shadow: none !important;
       }
     }
 
@@ -241,33 +242,34 @@ const menuList = ref([
       .el-sub-menu__title {
         background-color: #ffffff !important;
         color: #303133 !important;
-        border-bottom: 1px solid #f0f2f5;
+        font-weight: 600;
         height: auto;
         min-height: 48px; // 减小高度
         line-height: 1.2;
-        padding: 8px 20px; // 减小上下内边距
+        box-shadow: none;
+        transform: none;
+        // display: flex;
+        // justify-content: center;
 
         &:hover,
         &.is-opened {
-          // 统一悬停和展开状态的样式
-          background-color: #fafbfc !important;
-          color: #333333 !important; // #409EFF
+          color: #409eff !important; // #409EFF
         }
       }
 
       // 子菜单容器
       .el-menu {
-        background-color: #fafbfc !important;
+        // background-color: #fafbfc !important;
         height: auto !important;
         min-height: auto !important;
         overflow: visible;
 
         // 子菜单项
         .el-menu-item {
-          background-color: #fafbfc !important;
-          color: #606266 !important;
+          color: #303133 !important;
           padding-left: 20px !important; // 减小缩进
-          border-bottom: 1px solid #f0f2f5;
+          //   border-bottom: 1px solid #f0f2f5;
+          font-weight: 500;
           height: auto;
           min-height: 40px; // 减小高度
           line-height: 1.2;
@@ -277,8 +279,8 @@ const menuList = ref([
           &:hover,
           &.is-active {
             // 统一悬停和选中状态的样式，并显式移除边框和阴影
-            background-color: #e6f7ff!important; // #e6f7ff
-            color: #333333 !important; // #409EFF
+            background-color: #e6f7ff !important; // #e6f7ff
+            color: #409eff !important;
             border: none !important; // 显式移除边框
             box-shadow: none !important; // 显式移除阴影
             outline: none !important; // 显式移除焦点轮廓
@@ -315,6 +317,98 @@ const menuList = ref([
 
       &:hover {
         background: #909399;
+      }
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+.el-menu {
+  background-color: #ffffff !important;
+  border-right: none;
+  // height: calc(100vh - 60px);
+  overflow-y: auto;
+
+  // 主菜单项样式
+  .el-menu-item {
+    background-color: #ffffff !important;
+    color: #303133 !important;
+    font-weight: 600;
+    height: auto;
+    min-height: 48px; // 减小高度
+    line-height: 1.2;
+    padding: 8px 20px; // 减小上下内边距
+    box-shadow: none;
+    transform: none;
+
+    &:hover,
+    &.is-active {
+      color: #409eff !important; // #409EFF
+      box-shadow: none !important;
+      background-color: #e6f7ff !important;
+    }
+  }
+
+  // 子菜单样式
+  .el-sub-menu {
+    .el-sub-menu__title {
+      background-color: #ffffff !important;
+      color: #303133 !important;
+      font-weight: 600;
+      height: auto;
+      min-height: 48px; // 减小高度
+      line-height: 1.2;
+      box-shadow: none;
+      transform: none;
+      // display: flex;
+      // justify-content: center;
+
+      &:hover,
+      &.is-opened {
+        color: #409eff !important; // #409EFF
+      }
+    }
+
+    // 子菜单容器
+    .el-menu {
+      // background-color: #fafbfc !important;
+      height: auto !important;
+      min-height: auto !important;
+      overflow: visible;
+
+      // 子菜单项
+      .el-menu-item {
+        color: #303133 !important;
+        padding-left: 20px !important; // 减小缩进
+        //   border-bottom: 1px solid #f0f2f5;
+        font-weight: 500;
+        height: auto;
+        min-height: 40px; // 减小高度
+        line-height: 1.2;
+        padding-top: 6px; // 减小上下内边距
+        padding-bottom: 6px; // 减小上下内边距
+
+        &:hover,
+        &.is-active {
+          // 统一悬停和选中状态的样式，并显式移除边框和阴影
+          background-color: #e6f7ff !important; // #e6f7ff
+          color: #409eff !important;
+          border: none !important; // 显式移除边框
+          box-shadow: none !important; // 显式移除阴影
+          outline: none !important; // 显式移除焦点轮廓
+          position: relative;
+          &::before {
+            // 移除左侧蓝色竖条
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background-color: transparent;
+          }
+        }
       }
     }
   }

@@ -15,7 +15,7 @@
     
     <div class="header-right">
       <!-- 主题切换 -->
-      <el-tooltip content="主题切换" placement="bottom">
+      <!-- <el-tooltip content="主题切换" placement="bottom">
         <el-button
           type="text"
           class="header-btn"
@@ -27,7 +27,7 @@
           </el-icon>
         </el-button>
       </el-tooltip>
-      
+       -->
       <!-- 全屏 -->
       <el-tooltip content="全屏" placement="bottom">
         <el-button

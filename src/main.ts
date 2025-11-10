@@ -7,6 +7,7 @@ import App from './App.vue'
 import router from './router'
 import '@/styles/index.scss'
 import { setupDirectives } from '@/directives'
+import '@/styles/global.scss'
 
 // 开发环境工具
 if (process.env.NODE_ENV === 'development') {
