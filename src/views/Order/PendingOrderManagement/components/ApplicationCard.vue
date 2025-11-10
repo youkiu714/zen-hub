@@ -133,46 +133,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 进度条或提示信息 -->
-    <div v-if="isApplied" class="progress-container">
-      <div class="progress-label">申请进度</div>
-      <el-progress :percentage="progressPercentage" :stroke-width="8" :color="progressColor" />
-      <div class="progress-steps">
-        <span :class="{ 'active': currentStep >= 1 }">已提交申请</span>
-        <span :class="{ 'active': currentStep >= 2 }">审核中</span>
-        <span :class="{ 'active': currentStep >= 3 }">审核完成</span>
-      </div>
-    </div>
-
-    <!-- 提示信息 -->
-    <div v-if="isPending" class="tip-box" style="background-color: #e6f7ff; border-left: 4px solid #1890ff;">
-      <el-icon>
-        <InfoFilled />
-      </el-icon>
-      <span>请在入住日当天携带有效证件到客堂办理入住手续，建议上午9:00-11:00或下午14:00-16:00之间办理。</span>
-    </div>
-
-    <div v-if="isCheckedIn" class="tip-box" style="background-color: #f6ffed; border-left: 4px solid #52c41a;">
-      <el-icon>
-        <CircleCheck />
-      </el-icon>
-      <span>入住已确认。请遵守寺院作息时间，保持寮房安静整洁，共同维护良好的修行环境。</span>
-    </div>
-
-    <div v-if="isCheckedOut" class="tip-box" style="background-color: #fffbe6; border-left: 4px solid #faad14;">
-      <el-icon>
-        <Warning />
-      </el-icon>
-      <span>物品遗落提醒：您在退住时遗落了一本《金刚经》在寮房，请尽快联系客堂取回，联系电话：0571-87968665。</span>
-    </div>
-
-    <div v-if="isRejected" class="tip-box" style="background-color: #fff1f0; border-left: 4px solid #ff4d4f;">
-      <el-icon>
-        <Warning />
-      </el-icon>
-      <span>审核不通过原因：您申请期间正值寺院夏季禅七法会，寮房床位已满，建议您选择其他时间段申请或关注寺院公告了解法会期间挂单政策。</span>
-    </div>
   </el-card>
 
   
