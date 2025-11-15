@@ -3,13 +3,15 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { useUserStore } from '@/store/modules/user'
 import { useTabsStore } from '@/store/modules/tabs'
-import { getToken } from '@/utils'
+// import { getToken } from '@/utils'
+import { getToken, setToken, setUserInfo } from '@/utils'
+import { DEV_CONFIG, quickLogin } from '@/utils/dev-tools'
 
 // 配置 NProgress
 NProgress.configure({ showSpinner: false })
 
 // 白名单路由（无需登录）
-const whiteList = ['/login', '/404', '/403', '/500']
+const whiteList = ['/','/PendingOrderQuery', '/PendingOrderReview', '/login', '/404', '/403', '/500']
 
 export function setupRouterGuards(router: Router) {
   // 前置守卫
@@ -18,6 +20,26 @@ export function setupRouterGuards(router: Router) {
 
     const userStore = useUserStore()
     const token = getToken()
+
+        // 开发环境绕过登录逻辑
+    if (DEV_CONFIG.BYPASS_LOGIN && !token && to.path !== '/login') {
+      console.log('🚀 开发模式：自动创建虚拟用户信息')
+
+      // 使用快速登录功能
+      const { user: mockUser, token: mockToken } = quickLogin(DEV_CONFIG.DEFAULT_USER as any)
+
+      // 设置虚拟 token 和用户信息
+      setToken(mockToken, false)
+      setUserInfo(mockUser)
+
+      // 更新 store 状态
+      userStore.setMockToken(mockToken)
+      userStore.setMockUser(mockUser)
+
+      console.log('✅ 虚拟用户登录成功:', mockUser)
+      next()
+      return
+    }
 
     if (token) {
       if (to.path === '/login') {
@@ -58,7 +80,7 @@ export function setupRouterGuards(router: Router) {
     // 设置页面标题
     const title = to.meta?.title as string
     if (title) {
-      document.title = `${title} - Vue3 Admin System`
+      document.title = `${title} - 挂单申请系统`
     }
 
     // 添加标签页

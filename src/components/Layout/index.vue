@@ -1,28 +1,28 @@
 <template>
   <div class="layout">
-    <el-container>
+    <el-container class="layout-container">
       <!-- 侧边栏 -->
       <el-aside :width="sidebarWidth" class="sidebar">
         <Sidebar />
       </el-aside>
-      
+
       <!-- 主内容区 -->
-      <el-container>
+      <el-container class="main-container">
         <!-- 顶部导航 -->
         <el-header class="header">
           <Header />
         </el-header>
-        
+
         <!-- 标签页 -->
         <div v-if="showTabs" class="tabs-container">
           <Tabs />
         </div>
-        
+
         <!-- 面包屑 -->
         <div v-if="showBreadcrumb" class="breadcrumb-container">
           <Breadcrumb />
         </div>
-        
+
         <!-- 主内容 -->
         <el-main class="main">
           <router-view v-slot="{ Component, route }">
@@ -71,36 +71,53 @@ const cachedViews = computed(() => [])
 <style scoped lang="scss">
 .layout {
   height: 100vh;
-  
-  .sidebar {
-    background: #304156;
-    transition: width 0.3s;
-  }
-  
-  .header {
-    background: #fff;
-    border-bottom: 1px solid #e4e7ed;
-    padding: 0;
-    height: 60px;
-  }
-  
-  .tabs-container {
-    background: #fff;
-    border-bottom: 1px solid #e4e7ed;
-    padding: 0 20px;
-  }
-  
-  .breadcrumb-container {
-    background: #f5f5f5;
-    padding: 10px 20px;
-    border-bottom: 1px solid #e4e7ed;
-  }
-  
-  .main {
-    background: #f5f5f5;
-    padding: 20px;
-    overflow-y: auto;
-  }
+  overflow: hidden;
+}
+
+.layout-container {
+  height: 100vh;
+}
+
+.sidebar {
+  background: #304156;
+  transition: width 0.3s;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.main-container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.header {
+  background: #fff;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 0;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.tabs-container {
+  background: #fff;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+
+.breadcrumb-container {
+  background: #fdf6e3; // #f5f5f5
+  padding: 10px 20px;
+  border-bottom: 1px solid #e4e7ed;
+  flex-shrink: 0;
+}
+
+.main {
+  background: #fdf6e3; // #f5f5f5
+  padding: 0px;
+  padding-bottom: 0px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .fade-enter-active,

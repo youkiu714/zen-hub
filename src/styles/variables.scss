@@ -1,0 +1,189 @@
+// =====================================================
+// 设计系统变量 (Design Tokens)
+// =====================================================
+
+// --------------------
+// 颜色系统 (Color System)
+// --------------------
+// 主色调 - Vben Admin 风格蓝色
+$primary-color: #1890ff;
+$primary-light: #40a9ff;
+$primary-dark: #096dd9;
+
+// 功能色
+$success-color: #67c23a;
+$success-light: #95d475;
+$success-dark: #529b2e;
+
+$warning-color: #e6a23c;
+$warning-light: #ebb563;
+$warning-dark: #b88230;
+
+$danger-color: #f56c6c;
+$danger-light: #f78989;
+$danger-dark: #c45656;
+
+$info-color: #909399;
+$info-light: #a6a9ad;
+$info-dark: #73767a;
+
+// 中性色
+$text-color-primary: #303133;
+$text-color-regular: #606266;
+$text-color-secondary: #909399;
+$text-color-placeholder: #c0c4cc;
+
+// 边框色
+$border-color-base: #dcdfe6;
+$border-color-light: #e4e7ed;
+$border-color-lighter: #ebeef5;
+$border-color-extra-light: #f2f6fc;
+
+// 背景色 - Vben Admin 风格
+$bg-color: #ffffff;
+$bg-color-page: #f5f5f5;
+$bg-color-overlay: #ffffff;
+$bg-color-sidebar: #f6f6f6; // 侧边栏背景色
+
+// --------------------
+// 间距系统 (Spacing System)
+// --------------------
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;
+
+// 组件内部间距
+$component-padding-xs: $spacing-xs;
+$component-padding-sm: $spacing-sm;
+$component-padding-md: $spacing-md;
+$component-padding-lg: $spacing-lg;
+
+// 布局间距
+$layout-padding-sm: $spacing-md;
+$layout-padding-md: $spacing-lg;
+$layout-padding-lg: $spacing-xl;
+
+// --------------------
+// 字体系统 (Typography System)
+// --------------------
+// 字体族
+$font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-family-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+
+// 字体大小
+$font-size-xs: 12px;
+$font-size-sm: 13px;
+$font-size-base: 14px;
+$font-size-md: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 20px;
+$font-size-xxl: 24px;
+
+// 字体粗细
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// 行高
+$line-height-base: 1.5;
+$line-height-sm: 1.25;
+$line-height-lg: 1.75;
+
+// --------------------
+// 圆角系统 (Border Radius) - Vben Admin 风格
+// --------------------
+$border-radius-none: 0;
+$border-radius-xs: 2px;
+$border-radius-sm: 4px;
+$border-radius-base: 8px; // 增加基础圆角
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 20px;
+$border-radius-round: 20px;
+$border-radius-circle: 50%;
+
+// --------------------
+// 阴影系统 (Shadow System) - Vben Admin 风格
+// --------------------
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06);
+$shadow-base: 0 2px 8px rgba(0, 0, 0, 0.08);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+$shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+
+// --------------------
+// 过渡动画 (Transitions)
+// --------------------
+$transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+$transition-opacity: opacity 0.3s ease;
+$transition-transform: transform 0.3s ease;
+$transition-colors: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+
+// --------------------
+// 断点系统 (Breakpoints)
+// --------------------
+$breakpoint-xs: 480px;
+$breakpoint-sm: 768px;
+$breakpoint-md: 992px;
+$breakpoint-lg: 1200px;
+$breakpoint-xl: 1920px;
+
+// --------------------
+// Z-index 系统
+// --------------------
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+$z-index-notification: 2000;
+
+// --------------------
+// 组件特定变量
+// --------------------
+// 按钮高度
+$button-height-xs: 24px;
+$button-height-sm: 32px;
+$button-height-md: 40px;
+$button-height-lg: 48px;
+
+// 输入框高度
+$input-height-xs: 24px;
+$input-height-sm: 32px;
+$input-height-md: 40px;
+$input-height-lg: 48px;
+
+// 表格
+$table-cell-padding: $spacing-md;
+$table-border-color: $border-color-lighter;
+$table-header-bg: $bg-color-page;
+
+// 卡片 - Vben Admin 风格
+$card-padding: $spacing-lg;
+$card-border-radius: $border-radius-md;
+$card-shadow: $shadow-base;
+$card-bg: #ffffff;
+$card-header-border: 1px solid $border-color-lighter;
+
+// 侧边栏 - Vben Admin 风格
+$sidebar-width: 240px;
+$sidebar-collapsed-width: 64px;
+$sidebar-padding: $spacing-sm;
+$menu-item-height: 48px;
+$menu-sub-item-height: 40px;
+$menu-item-border-radius: $border-radius-md;
+
+// 头部
+$header-height: 60px;
+
+// 标签页
+$tabs-height: 40px;

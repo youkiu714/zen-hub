@@ -4,7 +4,7 @@ import type { ThemeConfig } from '@/types'
 
 export const useAppStore = defineStore('app', () => {
   const sidebarCollapsed = ref(false)
-  const showTabs = ref(true)
+  const showTabs = ref(false)
   const showBreadcrumb = ref(true)
   const isDark = ref(false)
   const primaryColor = ref('#409EFF')

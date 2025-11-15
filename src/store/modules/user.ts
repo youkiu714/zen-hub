@@ -69,6 +69,18 @@ export const useUserStore = defineStore('user', () => {
     removeUserInfo()
   }
 
+  // 设置虚拟token（开发模式使用）
+  const setMockToken = (newToken: string) => {
+    token.value = newToken
+  }
+
+  // 设置虚拟用户信息（开发模式使用）
+  const setMockUser = (userInfo: User) => {
+    user.value = userInfo
+    roles.value = userInfo.roles || []
+    permissions.value = userInfo.permissions || []
+  }
+
   return {
     token,
     user,
@@ -77,6 +89,8 @@ export const useUserStore = defineStore('user', () => {
     loginAction,
     getUserInfo,
     logout,
-    resetState
+    resetState,
+    setMockToken,
+    setMockUser
   }
 })
