@@ -97,9 +97,9 @@ const formData = reactive<{
 }>({
   basic: {
     name: '',
-    idCard: '232123234567876543',
+    idCard: '',
     ethnic: '',
-    gender: 1,
+    gender: "1",
     mobile: '',
     weChat: '',
     marital: '',
