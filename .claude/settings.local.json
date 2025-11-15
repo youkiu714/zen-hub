@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/share/入住管理/待入住/**)",
+      "Read(//c/share/zhusu/assets/page/**)",
+      "Bash(npm run dev:*)",
+      "Bash(npx vue-tsc:*)",
+      "Read(//c/share/挂单分床/已分配/**)",
+      "Read(//c/share/挂单申请/**)",
+      "Read(//c/share/挂单分床/已入住/**)",
+      "Read(//c/share/挂单分床/已退住/**)",
+      "Read(//c/share/入住管理/**)",
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr node)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

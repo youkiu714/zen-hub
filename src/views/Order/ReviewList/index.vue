@@ -97,6 +97,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 import ReviewDetailDialog from './ReviewDetailDialog.vue';
+import ReviewModal from './ReviewModal.vue';
 import { getReviews } from '@/api/review';
 import type { ReviewListItemVO, ReviewListResponse } from '@/types/review';
 
@@ -131,6 +132,11 @@ const isViewOnly = ref(true);
 // =============== 计算 ===============
 const statusFilter = computed(() => Number(activeTab.value));
 
+// =============== 审核窗口 ===============
+const showReview = ref(false)
+const currentApplicationId = ref(12345) // 示例ID，实际从数据中获取
+
+
 // ====== 监听 Tab 切换 ======
 watch(activeTab, () => {
   currentPage.value = 1; // 切换 Tab 时重置页码
@@ -144,6 +150,12 @@ const handleSearchChange = () => {
     fetchData();
   }
 };
+
+// =============== 子窗口返回的方法 ===============
+const handleReviewSuccess = () => {
+  fetchData()
+};
+
 
 const fetchData = async () => {
   try {
@@ -229,9 +241,10 @@ const handleView = (row: ReviewListItemVO) => {
 };
 
 const handleReview = (row: ReviewListItemVO) => {
+  currentApplicationId.value = row.id
   currentItem.value = row;
   isViewOnly.value = false;
-  dialogVisible.value = true;
+  showReview.value = true
 };
 
 const handleReReview = (row: ReviewListItemVO) => {

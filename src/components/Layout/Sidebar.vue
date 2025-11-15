@@ -104,7 +104,7 @@ const menuList = ref([
         path: '/hall-management/check-in-registration',
         name: 'CheckInRegistration',
         meta: {
-          title: '入住登记',
+          title: '入住管理',
           icon: 'House'
         }
       },
@@ -139,7 +139,15 @@ const menuList = ref([
           title: '挂单记录',
           icon: 'Document'
         }
-      }
+      },
+      {
+        path: '/hall-management/assignment-management',
+        name: 'AssignmentManagement',
+        meta: {
+          title: '挂单分床',
+          icon: 'House'
+        }
+      },
     ]
   },
   {
@@ -285,6 +293,7 @@ const menuList = ref([
             box-shadow: none !important; // 显式移除阴影
             outline: none !important; // 显式移除焦点轮廓
             position: relative;
+
             &::before {
               // 移除左侧蓝色竖条
               content: '';

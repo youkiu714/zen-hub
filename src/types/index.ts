@@ -155,6 +155,18 @@ export interface BasicInfo {
   medicationHistory?: string
   infectiousHistory?: string
   emergencyContacts: ContactItem[]
+  /**
+   * 年龄（可留空，后端会按出生年月计算填充） 新增加
+   */
+  age?: number
+  /**
+   * 出生年月   新增加
+   */
+  birthDate?: string
+  /**
+   * 所属部组（PROJECT/READING/COMPILATION/OTHER）  新增加
+   */
+  departmentCode?: string
   [property: string]: any
 }
 
@@ -178,6 +190,30 @@ export interface LodgingInfo {
   recommenderPhone?: string
   recommenderRelation?: string
   recommenderComment?: string
+  /**
+   * 来寺因缘（若 practice.visitAffinity 未填可在此提供）  新增加
+   */
+  causeOfVisit?: string
+  /**
+   * 出发行程日期
+   */
+  departureDate?: string
+  /**
+   * 用斋选择（0无 1早斋 2午斋 3药石）  新增加
+   */
+  mealPreference?: number
+  /**
+   * 离开行程日期  新增加
+   */
+  returnDate?: string
+  /**
+   * 自我评价  新增加
+   */
+  selfEvaluation?: string
+  /**
+   * 短住原因及期许  新增加
+   */
+  shortStayReason?: string
   [property: string]: any
 }
 

@@ -2,7 +2,7 @@
  * @Author: zhaoziying zhaoziying@kuaishou.com
  * @Date: 2025-11-09 10:23:51
  * @LastEditors: zhaoziying zhaoziying@kuaishou.com
- * @LastEditTime: 2025-11-15 23:41:47
+ * @LastEditTime: 2025-11-16 00:43:54
  * @FilePath: /zen-hub/src/types/application.ts
  * @Description: 
  * 

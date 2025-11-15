@@ -97,8 +97,9 @@ const formData = reactive<{
 }>({
   basic: {
     name: '',
-    idCard: '',
+    idCard: '232123234567876543',
     ethnic: '',
+    gender: 1,
     mobile: '',
     weChat: '',
     marital: '',
@@ -117,7 +118,10 @@ const formData = reactive<{
     emergencyContacts: [
       { contactName: '', contactPhone: '', sortNo: 1 },
       { contactName: '', contactPhone: '', sortNo: 2 }
-    ]
+    ],
+    age: undefined,
+    birthDate: '',
+    departmentCode: ''
   },
   practice: {
     refugeTakenDate: '',
@@ -136,7 +140,12 @@ const formData = reactive<{
     recommenderName: '',
     recommenderPhone: '',
     recommenderComment: '',
-    agreement: false
+    agreement: false,
+    causeOfVisit: '',
+    departureDate: '',
+    mealPreference: undefined,
+    returnDate: '',
+    shortStayReason: ''
   }
 })
 
