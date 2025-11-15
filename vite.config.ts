@@ -36,8 +36,8 @@ export default defineConfig({
     port: 3000,
     open: true,
     proxy: {
-      '/api': {  // http://localhost:8080
-        target: 'http://localhost:8080', // http://49.232.241.94:8080/lodging/api/applications?pageNo=1&pageSize=10
+      '/api': {
+        target: 'http://49.232.241.94:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

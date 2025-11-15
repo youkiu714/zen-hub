@@ -5,16 +5,9 @@
       <span v-if="!sidebarCollapsed" class="logo-text">页面列表</span>
     </div>
     <!-- 菜单 -->
-    <el-menu
-      :default-active="activeMenu"
-      :collapse="sidebarCollapsed"
-      :unique-opened="false"
-      :default-openeds="defaultOpeneds"
-      background-color="#ffffff"
-      text-color="#303133"
-      active-text-color="#333333"
-      router
-    >
+    <el-menu :default-active="activeMenu" :collapse="sidebarCollapsed" :unique-opened="false"
+      :default-openeds="defaultOpeneds" background-color="#ffffff" text-color="#303133" active-text-color="#333333"
+      router>
       <template v-for="item in menuList" :key="item.path">
         <SidebarItem :item="item" />
       </template>
@@ -104,7 +97,7 @@ const menuList = ref([
         path: '/hall-management/check-in-registration',
         name: 'CheckInRegistration',
         meta: {
-          title: '入住登记',
+          title: '入住管理',
           icon: 'House'
         }
       },
@@ -139,7 +132,15 @@ const menuList = ref([
           title: '挂单记录',
           icon: 'Document'
         }
-      }
+      },
+      {
+        path: '/hall-management/assignment-management',
+        name: 'AssignmentManagement',
+        meta: {
+          title: '挂单分床',
+          icon: 'House'
+        }
+      },
     ]
   },
   {
@@ -217,12 +218,13 @@ const menuList = ref([
       &:hover,
       &.is-active {
         // 统一悬停和选中状态的样式，并显式移除边框和阴影
-        background-color: rgb(228, 239, 255)!important; // #e6f7ff
+        background-color: rgb(228, 239, 255) !important; // #e6f7ff
         color: #333333 !important; // #409EFF
         border: none !important; // 显式移除边框
         box-shadow: none !important; // 显式移除阴影
         outline: none !important; // 显式移除焦点轮廓
         position: relative;
+
         &::before {
           // 移除左侧蓝色竖条
           content: '';
@@ -277,12 +279,13 @@ const menuList = ref([
           &:hover,
           &.is-active {
             // 统一悬停和选中状态的样式，并显式移除边框和阴影
-            background-color: #e6f7ff!important; // #e6f7ff
+            background-color: #e6f7ff !important; // #e6f7ff
             color: #333333 !important; // #409EFF
             border: none !important; // 显式移除边框
             box-shadow: none !important; // 显式移除阴影
             outline: none !important; // 显式移除焦点轮廓
             position: relative;
+
             &::before {
               // 移除左侧蓝色竖条
               content: '';

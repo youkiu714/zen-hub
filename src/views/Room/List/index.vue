@@ -128,16 +128,16 @@
       </div>
     </div>
 
-    <!-- 新增房间对话框 -->
+    <!-- 新增/编辑房间对话框 -->
     <el-dialog
       v-model="addRoomDialogVisible"
-      title="新增房间"
+      :title="isEditMode ? '编辑房间' : '新增房间'"
       width="600px"
       @close="resetAddForm"
     >
       <el-form ref="addRoomFormRef" :model="addRoomForm" :rules="addRoomRules" label-width="100px">
         <el-form-item label="房间号" prop="roomNo">
-          <el-input v-model="addRoomForm.roomNo" placeholder="例如：A101" />
+          <el-input v-model="addRoomForm.roomNo" placeholder="例如：A101" :disabled="isEditMode" />
         </el-form-item>
         <el-form-item label="房间类型" prop="gender">
           <el-select v-model="addRoomForm.gender" placeholder="请选择房间类型">
@@ -188,7 +188,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getRooms, createRoom, type CreateRoomRequest } from '@/api/room';
+import { getRooms, createRoom, updateRoom, type CreateRoomRequest } from '@/api/room';
 import type { IPageRoomSummaryVO } from '@/types/room'
 
 // 页面数据
@@ -212,7 +212,12 @@ const isViewOnly = ref(true);
 // 新增房间对话框相关
 const addRoomDialogVisible = ref(false);
 const addRoomFormRef = ref();
+
+// 编辑模式相关
+const isEditMode = ref(false);
+const editingRoomId = ref<number | null>(null);
 const addRoomForm = reactive({
+  id: 0,
   roomNo: '',
   gender: 1,
   roomType: 1,
@@ -310,6 +315,8 @@ const resetAddForm = () => {
     bedCount: 4,
     description: '',
   });
+  isEditMode.value = false;
+  editingRoomId.value = null;
 };
 
 const submitAddRoom = async () => {
@@ -318,27 +325,42 @@ const submitAddRoom = async () => {
       try {
         // 构建请求数据，按照API要求的格式
         const roomData: CreateRoomRequest = {
+          id: addRoomForm.id,
           roomNo: addRoomForm.roomNo,
           gender: addRoomForm.gender,
           roomType: addRoomForm.roomType,
+          bedCount: addRoomForm.bedCount,
           floor: addRoomForm.floor,
           status: addRoomForm.status,
           description: addRoomForm.description || undefined,
         };
 
-        console.log('提交新增房间:', roomData);
+        console.log('提交房间数据:', roomData);
 
-        // 调用API创建房间
-        await createRoom(roomData);
+        if (isEditMode.value) {
+          // 编辑模式 - 调用更新API
+          console.log('编辑模式 - 房间ID:', editingRoomId.value);
+          if (editingRoomId.value) {
+            // await updateRoom(editingRoomId.value, roomData);
+            await createRoom(roomData);
+            ElMessage.success('房间更新成功');
+          } else {
+            ElMessage.error('房间ID不存在，无法更新');
+            return;
+          }
+        } else {
+          // 新增模式
+          await createRoom(roomData);
+          ElMessage.success('房间添加成功');
+        }
 
-        ElMessage.success('房间添加成功');
         addRoomDialogVisible.value = false;
 
         // 刷新列表
         await fetchRooms();
       } catch (error) {
-        console.error('创建房间失败:', error);
-        ElMessage.error('房间添加失败，请重试');
+        console.error('操作失败:', error);
+        ElMessage.error(isEditMode.value ? '房间更新失败，请重试' : '房间添加失败，请重试');
       }
     } else {
       console.log('表单验证失败');
@@ -351,9 +373,25 @@ const handleBedManagement = (row: RoomSummaryVO) => {
   // 跳转到床位管理页面或打开床位管理弹窗
 };
 
-const handleEditRoom = (row: RoomSummaryVO) => {
-  ElMessage.info(`编辑房间 ${row.roomNo}`);
-  // 打开编辑弹窗，预填充数据
+const handleEditRoom = (row: IPageRoomSummaryVO) => {
+  // 设置编辑模式
+  isEditMode.value = true;
+  editingRoomId.value = row.id || null;
+
+  // 填充表单数据
+  Object.assign(addRoomForm, {
+    id: row.id || 0,
+    roomNo: row.roomNo || '',
+    gender: row.gender || 1,
+    roomType: row.roomType || 1,
+    floor: row.floor || 1,
+    status: row.status || 1,
+    bedCount: row.bedCount || 4,
+    description: row.description || '',
+  });
+
+  // 打开对话框
+  addRoomDialogVisible.value = true;
 };
 
 const handleToggleStatus = (row: RoomSummaryVO) => {

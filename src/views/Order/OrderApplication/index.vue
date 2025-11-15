@@ -48,32 +48,44 @@
 
         <el-form label-position="top" ref="basicFormRef" :model="formData.basic" :rules="basicRules" label-width="120px"
           class="form-content">
-          <!-- 姓名、身份证、民族、电话 -->
+          <!-- 姓名、性别、民族、电话 -->
           <el-row :gutter="20">
-            <el-col :span="12">
+            <el-col :span="6">
               <el-form-item label="姓名 *" prop="name">
                 <el-input v-model="formData.basic.name" placeholder="请输入姓名" clearable />
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item label="身份证号 *" prop="idCard">
-                <el-input v-model="formData.basic.idCard" placeholder="请输入18位身份证号" clearable />
+            <el-col :span="6">
+              <el-form-item label="性别" prop="gender">
+                <el-radio-group v-model="formData.basic.gender">
+                  <el-radio :value="1">男</el-radio>
+                  <el-radio :value="2">女</el-radio>
+                </el-radio-group>
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <el-row :gutter="20">
-            <el-col :span="12">
+            <el-col :span="6">
               <el-form-item label="民族 *" prop="ethnic">
                 <el-select v-model="formData.basic.ethnic" placeholder="请选择民族" clearable>
                   <el-option v-for="item in ethnicOptions" :key="item" :label="item" :value="item" />
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="6">
               <el-form-item label="电话号码 *" prop="mobile">
                 <el-input v-model="formData.basic.mobile" placeholder="请输入手机号码" clearable />
               </el-form-item>
+            </el-col>
+          </el-row>
+
+          <!-- 身份证 -->
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="身份证号 *" prop="idCard">
+                <el-input v-model="formData.basic.idCard" placeholder="请输入18位身份证号" clearable />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <!-- 预留空间 -->
             </el-col>
           </el-row>
 
@@ -104,6 +116,32 @@
             <el-col :span="12">
               <el-form-item label="详细地址 *" prop="address">
                 <el-input v-model="formData.basic.address" placeholder="请输入详细地址，包括街道、门牌号等" clearable />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <!-- 新增字段：出生年月、年龄、所属部组 -->
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <el-form-item label="出生年月" prop="birthDate">
+                <el-date-picker v-model="formData.basic.birthDate" type="date" placeholder="yyyy/mm/dd"
+                  format="YYYY/MM/DD" value-format="YYYY-MM-DD" clearable />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="年龄" prop="age">
+                <el-input-number v-model="formData.basic.age" :min="1" :max="120" placeholder="请输入年龄"
+                  controls-position="right" style="width: 100%" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="所属部组" prop="departmentCode">
+                <el-select v-model="formData.basic.departmentCode" placeholder="请选择部组" clearable>
+                  <el-option label="项目组" value="PROJECT" />
+                  <el-option label="学修组" value="READING" />
+                  <el-option label="编译组" value="COMPILATION" />
+                  <el-option label="其他" value="OTHER" />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -214,11 +252,28 @@
         <el-form label-position="top" ref="practiceFormRef" :model="formData.practice" :rules="practiceRules"
           label-width="120px" class="form-content">
           <el-row :gutter="20">
-            <el-col :span="24">
+            <el-col :span="12">
               <el-form-item label="皈依时间" prop="refugeTakenDate">
                 <el-date-picker v-model="formData.practice.refugeTakenDate" type="date" placeholder="yyyy/mm/dd"
                   format="YYYY/MM/DD" value-format="YYYY-MM-DD" clearable />
               </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="皈依寺院" prop="refugeTemple">
+                <el-input v-model="formData.practice.refugeTemple" placeholder="请输入皈依寺院名称" clearable />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="学修年数" prop="yearsOfPractice">
+                <el-input-number v-model="formData.practice.yearsOfPractice" :min="0" :max="100" placeholder="请输入学修年数"
+                  controls-position="right" style="width: 100%" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <!-- 预留空间或保持为空 -->
             </el-col>
           </el-row>
 
@@ -274,6 +329,24 @@
         </div>
         <el-form label-position="top" ref="lodgingFormRef" :model="formData.lodging" :rules="lodgingRules"
           label-width="120px" class="form-content">
+          <!-- 申请类型 -->
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="申请类型 *" prop="applicationType">
+                <el-select v-model="formData.lodging.applicationType" placeholder="请选择申请类型" clearable>
+                  <el-option label="短住" :value="1" />
+                  <el-option label="直通车" :value="2" />
+                  <el-option label="僧亲" :value="3" />
+                  <el-option label="团队挂单" :value="4" />
+                  <el-option label="特殊客人" :value="5" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <!-- 预留空间 -->
+            </el-col>
+          </el-row>
+
           <el-row :gutter="20">
             <el-col :span="12">
               <el-form-item label="申请短住开始时间 *" prop="checkinDate">
@@ -300,8 +373,58 @@
 
           <el-row :gutter="20">
             <el-col :span="24">
+              <el-form-item label="短住原因及期许（新）" prop="shortStayReason">
+                <el-input v-model="formData.lodging.shortStayReason" type="textarea" :rows="4" placeholder="请输入短住原因及期许"
+                  clearable />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="24">
               <el-form-item label="自我评价" prop="selfEvaluation">
                 <el-input v-model="formData.lodging.selfEvaluation" type="textarea" :rows="4" placeholder="请输入自我评价"
+                  clearable />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <!-- 新增字段：来寺因缘、出发行程日期、离开行程日期、用斋选择 -->
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="出发行程日期" prop="departureDate">
+                <el-date-picker v-model="formData.lodging.departureDate" type="date" placeholder="yyyy/mm/dd"
+                  format="YYYY/MM/DD" value-format="YYYY-MM-DD" clearable />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="离开行程日期" prop="returnDate">
+                <el-date-picker v-model="formData.lodging.returnDate" type="date" placeholder="yyyy/mm/dd"
+                  format="YYYY/MM/DD" value-format="YYYY-MM-DD" clearable />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="用斋选择" prop="mealPreference">
+                <el-select v-model="formData.lodging.mealPreference" placeholder="请选择用斋" clearable>
+                  <el-option label="无" :value="0" />
+                  <el-option label="早斋" :value="1" />
+                  <el-option label="午斋" :value="2" />
+                  <el-option label="药石" :value="3" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <!-- 预留空间 -->
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="24">
+              <el-form-item label="来寺因缘" prop="causeOfVisit">
+                <el-input v-model="formData.lodging.causeOfVisit" type="textarea" :rows="4" placeholder="请输入来寺因缘"
                   clearable />
               </el-form-item>
             </el-col>
@@ -410,8 +533,9 @@ const formData = reactive<{
 }>({
   basic: {
     name: '',
-    idCard: '',
+    idCard: '232123234567876543',
     ethnic: '',
+    gender: 1,
     mobile: '',
     weChat: '',
     marital: '',
@@ -430,14 +554,19 @@ const formData = reactive<{
     emergencyContacts: [
       { contactName: '', contactPhone: '', sortNo: 1 },
       { contactName: '', contactPhone: '', sortNo: 2 }
-    ]
+    ],
+    age: undefined,
+    birthDate: '',
+    departmentCode: ''
   },
   practice: {
     refugeTakenDate: '',
     pastPracticeExperience: '',
     currentPracticeExperience: '',
     visitRecords: '',
-    hasTakenPrecepts: null // 注意：用 null 表示“未选择”，true 表示任一戒律
+    hasTakenPrecepts: null, // 注意：用 null 表示"未选择"，true 表示任一戒律
+    refugeTemple: '',
+    yearsOfPractice: undefined
   },
   lodging: {
     applicationType: 1,
@@ -448,7 +577,12 @@ const formData = reactive<{
     recommenderName: '',
     recommenderPhone: '',
     recommenderComment: '',
-    agreement: false
+    agreement: false,
+    causeOfVisit: '',
+    departureDate: '',
+    mealPreference: undefined,
+    returnDate: '',
+    shortStayReason: ''
   }
 })
 
@@ -509,7 +643,7 @@ const handleAvatarChange = async (file: any) => {
     let path = response.url;
     const url = path.substring('/uploads'.length);
     
-    formData.basic.photoUrl = 'http://49.232.241.94:8080/' + url
+    formData.basic.photoUrl = 'http://49.232.241.94/' + url
   } catch (error) {
     console.error('头像上传失败:', error)
     ElMessage.error('上传失败，请稍后重试')
@@ -529,11 +663,25 @@ const infectiousHistoryOptions = ['无', '结核病', '肺部', '其他传染病
 // ========== 表单验证规则 ==========
 const basicRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
   idCard: [{ required: true, message: '请输入18位身份证号', trigger: 'blur' }],
   ethnic: [{ required: true, message: '请选择民族', trigger: 'change' }],
   mobile: [{ required: true, message: '请输入手机号码', trigger: 'blur' }],
   province: [{ required: true, message: '请选择省份', trigger: 'change' }],
   address: [{ required: true, message: '请输入详细地址', trigger: 'blur' }],
+  age: [
+    {
+      validator: (rule, value, callback) => {
+        if (value !== undefined && (value < 1 || value > 120)) {
+          callback(new Error('年龄必须在1-120之间'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
+  departmentCode: [{ message: '请选择部组', trigger: 'change' }],
   'emergencyContacts.0.contactName': [
     { required: true, message: '请输入紧急联系人姓名', trigger: 'blur' }
   ],
@@ -558,13 +706,38 @@ const practiceRules = reactive<FormRules>({
       },
       trigger: 'change'
     }
+  ],
+  yearsOfPractice: [
+    {
+      validator: (rule, value, callback) => {
+        if (value !== undefined && (value < 0 || value > 100)) {
+          callback(new Error('学修年数必须在0-100之间'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
   ]
 })
 
 const lodgingRules = reactive<FormRules>({
+  applicationType: [{ required: true, message: '请选择申请类型', trigger: 'change' }],
   checkinDate: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
   checkoutDate: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
   specialRequest: [{ required: true, message: '请输入短住原因及期许', trigger: 'blur' }],
+  mealPreference: [
+    {
+      validator: (rule, value, callback) => {
+        if (value !== undefined && (value < 0 || value > 3)) {
+          callback(new Error('请选择有效的用斋选项'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'change'
+    }
+  ],
   agreement: [
     {
       validator: (rule, value, callback) => {
@@ -601,8 +774,8 @@ const handleSubmit = async () => {
     return
   }
 
-  // 构造提交数据（注意：selfEvaluation 不在 LodgingInfo 中，需剔除）
-  const { selfEvaluation, agreement, ...lodgingData } = formData.lodging
+  // 构造提交数据（注意：agreement 不在 LodgingInfo 中，需剔除）
+  const { agreement, ...lodgingData } = formData.lodging
 
   const payload: ApplicationSubmitRequest = {
     basic: { ...formData.basic },
@@ -614,21 +787,19 @@ const handleSubmit = async () => {
   try {
 
     const res = await applications(payload);
-
-    console.log(res);
-
+    ElMessage.success(`申请提交成功！编号：${res}`)
     // const res = await request({
     //   url: 'http://49.232.241.94:8080/lodging/apply/applications',
     //   method: 'POST',
     //   data: payload
     // }) as ApiResponse<number>
 
-    if (res.code === 0) {
-      ElMessage.success(`申请提交成功！编号：${res.data}`)
-      // 可跳转或清空
-    } else {
-      ElMessage.error(res.message || '提交失败')
-    }
+    // if (res.code === 0) {
+    //   ElMessage.success(`申请提交成功！编号：${res.data}`)
+    //   // 可跳转或清空
+    // } else {
+    //   ElMessage.error(res.message || '提交失败')
+    // }
   } catch (err) {
     ElMessage.error('网络错误，请稍后重试')
     console.error(err)

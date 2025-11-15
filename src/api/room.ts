@@ -1,6 +1,7 @@
 
 import request from '@/utils/request'
 import type { IPageRoomSummaryVO, ApiResponse } from '@/types/room'
+import type { DashboardOverviewVO, RoomStatusDashboardVO } from '@/types/room-bed-management'
 
 export const getRooms = (
  params: {
@@ -24,9 +25,11 @@ export const getRooms = (
  * 新建房间请求参数
  */
 export interface CreateRoomRequest {
+  id?: number;
   roomNo: string;      // 房间号
   gender: number;      // 性别：1-男众，2-女众
   roomType: number;    // 房间类型
+  bedCount:number; 
   floor: number;       // 楼层
   status: number;      // 状态
   description?: string; // 房间描述（可选）
@@ -42,5 +45,44 @@ export const createRoom = (
     url: 'http://49.232.241.94:8080/lodging/api/rooms',
     method: 'POST',
     data,
+  });
+};
+
+/**
+ * 更新房间
+ */
+export const updateRoom = (
+  id: number,
+  data: CreateRoomRequest
+): Promise<ApiResponse<number>> => {
+  return request({
+    url: `http://49.232.241.94:8080/lodging/api/rooms/${id}`,
+    method: 'PUT',
+    data,
+  });
+};
+
+
+
+export const getRoomOverview = (): Promise<ApiResponse<DashboardOverviewVO>> => {
+  return request({
+    url: 'http://49.232.241.94:8080/lodging/api/dashboard/overview',
+    method: 'GET',
+  });
+};
+
+
+export const getRoomStatus = (
+ params: {
+    start?: string;
+    end?: string;
+    floor?: number;
+    gender?: number;
+}
+): Promise<ApiResponse<RoomStatusDashboardVO>> => {
+  return request({
+    url: 'http://49.232.241.94:8080/lodging/api/dashboard/room-status',
+    method: 'GET',
+    params,
   });
 };
