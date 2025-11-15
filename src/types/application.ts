@@ -1,3 +1,13 @@
+/*
+ * @Author: zhaoziying zhaoziying@kuaishou.com
+ * @Date: 2025-11-09 10:23:51
+ * @LastEditors: zhaoziying zhaoziying@kuaishou.com
+ * @LastEditTime: 2025-11-15 23:41:47
+ * @FilePath: /zen-hub/src/types/application.ts
+ * @Description: 
+ * 
+ * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved. 
+ */
 // types/application.ts
 export interface ApplicationListItemVO {
   id?: number;
@@ -21,7 +31,6 @@ export interface IPageApplicationListItemVO {
   current?: number;
   pages?: number;
   orders?: OrderItem[];
-  [property: string]: any;
 }
 
 export interface OrderItem {
@@ -41,12 +50,13 @@ export interface Request<T = any> {
 
 // 用于筛选的状态枚举
 export enum ApplicationStatus {
-  ALL = 0,
-  PENDING = 10, // 待入住
-  CHECKED_IN = 20, // 入住中
-  CHECKED_OUT = 30, // 已退住
-  REJECTED = 40, // 未通过
-  APPLIED = 70, // 申请中
+  DRAFT = 0, // 草稿
+  PENDING_REVIEW = 10, // 申请中
+  WAITING_CHECKIN = 20, // 待入住
+  CHECKED_IN = 30, // 入住中  
+  CHECKED_OUT = 40, // 已退住
+  REJECTED = 70, // 未通过
+  CANCELED = 90, // 已取消
 }
 
 // 用于展示的状态标签

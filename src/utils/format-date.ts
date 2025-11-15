@@ -1,3 +1,4 @@
+
 // 格式化日期 - 完整日期转换为 yyyy-mm-nn
 export const formatDate = (dateStr: string | null) => {
   if (!dateStr) return '-'
@@ -11,4 +12,10 @@ export const formatDate = (dateStr: string | null) => {
   } catch (e) {
     return dateStr
   }
+}
+
+
+/** 禁用当前时间之后的日期（用于出生年月） */
+export const disabledBirthDate = (time: Date) => {
+  return time.getTime() > Date.now()
 }

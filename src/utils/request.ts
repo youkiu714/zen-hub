@@ -3,6 +3,13 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import router from '@/router'
 
+export interface ApiResponse<T = any> {
+  code: number
+  message: string
+  data: T
+}
+
+
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
   baseURL: '/api',
@@ -31,13 +38,12 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-  (response: AxiosResponse) => {
+  (response: AxiosResponse<ApiResponse<any>>) => {
     const { code, message, data } = response.data
     
-    if (code === 0) { // 200
+    if (code === 0) { 
       return data
     } else {
-      ElMessage.error(message || '请求失败')
       return Promise.reject(new Error(message || '请求失败'))
     }
   },

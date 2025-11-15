@@ -71,7 +71,6 @@ const cachedViews = computed(() => [])
 <style scoped lang="scss">
 .layout {
   height: 100vh;
-  overflow: hidden;
 }
 
 .layout-container {
@@ -87,7 +86,6 @@ const cachedViews = computed(() => [])
 
 .main-container {
   height: 100vh;
-  overflow: hidden;
 }
 
 .header {

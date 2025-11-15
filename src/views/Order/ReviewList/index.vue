@@ -90,24 +90,6 @@
     <ReviewDetailDialog v-model="dialogVisible" :current-item="currentItem" :is-view-only="isViewOnly"
       @close="dialogVisible = false" @review-submitted="fetchData" />
   </div>
-  <!-- 底部信息区 -->
-  <div class="footer">
-    <div class="container">
-      <div class="footer-section">
-        <h4>寺院客堂</h4>
-        <p>地址：浙江省杭州市灵隐寺客堂</p>
-        <p>电话：0571-8796XXXX</p>
-      </div>
-      <div class="footer-section">
-        <h4>技术支持</h4>
-        <p>如有系统问题，请联系信息组</p>
-        <p>邮箱：it@lingyinsi.org</p>
-      </div>
-    </div>
-    <div class="footer-copyright">
-      © 2025 灵隐寺挂单管理系统
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">

@@ -1,19 +1,19 @@
 <template>
   <div class="status-filter">
-   <div>
-     <el-button
-      v-for="status in statusOptions"
-      round
-      :key="status.value"
-      :type="status.type"
-      :icon="status.icon"
-      :plain="selectedStatus !== status.value"
-      @click="handleStatusChange(status.value)"
-      :class="{ active: selectedStatus === status.value }"
-      class="status-btn"
-      >{{ status.label }}</el-button
-    >
-   </div>
+    <div>
+      <el-button
+        v-for="status in statusOptions"
+        round
+        :key="status.value"
+        :type="status.type"
+        :icon="status.icon"
+        :plain="selectedStatus !== status.value"
+        @click="handleStatusChange(status.value)"
+        :class="{ active: selectedStatus === status.value }"
+        class="status-btn"
+        >{{ status.label }}</el-button
+      >
+    </div>
   </div>
 </template>
 
@@ -31,19 +31,19 @@ const selectedStatus = ref(props.modelValue)
 
 const statusOptions = computed<StatusTag[]>(() => [
   {
-    value: ApplicationStatus.ALL,
+    value: ApplicationStatus.DRAFT,
     label: '全部状态',
     type: 'default',
     icon: 'Document'
   },
   {
-    value: ApplicationStatus.APPLIED,
+    value: ApplicationStatus.PENDING_REVIEW,
     label: '申请中',
     type: 'default',
     icon: 'Edit'
   },
   {
-    value: ApplicationStatus.PENDING,
+    value: ApplicationStatus.WAITING_CHECKIN,
     label: '待入住',
     type: 'default',
     icon: 'CircleCheck'
@@ -63,6 +63,12 @@ const statusOptions = computed<StatusTag[]>(() => [
   {
     value: ApplicationStatus.REJECTED,
     label: '未通过',
+    type: 'default',
+    icon: 'Close'
+  },
+  {
+    value: ApplicationStatus.CANCELED,
+    label: '已取消',
     type: 'default',
     icon: 'Close'
   }

@@ -161,10 +161,11 @@ export interface BasicInfo {
 export interface PracticeInfo {
   yearsOfPractice?: number
   refugeTakenDate?: string
+  refugeTemple?: string
   pastPracticeExperience?: string
   currentPracticeExperience?: string
   visitRecords?: string
-  hasTakenPrecepts?: boolean | null // 注意：UI 需要区分 “无” vs true
+  hasTakenPrecepts?: number | null // 修改为数字类型：0=无, 1=居士五戒, 2=八戒, 3=八关斋戒, 4=菩萨戒
   [property: string]: any
 }
 

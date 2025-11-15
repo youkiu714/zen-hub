@@ -71,11 +71,11 @@
         <div class="flex-space-between line-margin">
           <div class="info-left">
             <div class="base-info-label">常住地省市：</div>
-            <div class="base-info-value">{{ detail?.basic?.city }}</div>
+            <div class="base-info-value">{{ provinceCity }}</div>
           </div>
           <div class="info-right">
             <div class="base-info-label">详细地址：</div>
-            <div class="base-info-value">{{ detail?.basic?.province }}</div>
+            <div class="base-info-value">{{ detail?.basic?.address }}</div>
           </div>
         </div>
         <div class="flex-space-between line-margin">
@@ -232,9 +232,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { ApplicationDetailVO } from './types' // 假设接口定义在同级 types.ts
 import { getApplicationById } from '@/api/application'
+import { regionData } from 'element-china-area-data'
 
 import type { TabsPaneContext } from 'element-plus'
 
@@ -281,6 +282,46 @@ const handleClose = () => {
   emit('close')
 }
 
+const provinceCity = computed(() => {
+  const codes = detail.value?.basic?.provinceCity
+  if (!codes || !Array.isArray(codes) || codes.length === 0) {
+    return ''
+  }
+  
+  // 递归查找地区名称
+  const findAreaName = (data: any[], code: string): string => {
+    for (const item of data) {
+      if (item.value === code) {
+        return item.label
+      }
+      if (item.children) {
+        const found = findAreaName(item.children, code)
+        if (found) return found
+      }
+    }
+    return ''
+  }
+  
+  const names: string[] = []
+  let currentData = regionData
+  
+  for (const code of codes) {
+    const name = findAreaName(currentData, code)
+    if (name) {
+      names.push(name)
+      const currentItem = currentData.find(item => item.value === code)
+      if (currentItem?.children) {
+        currentData = currentItem.children
+      }
+    }
+  }
+
+  const cityName = names.length > 0 ?  names.join(' ') : '暂无信息';
+
+  console.log("cityName:",cityName)
+
+  return cityName
+})
 // 工具函数
 const getGenderText = (gender?: number): string => {
   if (gender === 1) return '男'
