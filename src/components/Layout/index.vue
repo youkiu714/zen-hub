@@ -19,9 +19,9 @@
         </div>
 
         <!-- 面包屑 -->
-        <div v-if="showBreadcrumb" class="breadcrumb-container">
+        <!-- <div v-if="showBreadcrumb" class="breadcrumb-container">
           <Breadcrumb />
-        </div>
+        </div> -->
 
         <!-- 主内容 -->
         <el-main class="main">
@@ -71,7 +71,6 @@ const cachedViews = computed(() => [])
 <style scoped lang="scss">
 .layout {
   height: 100vh;
-  overflow: hidden;
 }
 
 .layout-container {
@@ -87,7 +86,6 @@ const cachedViews = computed(() => [])
 
 .main-container {
   height: 100vh;
-  overflow: hidden;
 }
 
 .header {

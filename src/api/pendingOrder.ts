@@ -265,7 +265,13 @@ export const getLodgingApplications = (
 //     })
 //   }
 
-export const applications = (data: ApplicationSubmitRequest): Promise<{ code: number; message: string }> => {
+export const applications = (data: ApplicationSubmitRequest): Promise<{
+  code: number
+  message: string
+  data: any
+  success: boolean
+  timestamp: number
+}> => {
   return request({
     url: 'http://49.232.241.94:8080/lodging/apply/applications',
     method: 'post',
