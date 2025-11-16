@@ -2,7 +2,7 @@
   <el-drawer 
     v-model="visible" 
     width="800px"
-    :close-on-click-modal="false"
+    close-on-click-modal
     @close="handleClose"
   >
     <template #header>
@@ -27,7 +27,7 @@
             </div>
             <p class="timeline-description">{{ item.description }}</p>
             <div v-if="item.comment" class="timeline-comment">
-              <span class="comment-text">"{{ item.comment }}"</span>
+              <span class="comment-text">{{ item.comment }}</span>
             </div>
         </el-timeline-item>
       </el-timeline>
@@ -37,10 +37,9 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Check, Clock, ChatDotRound } from '@element-plus/icons-vue'
+import { Check, Clock, ChatDotRound, MoreFilled, Select } from '@element-plus/icons-vue'
 import { getApplicationById } from '@/api/application'
 
-// Props & Emits
 const props = defineProps<{
   modelValue: boolean
   applicationId: number
@@ -51,91 +50,57 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-// 控制显示
 const visible = ref(false)
 const detail = ref<any>(null)
-
-// 时间线数据
 const timelineData = ref<any[]>([])
 
 // 获取审核流程数据
 const getApplicationItem = async (applicationId: number) => {
-  console.log('applicationId:', applicationId)
   const data = await getApplicationById(applicationId)
-  console.log('挂单详情')
-  console.log(data)
   detail.value = data
   
   // 处理时间线数据
   if (data && data.timeline) {
     // 将接口返回的timeline数据转换为组件需要的格式
-    const processedTimeline = data.timeline.map((item: any) => {
+    const processedTimeline = data.timeline.map((item: any, index: number) => {
+      // 反转后，最后一个元素（原数组的第一个）是最新的
+      const isLatest = index === data.timeline.length - 1
       return {
         title: item.title,
         timestamp: item.time,
-        description: "测试环",
+        description: "",
         comment: item.content,
-        icon: Check,
-        type: getStageType(item.stage, item.result),
-        color: getStageColor(item.stage, item.result),
+        icon: getStageIcon(isLatest),
+        type: getStageType(item.stage, item.result, isLatest),
+        color: getStageColor(item.stage, item.result, isLatest),
         size: 'large',
         status: getStageStatus(item.stage, item.result),
         statusClass: getStageStatusClass(item.stage, item.result)
       }
     })
     
-    // 倒序排列，最新的在前面
     timelineData.value = processedTimeline.reverse()
   }
 }
 
-// 根据stage获取标题
-const getStageTitle = (stage: number) => {
-  const stageMap: Record<number, string> = {
-    10: '申请已提交',
-    20: '推荐人评价',
-    30: '客堂审核',
-    40: '审核完成'
-  }
-  return stageMap[stage] || '未知阶段'
+const getStageIcon = (isLatest: boolean = false) => {
+  if (isLatest) return MoreFilled
+  return Select
 }
 
-// 根据stage和result获取描述
-const getStageDescription = (stage: number, result: number) => {
-  if (stage === 10) return '您的挂单申请已成功提交，等待推荐人评价。'
-  if (stage === 20) {
-    if (result === 1) return '推荐人已完成评价，评价结果：通过。'
-    if (result === 0) return '推荐人已完成评价，评价结果：未通过。'
-    return '等待推荐人评价。'
-  }
-  if (stage === 30) {
-    if (result === 1) return '客堂审核通过。'
-    if (result === 0) return '客堂审核未通过。'
-    return '您的申请已提交至客堂审核，请耐心等待审核结果。'
-  }
-  if (stage === 40) return '审核流程已完成。'
-  return '处理中...'
-}
-
-// 根据stage和result获取图标
-const getStageIcon = (stage: number, result: number) => {
-  if (result === 1) return Check
-  if (result === 0) return Check
-  return Clock
-}
 
 // 根据stage和result获取类型
-const getStageType = (stage: number, result: number) => {
+const getStageType = (stage: number, result: number, isLatest: boolean = false) => {
+  if (isLatest) return 'primary'
   if (result === 1) return 'success'
   if (result === 0) return 'danger'
   return 'info'
 }
 
 // 根据stage和result获取颜色
-const getStageColor = (stage: number, result: number) => {
-  if (result === 1) return '#67C23A'
-  if (result === 0) return '#F56C6C'
-  return '#909399'
+const getStageColor = (stage: number, result: number, isLatest: boolean = false) => {
+  if (isLatest) return '#409EFF'
+  return '#0bbd87'
 }
 
 // 根据stage和result获取状态
@@ -152,13 +117,10 @@ const getStageStatusClass = (stage: number, result: number) => {
   return 'status-current'
 }
 
-// 显隐控制和数据加载
 watch(
   () => [props.modelValue, props.applicationId] as const,
   async ([modelValue, newId]) => {
     visible.value = modelValue
-    console.log(modelValue)
-    console.log('newId:', newId)
     if (modelValue && newId && newId > 0) {
       await getApplicationItem(newId)
     }

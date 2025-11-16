@@ -195,8 +195,8 @@ import { FormInstance, FormRules } from 'element-plus'
 import { House } from '@element-plus/icons-vue'
 import type { LodgingInfo } from '@/types'
 import { useFormValidationRules } from '@/views/Order/OrderApplication/CheckHook'
+import { departmentOptions, mealOptions, applicationTypeOptions} from "@/utils/constants"
 
-/** 让父组件传入 LodgingInfo & { agreement:boolean; selfEvaluation?:string } */
 type LocalLodging = LodgingInfo & { agreement: boolean; selfEvaluation?: string }
 
 const props = defineProps<{ modelValue: LocalLodging }>()
@@ -206,61 +206,6 @@ const form = computed({
   set: (v) => emit('update:modelValue', v)
 })
 
-const departmentOptions = [
-  {
-    label: '项目部',
-    value: 'PROJECT'
-  },
-  {
-    label: '读书会',
-    value: 'READING'
-  },
-  {
-    label: '汇编',
-    value: 'COMPILATION'
-  },
-  {
-    label: '其他',
-    value: 'OTHER'
-  }
-]
-const mealOptions = [
-  {
-    label: '不用斋',
-    value: 0
-  },
-  {
-    label: '早斋',
-    value: 1
-  },
-  {
-    label: '午斋',
-    value: 2
-  },
-  {
-    label: '药石',
-    value: 3
-  }
-]
-
-const applicationTypeOptions = [
-  {
-    label: '短住',
-    value: 1
-  },
-  {
-    label: '团体',
-    value: 2
-  },
-  {
-    label: '直通车',
-    value: 3
-  },
-  {
-    label: '特殊客人',
-    value: 4
-  }
-]
 
 const disabledCheckinDate = (time: Date) => time.getTime() < Date.now() - 24 * 60 * 60 * 1000
 const disabledCheckoutDate = (time: Date) => {

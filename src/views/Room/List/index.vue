@@ -79,55 +79,6 @@
       </div>
     </div>
 
-    <!-- 底部信息区 -->
-    <div class="footer">
-      <div class="footer-content">
-        <div class="footer-section">
-          <div class="footer-logo">
-            <span class="logo-text">卍 挂单申请系统</span>
-          </div>
-          <p class="footer-desc">提供便捷的寺院挂单申请服务，让修行之路更加顺畅</p>
-        </div>
-        <div class="footer-section">
-          <h4>快速链接</h4>
-          <ul>
-            <li><a href="#">首页</a></li>
-            <li><a href="#">挂单申请</a></li>
-            <li><a href="#">申请状态</a></li>
-            <li><a href="#">挂单审核</a></li>
-            <li><a href="#">房间管理</a></li>
-            <li><a href="#">帮助中心</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4>联系我们</h4>
-          <div class="contact-info">
-            <p><i class="el-icon-location"></i> 北京市大兴区</p>
-            <p><i class="el-icon-phone"></i> 0571-87968665</p>
-            <p><i class="el-icon-message"></i> guadan@cn.org</p>
-          </div>
-        </div>
-        <div class="footer-section">
-          <h4>关注我们</h4>
-          <div class="social-icons">
-            <el-tooltip content="微信公众号" placement="top">
-              <el-button icon="ChatLineRound" circle />
-            </el-tooltip>
-            <el-tooltip content="微博" placement="top">
-              <el-button icon="Share" circle />
-            </el-tooltip>
-            <el-tooltip content="官网" placement="top">
-              <el-button icon="Link" circle />
-            </el-tooltip>
-          </div>
-          <p class="qr-code-tip">扫描二维码关注公众号<br>获取更多寺院信息</p>
-        </div>
-      </div>
-      <div class="copyright">
-        © 2023 挂单申请系统 版权所有 | 浙ICP备12345678号
-      </div>
-    </div>
-
     <!-- 新增/编辑房间对话框 -->
     <el-dialog
       v-model="addRoomDialogVisible"

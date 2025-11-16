@@ -35,6 +35,11 @@ export function updateLodgingInfo(id: number, data: {
     checkoutDate: string;
     shortStayReason: string;
     selfEvaluation: string;
+    mealPreference: number;
+    departureDate: string;
+    returnDate: string;
+    recommenderComment: string;
+    departmentCode: string;
   }
 }) {
   return request.post<Request<any>>(`/api/apply/${id}/update-lodging`, data);

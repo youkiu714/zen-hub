@@ -12,7 +12,31 @@
     </PageHeader>
 
     <ApplicationStatusFilter v-model="filterStatus" @update:modelValue="loadApplications" />
+
     <div class="table-container">
+      <div class="filter-bar">
+        <el-input
+          v-model="nameKeyword"
+          placeholder="输入姓名进行筛选"
+          :suffix-icon="Search"
+          @clear="handleKeywordSearch"
+          @keyup.enter="handleKeywordSearch"
+          style="width: 240px"
+        />
+        <el-input
+          v-model="mobileKeyword"
+          placeholder="输入手机号进行筛选"
+          :suffix-icon="Search"
+          @clear="handleKeywordSearch"
+          @keyup.enter="handleKeywordSearch"
+          style="width: 240px"
+        />
+
+        <!-- <el-button size="medium" plain class="search-btn" @click="handleKeywordSearch">
+          <el-icon class="icon"><Search /></el-icon> 查询
+        </el-button> -->
+      </div>
+
       <el-table
         :data="applications"
         style="width: 100%"
@@ -22,10 +46,31 @@
         v-loading="loading"
       >
         <el-table-column prop="applicantName" label="申请人" width="120" fixed="left" />
-        <el-table-column prop="idCardMasked" label="身份证" min-width="160" />
+        <el-table-column prop="mobile" label="手机号" width="130" />
+        <el-table-column prop="applicationType" label="挂单类型" min-width="90">
+          <template #default="{ row }">
+            <span class="dot" :class="getApplicationTypeClass(row.applicationType)"></span>
+            {{
+              applicationTypeOptions.find((item) => item.value === row.applicationType)?.label ??
+              '其他'
+            }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="departmentCode" label="所属部族" min-width="90">
+          <template #default="{ row }">
+            {{
+              departmentOptions.find((item) => item.value === row.departmentCode)?.label ?? '其他'
+            }}
+          </template>
+        </el-table-column>
         <el-table-column label="申请状态" min-width="100">
           <template #default="{ row }">
-            <el-tag :type="getApplicationStatusType(row.status)" effect="dark" round>
+            <el-tag
+              :type="getApplicationStatusType(row.status)"
+              effect="dark"
+              round
+              class="status-tag"
+            >
               {{ APPLICATION_STATUS_MAP[row.status] }}
             </el-tag>
           </template>
@@ -85,7 +130,7 @@
             >
           </template>
         </el-table-column>
-        
+
         <!-- 空状态 -->
         <template #empty>
           <el-empty description="暂无申请数据" />
@@ -133,13 +178,19 @@ import { ApplicationStatus } from '@/types/application'
 import { getApplications, cancelApplication } from '@/api/application'
 import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
 import { ElMessage } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Search } from '@element-plus/icons-vue'
 import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
 import ReviewPage from '@/components/ReviewPage.vue'
 import EditApplication from './components/EditApplication.vue'
 import PageHeader from '@/components/PageHeader.vue'
-import { APPLICATION_STATUS_MAP, getApplicationStatusType } from '@/utils/constants'
+import {
+  APPLICATION_STATUS_MAP,
+  getApplicationStatusType,
+  applicationTypeOptions,
+  departmentOptions
+} from '@/utils/constants'
 import { formatDate } from '@/utils/format-date'
+import { throttle, debounce } from 'lodash-es'
 
 const router = useRouter()
 
@@ -150,8 +201,8 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
 const filterStatus = ref(ApplicationStatus.DRAFT)
-
-
+const nameKeyword = ref('')
+const mobileKeyword = ref('')
 
 const detailVisible = ref(false)
 const currentAppId = ref(0)
@@ -171,13 +222,21 @@ const currentEditData = ref({
 })
 
 // 加载数据
+const getKeywordParam = () => {
+  const mobile = mobileKeyword.value.trim()
+  if (mobile) return mobile
+  const name = nameKeyword.value.trim()
+  return name || undefined
+}
+
 const loadApplications = async () => {
   loading.value = true
   try {
     const response = await getApplications({
       pageNo: currentPage.value,
       pageSize: pageSize.value,
-      status: filterStatus.value !== ApplicationStatus.DRAFT ? filterStatus.value : undefined
+      status: filterStatus.value !== ApplicationStatus.DRAFT ? filterStatus.value : undefined,
+      keyword: getKeywordParam()
     })
     console.log(response)
 
@@ -194,15 +253,20 @@ const loadApplications = async () => {
   }
 }
 
+const handleKeywordSearch = () => {
+  currentPage.value = 1
+  loadApplications()
+}
+
 // 页面初始化
 onMounted(() => {
   loadApplications()
 })
 
-// 事件处理
-const handleNewApplication = () => {
+// 事件处理 - 添加节流控制
+const handleNewApplication = throttle(() => {
   router.push('/contact-application/pending-application')
-}
+}, 1000) // 1秒内只能点击一次
 
 const handleViewDetail = (id: number) => {
   currentAppId.value = id
@@ -232,6 +296,17 @@ const handleCancelApplication = async (id: number) => {
     console.error('取消申请失败:', error)
     ElMessage.error('取消申请失败，请稍后重试')
   }
+}
+
+// 获取申请类型对应的样式类
+const getApplicationTypeClass = (applicationType: number) => {
+  const typeClassMap: Record<number, string> = {
+    1: 'short-stay', // 短住 - #5F3DC4
+    2: 'long-stay', // 常住 - #08979C
+    3: 'direct-bus', // 直通车 - #D4B106
+    4: 'special-guest' // 特殊客人 - #C41D7F
+  }
+  return typeClassMap[applicationType] || 'default'
 }
 
 // 处理修改申请信息
@@ -265,9 +340,6 @@ const handleCurrentChange = (newCurrentPage: number) => {
 // 处理修改提交
 const handleEditSubmit = async (data: any, id: number) => {
   try {
-    console.log('提交修改数据:', data, '申请ID:', id)
-
-    // API调用已在组件内部完成，这里只需要处理成功后的逻辑
     loadApplications() // 重新加载数据
   } catch (error) {
     console.error('修改申请信息失败:', error)
@@ -282,11 +354,18 @@ const handleEditSubmit = async (data: any, id: number) => {
 }
 .table-container {
   background-color: white;
-  padding-bottom: 20px;
-  overflow: auto;
-  /* 隐藏滚动条 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 和 Edge */
+  padding: 12px 10px;
+  border-radius: 12px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filter-input {
+  max-width: 260px;
 }
 
 /* 隐藏 Webkit 浏览器的滚动条 */
@@ -295,7 +374,7 @@ const handleEditSubmit = async (data: any, id: number) => {
 }
 
 .application-table {
-  max-height: calc(100vh - 320px);
+  max-height: calc(100vh - 360px);
   overflow-y: scroll;
   /* 隐藏滚动条 */
   scrollbar-width: none; /* Firefox */
@@ -362,6 +441,35 @@ const handleEditSubmit = async (data: any, id: number) => {
 .new-application-btn {
   background-color: #8b4513;
   border-color: #8b4513;
+}
+
+// 申请类型圆点样式
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+
+  &.short-stay {
+    background-color: #08979c; // 短住
+  }
+
+  &.long-stay {
+    background-color: #5f3dc4; // 常住
+  }
+
+  &.direct-bus {
+    background-color: #d4b106; // 直通车
+  }
+
+  &.special-guest {
+    background-color: #c41d7f; // 特殊客人
+  }
+
+  &.default {
+    background-color: #909399; // 默认颜色
+  }
   color: white;
 }
 
@@ -391,6 +499,18 @@ const handleEditSubmit = async (data: any, id: number) => {
   justify-content: center;
   margin-top: 20px;
 }
+
+// 查询按钮样式
+.search-btn {
+  font-weight: 600;
+  &:hover,
+  &:active,
+  &:focus {
+    color: rgb(120 75 35);
+    border: 1px solid rgb(120 75 35);
+  }
+}
+
 .btn-default {
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
   color: rgb(55 65 81 / var(--tw-text-opacity, 1));
@@ -414,5 +534,17 @@ const handleEditSubmit = async (data: any, id: number) => {
 .btn-success {
   border: none;
   border-radius: 8px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.status-tag {
+  font-weight: 600;
 }
 </style>
