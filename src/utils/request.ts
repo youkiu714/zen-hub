@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
+import { getToken } from '@/utils'
 import router from '@/router'
 
 export interface ApiResponse<T = any> {
@@ -12,7 +13,7 @@ export interface ApiResponse<T = any> {
 
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: '/',
   timeout: 10000
 })
 
@@ -20,12 +21,12 @@ const service: AxiosInstance = axios.create({
 service.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     const userStore = useUserStore()
-    const token = userStore.token
+    const token = userStore.token || getToken()
     
     if (token) {
       config.headers = {
         ...config.headers,
-        Authorization: `Bearer ${token}`
+        'X-Auth-Token': token
       }
     }
     
@@ -78,7 +79,7 @@ service.interceptors.response.use(
         case 401:
           ElMessage.error('登录已过期，请重新登录')
           const userStore = useUserStore()
-          userStore.logout()
+          userStore.resetState()
           router.push('/login')
           break
         case 403:

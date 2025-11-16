@@ -60,10 +60,6 @@
               <el-icon><Setting /></el-icon>
               系统设置
             </el-dropdown-item>
-            <el-dropdown-item divided command="logout">
-              <el-icon><SwitchButton /></el-icon>
-              退出登录
-            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -109,21 +105,6 @@ const handleCommand = async (command: string) => {
       break
     case 'settings':
       ElMessage.info('系统设置功能开发中...')
-      break
-    case 'logout':
-      try {
-        await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-        
-        await userStore.logout()
-        ElMessage.success('退出登录成功')
-        router.push('/login')
-      } catch (error) {
-        // 用户取消操作
-      }
       break
   }
 }

@@ -3,9 +3,9 @@
     v-model="visible"
     title="挂单详情"
     width="800px"
-    :close-on-click-modal="false"
     class="application-detail-dialog"
     @close="handleClose"
+    close-on-click-modal
   >
     <template #header>
       <div class="dialog-header">
