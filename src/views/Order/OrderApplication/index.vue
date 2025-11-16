@@ -182,9 +182,7 @@ const scrollToTop = () => {
   }
 }
 
-// 原始提交函数
 const _handleSubmit = async () => {
-  // 表单验证
   const valid1 = await basicFormRef.value?.validate().catch(() => false)
   const valid2 = await practiceFormRef.value?.validate().catch(() => false)
   const valid3 = await lodgingFormRef.value?.validate().catch(() => false)
