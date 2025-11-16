@@ -44,7 +44,7 @@ export const login = async (data: LoginForm): Promise<{ token: string; user: Use
     })
 
     const response = await request({
-      url: '/auth/login',
+      url: '/api/auth/login',
       method: 'post',
       data
     })
@@ -145,7 +145,7 @@ export const refreshToken = async (): Promise<{ token: string }> => {
     })
 
     const response = await request({
-      url: '/auth/refresh',
+      url: '/api/auth/refresh',
       method: 'post'
     })
 
@@ -174,11 +174,11 @@ export const logout = async (): Promise<void> => {
   // 使用真实API
   try {
     console.log('🌐 使用真实API登出:', {
-      url: '/auth/logout'
+      url: '/api/auth/logout'
     })
 
     await request({
-      url: '/auth/logout',
+      url: '/aip/auth/logout',
       method: 'post'
     })
   } catch (error: any) {
