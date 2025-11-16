@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <div class="dashboard-header">
-      <h1>欢迎使用 挂单申请系统</h1>
+      <!-- <h1>欢迎使用 挂单申请系统</h1> -->
       <!-- <p>这是一个基于 Vue3 + Element Plus + Vite 构建的后台管理系统</p> -->
     </div>
     

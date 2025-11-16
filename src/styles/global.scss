@@ -1,0 +1,13 @@
+.el-table th.el-table__cell.is-leaf {
+  color: var(--Text-Gary_9, #1a1c1f);
+  font-weight: 600;
+}
+.el-table td.el-table__cell {
+    color: #1a1c1f;
+}
+
+.flex-space-between {
+    display: flex;
+    justify-content:space-between;
+    align-items: center;
+}

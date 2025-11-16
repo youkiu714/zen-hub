@@ -23,7 +23,7 @@ import type {
  * 获取待分配人员列表
  */
 // export function getPendingAssignments(params: AssignmentRequest) {
-//   return request.get<AssignmentResponse>('http://49.232.241.94:8080/lodging/assignments/pending', {
+//   return request.get<AssignmentResponse>('/assignments/pending', {
 //     params,
 //   });
 // }

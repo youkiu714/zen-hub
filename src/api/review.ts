@@ -15,7 +15,7 @@ export const getReviews = (
 }
 ): Promise<OrderListResponse> => {
   return request({
-    url: '/api/reception/reviews',
+    url: '/reception/reviews',
     method: 'GET',
     params,
   });
@@ -32,7 +32,7 @@ export const reception = (params: {
     // console.log(id);
 
   return request({
-    url: `/api/reception/${id}/master`,
+    url: `/reception/${id}/master`,
     method: 'POST',
     data:params
   })

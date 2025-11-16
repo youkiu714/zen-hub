@@ -12,7 +12,9 @@
       "Read(//c/share/入住管理/**)",
       "Bash(taskkill:*)",
       "Bash(tasklist:*)",
-      "Bash(findstr node)"
+      "Bash(findstr node)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm preview:*)"
     ],
     "deny": [],
     "ask": []

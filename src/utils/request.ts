@@ -3,6 +3,13 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import router from '@/router'
 
+export interface ApiResponse<T = any> {
+  code: number
+  message: string
+  data: T
+}
+
+
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
   baseURL: '/api',
@@ -31,15 +38,37 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-  (response: AxiosResponse) => {
-    const { code, message, data } = response.data
-    
-    if (code === 0) { // 200
+  (response: AxiosResponse<ApiResponse<any>>) => {
+    const { data } = response
+
+    // 兼容多种响应格式
+    if (typeof data === 'object' && data !== null) {
+      // 格式1: { code: 0, message: '', data: {...} }
+      if (data.code !== undefined) {
+        if (data.code === 0) {
+          return data.data
+        } else {
+          return Promise.reject(new Error(data.message || '请求失败'))
+        }
+      }
+
+      // 格式2: 直接返回数据 { token: '', user: {...} }
+      // 格式3: 其他成功响应格式
+      if (data.token || data.user || data.id) {
+        return data
+      }
+
+      // 格式4: 标准的成功响应
+      if (data.success === true || data.status === 'success') {
+        return data.data || data
+      }
+
+      // 如果都不匹配，直接返回原数据
       return data
-    } else {
-      ElMessage.error(message || '请求失败')
-      return Promise.reject(new Error(message || '请求失败'))
     }
+
+    // 非对象类型的响应
+    return data
   },
   (error) => {
     const { response } = error

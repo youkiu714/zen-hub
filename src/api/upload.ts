@@ -7,7 +7,7 @@ import type { UploadAvatarRequest, ApiResponse, UploadAvatarResponse } from '@/t
 export const uploadAvatar = (
   file: File,
   params?: UploadAvatarRequest
-): Promise<ApiResponse<UploadAvatarResponse>> => {
+): Promise<UploadAvatarResponse> => {
   const formData = new FormData()
   formData.append('file', file)
 

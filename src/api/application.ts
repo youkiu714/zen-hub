@@ -1,6 +1,7 @@
-// api/application.ts
 import request from '@/utils/request';
-import { Request, IPageApplicationListItemVO, ApplicationListItemVO } from '@/types/application';
+import { Request, IPageApplicationListItemVO } from '@/types/application';
+import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types' 
+
 
 export function getApplications(params: {
   pageNo: number;
@@ -11,14 +12,30 @@ export function getApplications(params: {
   checkinFrom?: string;
   checkinTo?: string;
 }) {
-  return request.get<Request<IPageApplicationListItemVO>>('/api/apply/applications', {
+  return request.get<IPageApplicationListItemVO, IPageApplicationListItemVO>('/apply/applications', {
     params,
   });
 }
 
-import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types' 
 export function getApplicationById(id: number) {
-  console.log(id);
   
-  return request.get<Request<ApplicationDetailVO>>(`/api/apply/applications/${id}`);
+  return request.get<Request<ApplicationDetailVO>>(`/apply/applications/${id}`);
+}
+
+// 取消申请
+export function cancelApplication(id: number) {
+  return request.post<Request<any>>(`/apply/${id}/cancel`);
+}
+
+// 修改挂单信息
+export function updateLodgingInfo(id: number, data: {
+  lodging: {
+    applicationType: number;
+    checkinDate: string;
+    checkoutDate: string;
+    shortStayReason: string;
+    selfEvaluation: string;
+  }
+}) {
+  return request.post<Request<any>>(`/apply/${id}/update-lodging`, data);
 }

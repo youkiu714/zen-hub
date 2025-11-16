@@ -250,7 +250,7 @@ export const getLodgingApplications = (
   }
 ): Promise<OrderListResponse> => {
   return request({
-    url: '/api/apply/applications',
+    url: '/apply/applications',
     method: 'GET',
     params,
   });
@@ -259,15 +259,21 @@ export const getLodgingApplications = (
 
 // export const applications = (data: ApplicationSubmitRequest): Promise<{ code: number; message: string }> {
 //     return request({
-//       url: '/api/apply/applications',
+//       url: '/apply/applications',
 //       method: 'post',
 //       data
 //     })
 //   }
 
-export const applications = (data: ApplicationSubmitRequest): Promise<{ code: number; message: string }> => {
+export const applications = (data: ApplicationSubmitRequest): Promise<{
+  code: number
+  message: string
+  data: any
+  success: boolean
+  timestamp: number
+}> => {
   return request({
-    url: '/api/apply/applications',
+    url: '/apply/applications',
     method: 'post',
     data
   })
