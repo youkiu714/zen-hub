@@ -230,16 +230,6 @@
       </div>
     </div>
 
-    <!-- 底部信息区 -->
-    <div class="footer">
-      <p>© 2023 挂单床位安排系统. 保留所有权利.</p>
-      <div class="footer-links">
-        <el-link type="primary" :underline="false">使用帮助</el-link>
-        <el-link type="primary" :underline="false">联系我们</el-link>
-        <el-link type="primary" :underline="false">隐私政策</el-link>
-      </div>
-    </div>
-
     <!-- 床位分配弹窗 -->
     <el-dialog v-model="bedAllocationVisible" title="分配床位" width="600px" @close="resetAllocationForm">
       <template #header>

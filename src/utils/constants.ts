@@ -53,3 +53,66 @@ export const getApplicationStatusType = (
       return 'info'
   }
 }
+
+export const departmentOptions = [
+  {
+    label: '项目部',
+    value: 'PROJECT'
+  },
+  {
+    label: '读书会',
+    value: 'READING'
+  },
+  {
+    label: '汇编',
+    value: 'COMPILATION'
+  },
+  {
+    label: '其他',
+    value: 'OTHER'
+  }
+]
+export const mealOptions = [
+  {
+    label: '不用斋',
+    value: 0
+  },
+  {
+    label: '早斋',
+    value: 1
+  },
+  {
+    label: '午斋',
+    value: 2
+  },
+  {
+    label: '药石',
+    value: 3
+  }
+]
+
+export const applicationTypeOptions = [
+  {
+    label: '短住',
+    value: 1
+  },
+  {
+    label: '团体',
+    value: 2
+  },
+  {
+    label: '直通车',
+    value: 3
+  },
+  {
+    label: '特殊客人',
+    value: 4
+  }
+]
+
+export const preceptsOptions = [
+  { label: 1, text: '无' },
+  { label: 2, text: '居士五戒' },
+  { label: 3, text: '八戒' },
+  { label: 4, text: '菩萨戒' }
+]

@@ -61,3 +61,9 @@ export const throttle = (fn: Function, delay: number) => {
     }
   }
 }
+
+export const getGenderText = (gender?: number): string => {
+  if (gender === 1) return '男'
+  if (gender === 2) return '女'
+  return '未知'
+}

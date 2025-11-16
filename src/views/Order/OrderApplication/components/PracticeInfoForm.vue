@@ -2,7 +2,7 @@
   <div class="section">
     <div class="section-header">
       <el-icon><Reading /></el-icon>
-      <span>学修情况{{ form.hasTakenPrecepts }}</span>
+      <span>学修情况</span>
     </div>
 
     <el-form
@@ -36,11 +36,9 @@
         <el-col :span="8">
           <el-form-item label="是否受戒" prop="hasTakenPrecepts">
             <el-radio-group v-model="form.hasTakenPrecepts">
-              <el-radio :label="0" key="0">无</el-radio>
-              <el-radio :label="1" key="1">居士五戒</el-radio>
-              <el-radio :label="2" key="2">八戒</el-radio>
-              <el-radio :label="3" key="3">八关斋戒</el-radio>
-              <el-radio :label="4" key="4">菩萨戒</el-radio>
+              <el-radio v-for="option in preceptsOptions" :key="option.label" :label="option.label">
+                {{ option.text }}
+              </el-radio>
             </el-radio-group>
           </el-form-item>
         </el-col>
@@ -97,6 +95,7 @@ import { FormInstance, FormRules } from 'element-plus'
 import { Reading } from '@element-plus/icons-vue'
 import type { PracticeInfo } from '@/types'
 import { useFormValidationRules } from '@/views/Order/OrderApplication/CheckHook'
+import { preceptsOptions } from '@/utils/constants'
 
 const props = defineProps<{ modelValue: PracticeInfo }>()
 const emit = defineEmits<{ 'update:modelValue': [PracticeInfo] }>()
@@ -114,9 +113,9 @@ const rules = reactive<FormRules>({
     { required: true, message: '请输入皈依寺庙', trigger: 'blur' },
     { min: 2, max: 50, message: '皈依寺庙名称长度应在2-50个字符之间', trigger: 'blur' }
   ],
-//   hasTakenPrecepts: [
-//     { required: true, message: '请选择是否受戒', trigger: 'change' },
-//   ],
+  //   hasTakenPrecepts: [
+  //     { required: true, message: '请选择是否受戒', trigger: 'change' },
+  //   ],
   pastPracticeExperience: [{ required: true, message: '请输入过往学修/承担经历', trigger: 'blur' }],
   currentPracticeExperience: [
     { required: true, message: '请输入现参加承担/学修', trigger: 'blur' }
