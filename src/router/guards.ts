@@ -11,7 +11,7 @@ import { DEV_CONFIG, quickLogin } from '@/utils/dev-tools'
 NProgress.configure({ showSpinner: false })
 
 // 白名单路由（无需登录）
-const whiteList = ['/','/PendingOrderQuery', '/PendingOrderReview', '/login', '/404', '/403', '/500']
+const whiteList = ['/login', '/404', '/403', '/500'] // '/', '/dashboard', 
 
 export function setupRouterGuards(router: Router) {
   // 前置守卫
@@ -55,7 +55,7 @@ export function setupRouterGuards(router: Router) {
           } catch (error) {
             // 获取用户信息失败，清除 token 并重定向到登录页
             userStore.resetState()
-            // next(`/login?redirect=${to.path}`)
+            next(`/login?redirect=${to.path}`)
             NProgress.done()
           }
         } else {
@@ -67,8 +67,12 @@ export function setupRouterGuards(router: Router) {
       if (whiteList.includes(to.path)) {
         next()
       } else {
-        // next(`/login?redirect=${to.path}`)
-        NProgress.done()
+        // 生产环境未登录，重定向到登录页
+        if (process.env.NODE_ENV === 'production') {
+          next(`/login?redirect=${to.path}`)
+        } else {
+          NProgress.done()
+        }
       }
     }
   })

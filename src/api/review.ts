@@ -15,7 +15,7 @@ export const getReviews = (
 }
 ): Promise<OrderListResponse> => {
   return request({
-    url: 'http://49.232.241.94:8080/lodging/reception/reviews',
+    url: '/reception/reviews',
     method: 'GET',
     params,
   });
@@ -32,7 +32,7 @@ export const reception = (params: {
     // console.log(id);
 
   return request({
-    url: `http://49.232.241.94:8080/lodging/reception/${id}/master`,
+    url: `/reception/${id}/master`,
     method: 'POST',
     data:params
   })

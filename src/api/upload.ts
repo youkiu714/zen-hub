@@ -17,7 +17,7 @@ export const uploadAvatar = (
   }
 
   return request({
-    url: 'http://49.232.241.94:8080/lodging/api/files/avatar',
+    url: '/api/files/avatar',
     method: 'POST',
     data: formData,
     headers: {

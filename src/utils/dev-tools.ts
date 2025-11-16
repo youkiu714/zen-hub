@@ -44,7 +44,8 @@ export const DEV_CONFIG = {
   BYPASS_LOGIN: process.env.NODE_ENV === 'development',
   AUTO_LOGIN: process.env.NODE_ENV === 'development',
   DEFAULT_USER: 'developer', // admin, developer, user
-  ENABLE_CONSOLE_LOGS: true
+  ENABLE_CONSOLE_LOGS: true,
+  USE_MOCK_API: false // 新增：是否使用Mock API，false表示使用真实API
 }
 
 // 生成虚拟token
@@ -79,6 +80,20 @@ export const mockDelay = (ms: number = 1000): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+// 切换API模式
+export const toggleApiMode = (useMock?: boolean) => {
+  if (process.env.NODE_ENV !== 'development') {
+    console.warn('⚠️ 此功能仅在开发环境可用')
+    return
+  }
+
+  // @ts-ignore
+  DEV_CONFIG.USE_MOCK_API = useMock !== undefined ? useMock : !DEV_CONFIG.USE_MOCK_API
+
+  console.log(`🔄 API模式已切换: ${DEV_CONFIG.USE_MOCK_API ? 'Mock API' : '真实API'}`)
+  return DEV_CONFIG.USE_MOCK_API
+}
+
 // 在控制台暴露全局函数（仅开发环境）
 if (process.env.NODE_ENV === 'development') {
   // @ts-ignore
@@ -87,6 +102,7 @@ if (process.env.NODE_ENV === 'development') {
     MOCK_USERS,
     generateMockToken,
     mockDelay,
+    toggleApiMode,
 
     // 便捷登录方法
     loginAsAdmin: () => quickLogin('admin'),
@@ -107,12 +123,15 @@ if (process.env.NODE_ENV === 'development') {
 🛠️  开发者工具已加载！
 
 使用方法：
-- window.DEV_TOOLS.loginAsAdmin()  // 以管理员身份登录
-- window.DEV_TOOLS.loginAsDev()    // 以开发者身份登录
-- window.DEV_TOOLS.loginAsUser()   // 以普通用户身份登录
-- window.DEV_TOOLS.clearAuth()     // 清除认证信息
+- window.DEV_TOOLS.loginAsAdmin()    // 以管理员身份登录
+- window.DEV_TOOLS.loginAsDev()      // 以开发者身份登录
+- window.DEV_TOOLS.loginAsUser()     // 以普通用户身份登录
+- window.DEV_TOOLS.toggleApiMode()   // 切换Mock/真实API模式
+- window.DEV_TOOLS.clearAuth()       // 清除认证信息
 
-当前用户类型: ${DEV_CONFIG.DEFAULT_USER}
-自动登录: ${DEV_CONFIG.AUTO_LOGIN ? '✅' : '❌'}
+当前配置：
+- 用户类型: ${DEV_CONFIG.DEFAULT_USER}
+- 自动登录: ${DEV_CONFIG.AUTO_LOGIN ? '✅' : '❌'}
+- API模式: ${DEV_CONFIG.USE_MOCK_API ? 'Mock API' : '真实API'}
   `)
 }

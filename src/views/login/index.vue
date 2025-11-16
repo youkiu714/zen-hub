@@ -74,7 +74,7 @@ const loading = ref(false)
 const captchaText = ref('')
 
 const loginForm = reactive<LoginForm>({
-  username: 'admin',
+  username: 'liaison01',
   password: '123456',
   captcha: '',
   remember: false
