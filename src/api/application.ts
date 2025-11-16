@@ -12,19 +12,19 @@ export function getApplications(params: {
   checkinFrom?: string;
   checkinTo?: string;
 }) {
-  return request.get<IPageApplicationListItemVO, IPageApplicationListItemVO>('http://49.232.241.94:8080/lodging/apply/applications', {
+  return request.get<IPageApplicationListItemVO, IPageApplicationListItemVO>('/api/apply/applications', {
     params,
   });
 }
 
 export function getApplicationById(id: number) {
   
-  return request.get<Request<ApplicationDetailVO>>(`http://49.232.241.94:8080/lodging/apply/applications/${id}`);
+  return request.get<Request<ApplicationDetailVO>>(`/api/apply/applications/${id}`);
 }
 
 // 取消申请
 export function cancelApplication(id: number) {
-  return request.post<Request<any>>(`http://49.232.241.94:8080/lodging/apply/${id}/cancel`);
+  return request.post<Request<any>>(`/api/apply/${id}/cancel`);
 }
 
 // 修改挂单信息
@@ -37,5 +37,5 @@ export function updateLodgingInfo(id: number, data: {
     selfEvaluation: string;
   }
 }) {
-  return request.post<Request<any>>(`http://49.232.241.94:8080/lodging/apply/${id}/update-lodging`, data);
+  return request.post<Request<any>>(`/api/apply/${id}/update-lodging`, data);
 }

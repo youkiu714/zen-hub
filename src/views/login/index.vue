@@ -69,7 +69,7 @@ const loading = ref(false)
 const captchaText = ref('')
 
 const loginForm = reactive<LoginForm>({
-  username: 'admin',
+  username: 'liaison01',
   password: '123456',
 })
 
@@ -163,13 +163,9 @@ const handleLogin = async () => {
     loading.value = true
 
     await userStore.loginAction(loginForm)
-
-    // ElMessage.success('登录成功')
-
-    // const redirect = route.query.redirect as string
-    // router.push(redirect || '/')
   } catch (error) {
     console.error('Login failed:', error)
+    ElMessage.error('登录失败，请检查用户名和密码')
     // 登录失败时刷新验证码
     refreshCaptcha()
   } finally {

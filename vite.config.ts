@@ -5,8 +5,11 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
-// https://vitejs.dev/config/
 export default defineConfig({
+  base: '/', // 部署到根目录，如果是子目录请改为 '/子目录名/'
+  build: {
+    chunkSizeWarningLimit: 2000
+  },
   plugins: [
     vue(),
     AutoImport({
@@ -37,9 +40,8 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'http://49.232.241.94:8080',
+        target: 'http://49.232.241.94:8080/lodging',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   }
