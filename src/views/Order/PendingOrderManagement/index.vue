@@ -19,6 +19,7 @@
         size="large"
         :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
         class="application-table"
+        v-loading="loading"
       >
         <el-table-column prop="applicantName" label="申请人" width="120" fixed="left" />
         <el-table-column prop="idCardMasked" label="身份证" min-width="160" />
@@ -84,10 +85,15 @@
             >
           </template>
         </el-table-column>
+        
+        <!-- 空状态 -->
+        <template #empty>
+          <el-empty description="暂无申请数据" />
+        </template>
       </el-table>
 
-      <!-- 分页 -->
-      <div v-if="total > 0" class="pagination-container">
+      <!-- 分页 - 只有当总数据量大于单页数据量时才显示 -->
+      <div v-if="total > 10" class="pagination-container">
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"

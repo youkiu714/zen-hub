@@ -1,18 +1,19 @@
 // 用户相关类型定义
 export interface User {
-  id: number
-  username: string
-  email: string
-  avatar?: string
-  roles: string[]
+  userId: string
+  displayName: string
+  roleCode: string
   permissions: string[]
+  department?: string
+  roles?: string[]
 }
 
 // 登录表单类型
 export interface LoginForm {
   username: string
   password: string
-  remember: boolean
+  remember?: boolean
+  captcha?: string
 }
 
 // API 响应类型

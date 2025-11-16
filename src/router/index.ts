@@ -5,15 +5,6 @@ import { setupRouterGuards } from './guards'
 // 基础路由（无需权限）
 export const constantRoutes: RouteRecordRaw[] = [
   {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/login/index.vue'),
-    meta: {
-      title: '登录',
-      hidden: true
-    }
-  },
-  {
     path: '/404',
     name: '404',
     component: () => import('@/views/error/404.vue'),
@@ -44,6 +35,15 @@ export const constantRoutes: RouteRecordRaw[] = [
 
 // 动态路由（需要权限）
 export const asyncRoutes: RouteRecordRaw[] = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/login/index.vue'),
+    meta: {
+      title: '登录',
+      hidden: true
+    }
+  },
   {
     path: '/',
     name: 'Layout',

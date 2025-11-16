@@ -1,4 +1,3 @@
-
 import request from '@/utils/request'
 import type { OrderListResponse } from '@/types/review'
 import { number } from 'echarts';
@@ -15,7 +14,7 @@ export const getReviews = (
 }
 ): Promise<OrderListResponse> => {
   return request({
-    url: '/reception/reviews',
+    url: '/api/reception/reviews',
     method: 'GET',
     params,
   });

@@ -218,52 +218,7 @@ export const getGenderText = (gender: number): string => {
 }
 
 
-export const getOrderList = (params: {
-  current: number
-  size: number
-}) => {
-  return request<{
-    records: OrderItem[]
-    total: number
-    size: number
-    current: number
-    pages: number
-  }>({
-    url: '/api/applications',
-    method: 'get',
-    params
-  })
-}
-
-
-
 import type { OrderListResponse } from '@/types/order';
-
-/**
- * 获取挂单申请列表
- * @param params - 分页参数
- */
-export const getLodgingApplications = (
-  params: {
-    pageNo: number;
-    pageSize: number;
-  }
-): Promise<OrderListResponse> => {
-  return request({
-    url: '/apply/applications',
-    method: 'GET',
-    params,
-  });
-};
-
-
-// export const applications = (data: ApplicationSubmitRequest): Promise<{ code: number; message: string }> {
-//     return request({
-//       url: '/apply/applications',
-//       method: 'post',
-//       data
-//     })
-//   }
 
 export const applications = (data: ApplicationSubmitRequest): Promise<{
   code: number
@@ -273,7 +228,7 @@ export const applications = (data: ApplicationSubmitRequest): Promise<{
   timestamp: number
 }> => {
   return request({
-    url: '/apply/applications',
+    url: '/api/apply/applications',
     method: 'post',
     data
   })

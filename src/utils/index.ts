@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie'
+import type { User } from '@/types'
 
 const TOKEN_KEY = 'admin_token'
 const USER_KEY = 'admin_user'
@@ -18,12 +19,12 @@ export const removeToken = (): void => {
 }
 
 // 用户信息相关
-export const getUserInfo = () => {
+export const getUserInfo = (): User | null => {
   const userStr = localStorage.getItem(USER_KEY)
   return userStr ? JSON.parse(userStr) : null
 }
 
-export const setUserInfo = (user: any): void => {
+export const setUserInfo = (user: User): void => {
   localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
