@@ -44,7 +44,7 @@ export const login = async (data: LoginForm): Promise<{ token: string; user: Use
     })
 
     const response = await request({
-      url: '/api/auth/login',
+      url: '/auth/login',
       method: 'post',
       data
     })
