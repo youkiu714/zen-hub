@@ -1,6 +1,18 @@
 import request from '@/utils/request'
 import type { LoginForm, User, ApiResponse } from '@/types'
 
+// 登录请求参数类型
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+// 登录响应类型
+export interface LoginResponse {
+  token: string
+  user: User
+}
+
 // Mock 用户数据
 const mockUser: User = {
   id: 1,
@@ -13,6 +25,14 @@ const mockUser: User = {
 
 // Mock token
 const mockToken = 'mock-jwt-token-' + Date.now()
+
+export const loginApi = (data: LoginRequest): Promise<LoginResponse> => {
+  return request({
+    url: '/api/auth/login',
+    method: 'POST',
+    data
+  })
+}
 
 // 登录 - 统一使用mock模式
 export const login = async (data: LoginForm): Promise<{ token: string; user: User }> => {
@@ -34,25 +54,12 @@ export const login = async (data: LoginForm): Promise<{ token: string; user: Use
   } else {
     throw new Error('用户名或密码错误')
   }
-
-  // TODO: 后续可以替换为真实API
-  // return request({
-  //   url: '/auth/login',
-  //   method: 'post',
-  //   data
-  // })
 }
 
 // 获取用户信息 - 统一使用mock模式
 export const getUserInfo = async (): Promise<User> => {
   await new Promise(resolve => setTimeout(resolve, 500))
   return mockUser
-
-  // TODO: 后续可以替换为真实API
-  // return request({
-  //   url: '/auth/user',
-  //   method: 'get'
-  // })
 }
 
 // 刷新 token - 统一使用mock模式

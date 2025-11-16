@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { User, LoginForm } from '@/types'
-import { login, getUserInfo as fetchUserInfo, logout as apiLogout } from '@/api/auth'
+import { loginApi, getUserInfo as fetchUserInfo, logout as apiLogout } from '@/api/auth'
 import { getToken, setToken, removeToken, setUserInfo, removeUserInfo } from '@/utils'
 
 export const useUserStore = defineStore('user', () => {
@@ -12,8 +12,10 @@ export const useUserStore = defineStore('user', () => {
 
   // 登录
   const loginAction = async (loginForm: LoginForm) => {
+
+    console.log("loginForm:", loginForm)
     try {
-      const { token: newToken, user: userInfo } = await login(loginForm)
+      const { token: newToken, user: userInfo } = await loginApi(loginForm)
       
       token.value = newToken
       user.value = userInfo

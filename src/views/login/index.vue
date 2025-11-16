@@ -34,11 +34,6 @@
               required
             />
           </el-form-item>
-
-          <el-form-item>
-            <el-checkbox v-model="loginForm.remember">记住我</el-checkbox>
-          </el-form-item>
-
           <el-form-item>
             <el-button
               type="primary"
@@ -76,8 +71,6 @@ const captchaText = ref('')
 const loginForm = reactive<LoginForm>({
   username: 'admin',
   password: '123456',
-  captcha: '',
-  remember: false
 })
 
 const loginRules: FormRules = {
@@ -89,19 +82,6 @@ const loginRules: FormRules = {
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' }
   ],
-  captcha: [
-    { required: true, message: '请输入验证码', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (value.toLowerCase() !== captchaText.value.toLowerCase()) {
-          callback(new Error('验证码错误'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
-  ]
 }
 
 // 生成随机验证码
@@ -184,10 +164,10 @@ const handleLogin = async () => {
 
     await userStore.loginAction(loginForm)
 
-    ElMessage.success('登录成功')
+    // ElMessage.success('登录成功')
 
-    const redirect = route.query.redirect as string
-    router.push(redirect || '/')
+    // const redirect = route.query.redirect as string
+    // router.push(redirect || '/')
   } catch (error) {
     console.error('Login failed:', error)
     // 登录失败时刷新验证码

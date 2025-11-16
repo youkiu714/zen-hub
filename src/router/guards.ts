@@ -11,7 +11,15 @@ import { DEV_CONFIG, quickLogin } from '@/utils/dev-tools'
 NProgress.configure({ showSpinner: false })
 
 // 白名单路由（无需登录）
-const whiteList = ['/','/PendingOrderQuery', '/PendingOrderReview', '/login', '/404', '/403', '/500']
+const whiteList = [
+  '/',
+  '/PendingOrderQuery',
+  '/PendingOrderReview',
+  '/login',
+  '/404',
+  '/403',
+  '/500'
+]
 
 export function setupRouterGuards(router: Router) {
   // 前置守卫
@@ -21,7 +29,7 @@ export function setupRouterGuards(router: Router) {
     const userStore = useUserStore()
     const token = getToken()
 
-        // 开发环境绕过登录逻辑
+    // 开发环境绕过登录逻辑
     if (DEV_CONFIG.BYPASS_LOGIN && !token && to.path !== '/login') {
       console.log('🚀 开发模式：自动创建虚拟用户信息')
 
@@ -43,8 +51,9 @@ export function setupRouterGuards(router: Router) {
 
     if (token) {
       if (to.path === '/login') {
+        console.log('to.path:', to.path)
         // 已登录，重定向到首页
-        // next({ path: '/' })
+        next({ path: '/' })
         NProgress.done()
       } else {
         // 检查是否有用户信息
@@ -55,7 +64,7 @@ export function setupRouterGuards(router: Router) {
           } catch (error) {
             // 获取用户信息失败，清除 token 并重定向到登录页
             userStore.resetState()
-            // next(`/login?redirect=${to.path}`)
+            next(`/login?redirect=${to.path}`)
             NProgress.done()
           }
         } else {
@@ -63,11 +72,12 @@ export function setupRouterGuards(router: Router) {
         }
       }
     } else {
+      console.log('aaaa')
       // 未登录
       if (whiteList.includes(to.path)) {
         next()
       } else {
-        // next(`/login?redirect=${to.path}`)
+        next(`/login?redirect=${to.path}`)
         NProgress.done()
       }
     }
