@@ -229,7 +229,7 @@ export const getOrderList = (params: {
     current: number
     pages: number
   }>({
-    url: 'http://49.232.241.94:8080/lodging/api/applications',
+    url: '/api/applications',
     method: 'get',
     params
   })
@@ -250,7 +250,7 @@ export const getLodgingApplications = (
   }
 ): Promise<OrderListResponse> => {
   return request({
-    url: 'http://49.232.241.94:8080/lodging/apply/applications',
+    url: '/api/apply/applications',
     method: 'GET',
     params,
   });
@@ -259,7 +259,7 @@ export const getLodgingApplications = (
 
 // export const applications = (data: ApplicationSubmitRequest): Promise<{ code: number; message: string }> {
 //     return request({
-//       url: 'http://49.232.241.94:8080/lodging/apply/applications',
+//       url: '/api/apply/applications',
 //       method: 'post',
 //       data
 //     })
@@ -267,7 +267,7 @@ export const getLodgingApplications = (
 
 export const applications = (data: ApplicationSubmitRequest): Promise<{ code: number; message: string }> => {
   return request({
-    url: 'http://49.232.241.94:8080/lodging/apply/applications',
+    url: '/api/apply/applications',
     method: 'post',
     data
   })

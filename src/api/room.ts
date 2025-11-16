@@ -15,7 +15,7 @@ export const getRooms = (
 }
 ): Promise<IPageRoomSummaryVO> => {
   return request({
-    url: 'http://49.232.241.94:8080/lodging/api/rooms',
+    url: '/api/rooms',
     method: 'GET',
     params,
   });
@@ -42,7 +42,7 @@ export const createRoom = (
   data: CreateRoomRequest
 ): Promise<ApiResponse<number>> => {
   return request({
-    url: 'http://49.232.241.94:8080/lodging/api/rooms',
+    url: '/api/rooms',
     method: 'POST',
     data,
   });
@@ -56,7 +56,7 @@ export const updateRoom = (
   data: CreateRoomRequest
 ): Promise<ApiResponse<number>> => {
   return request({
-    url: `http://49.232.241.94:8080/lodging/api/rooms/${id}`,
+    url: `/api/rooms/${id}`,
     method: 'PUT',
     data,
   });
@@ -66,7 +66,7 @@ export const updateRoom = (
 
 export const getRoomOverview = (): Promise<ApiResponse<DashboardOverviewVO>> => {
   return request({
-    url: 'http://49.232.241.94:8080/lodging/api/dashboard/overview',
+    url: '/api/dashboard/overview',
     method: 'GET',
   });
 };
@@ -81,7 +81,7 @@ export const getRoomStatus = (
 }
 ): Promise<ApiResponse<RoomStatusDashboardVO>> => {
   return request({
-    url: 'http://49.232.241.94:8080/lodging/api/dashboard/room-status',
+    url: '/api/dashboard/room-status',
     method: 'GET',
     params,
   });

@@ -11,7 +11,7 @@ export function getApplications(params: {
   checkinFrom?: string;
   checkinTo?: string;
 }) {
-  return request.get<Request<IPageApplicationListItemVO>>('http://49.232.241.94:8080/lodging/apply/applications', {
+  return request.get<Request<IPageApplicationListItemVO>>('/api/apply/applications', {
     params,
   });
 }
@@ -20,5 +20,5 @@ import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/c
 export function getApplicationById(id: number) {
   console.log(id);
   
-  return request.get<Request<ApplicationDetailVO>>(`http://49.232.241.94:8080/lodging/apply/applications/${id}`);
+  return request.get<Request<ApplicationDetailVO>>(`/api/apply/applications/${id}`);
 }

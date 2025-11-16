@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git 命令指南 - 分支合并操作</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.3rem;
+            margin: 25px 0 15px 0;
+            padding-left: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .command-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .command-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #3182ce;
+        }
+
+        .copy-btn.copied {
+            background: #48bb78;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .info-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .warning-box {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .warning-box h4 {
+            color: #e53e3e;
+            margin-bottom: 10px;
+        }
+
+        .tip-box {
+            background: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #38a169;
+        }
+
+        .tip-box h4 {
+            color: #38a169;
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 0.9rem;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .command-description {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .status-safe {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .workflow-diagram {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .workflow-step {
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .workflow-arrow {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin: 0 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .action-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.danger {
+            background: #e74c3c;
+        }
+
+        .action-btn.danger:hover {
+            background: #c0392b;
+        }
+
+        .action-btn.success {
+            background: #27ae60;
+        }
+
+        .action-btn.success:hover {
+            background: #219a52;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔀 Git 分支合并命令指南</h1>
+            <p>将 main 分支合并到 wzy 分支的完整操作指南</p>
+        </div>
+
+        <div class="content">
+            <!-- 当前状态 -->
+            <div class="section">
+                <h2>📍 当前状态</h2>
+                <div class="info-card">
+                    <h4>分支信息</h4>
+                    <ul>
+                        <li><strong>当前分支：</strong> main</li>
+                        <li><strong>目标分支：</strong> wzy</li>
+                        <li><strong>操作类型：</strong> 将 main 合并到 wzy</li>
+                        <li><strong>最新提交：</strong> feat: 实现真实API登录接口集成</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 标准合并流程 -->
+            <div class="section">
+                <h2>🚀 标准合并流程</h2>
+
+                <h3><span class="step-number">1</span>切换到 wzy 分支</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git checkout wzy')">复制</button>
+                    <pre>git checkout wzy</pre>
+                </div>
+                <div class="command-description">
+                    切换到目标分支 wzy，所有后续操作都将在 wzy 分支上进行
+                </div>
+
+                <h3><span class="step-number">2</span>确保 wzy 分支是最新的</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git pull origin wzy')">复制</button>
+                    <pre>git pull origin wzy</pre>
+                </div>
+                <div class="command-description">
+                    拉取远程 wzy 分支的最新更改，避免与其他开发者的工作产生冲突
+                </div>
+
+                <h3><span class="step-number">3</span>合并 main 分支</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git merge main')">复制</button>
+                    <pre>git merge main</pre>
+                </div>
+                <div class="command-description">
+                    将 main 分支的提交合并到当前 wzy 分支中
+                </div>
+
+                <h3><span class="step-number">4</span>推送到远程仓库</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git push origin wzy')">复制</button>
+                    <pre>git push origin wzy</pre>
+                </div>
+                <div class="command-description">
+                    将合并后的 wzy 分支推送到远程仓库，使其他团队成员可以访问最新的更改
+                </div>
+            </div>
+
+            <!-- 工作流程图 -->
+            <div class="section">
+                <h2>📊 工作流程图</h2>
+                <div class="workflow-diagram">
+                    <div style="margin-bottom: 20px;">
+                        <h4>Git 分支状态</h4>
+                        <div class="workflow-step">main (最新提交)</div>
+                        <span class="workflow-arrow">↓</span>
+                        <div class="workflow-step">checkout wzy</div>
+                        <span class="workflow-arrow">↓</span>
+                        <div class="workflow-step">pull origin wzy</div>
+                        <span class="workflow-arrow">↓</span>
+                        <div class="workflow-step">merge main</div>
+                        <span class="workflow-arrow">↓</span>
+                        <div class="workflow-step">push origin wzy</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 安全合并方式 -->
+            <div class="section">
+                <h2>🛡️ 安全合并方式（推荐）</h2>
+
+                <h3><span class="step-number">1</span>切换到 wzy 分支</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git checkout wzy')">复制</button>
+                    <pre>git checkout wzy</pre>
+                </div>
+
+                <h3><span class="step-number">2</span>创建合并前备份点</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git tag wzy-before-merge-$(date +%Y%m%d)')">复制</button>
+                    <pre>git tag wzy-before-merge-$(date +%Y%m%d)</pre>
+                </div>
+                <div class="command-description">
+                    创建一个标签作为合并前的备份点，如果出现问题可以轻松回滚
+                </div>
+
+                <h3><span class="step-number">3</span>拉取最新的 wzy 分支</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git pull origin wzy')">复制</button>
+                    <pre>git pull origin wzy</pre>
+                </div>
+
+                <h3><span class="step-number">4</span>合并 main 分支</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git merge main')">复制</button>
+                    <pre>git merge main</pre>
+                </div>
+
+                <h3><span class="step-number">5</span>推送到远程</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git push origin wzy')">复制</button>
+                    <pre>git push origin wzy</pre>
+                </div>
+            </div>
+
+            <!-- 冲突处理 -->
+            <div class="section">
+                <h2>⚠️ 冲突处理</h2>
+                <div class="warning-box">
+                    <h4>如果在合并过程中出现冲突</h4>
+                    <p>Git 会提示您解决冲突文件。以下是处理步骤：</p>
+                </div>
+
+                <h3><span class="step-number">1</span>查看冲突文件</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git status')">复制</button>
+                    <pre>git status</pre>
+                </div>
+                <div class="command-description">
+                    Git 会列出所有存在冲突的文件
+                </div>
+
+                <h3><span class="step-number">2</span>手动解决冲突</h3>
+                <div class="info-card">
+                    <h4>冲突标记示例：</h4>
+                    <div class="command-block">
+                        <pre><<<<<<< HEAD
+# wzy 分支的内容
+=======
+# main 分支的内容
+>>>>>>> main</pre>
+                    </div>
+                    <p>编辑冲突文件，保留需要的内容，删除冲突标记</p>
+                </div>
+
+                <h3><span class="step-number">3</span>添加解决的文件</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git add <conflicted-files>')">复制</button>
+                    <pre>git add &lt;conflicted-files&gt;</pre>
+                </div>
+                <div class="command-description">
+                    将解决冲突后的文件添加到暂存区
+                </div>
+
+                <h3><span class="step-number">4</span>完成合并</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git commit')">复制</button>
+                    <pre>git commit</pre>
+                </div>
+                <div class="command-description">
+                    Git 会自动生成合并提交信息
+                </div>
+
+                <h3><span class="step-number">5</span>推送到远程</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git push origin wzy')">复制</button>
+                    <pre>git push origin wzy</pre>
+                </div>
+            </div>
+
+            <!-- 快捷操作 -->
+            <div class="section">
+                <h2>⚡ 一键命令集合</h2>
+
+                <div class="info-card">
+                    <h4>标准合并（一条命令）</h4>
+                    <div class="command-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this, 'git checkout wzy && git pull origin wzy && git merge main && git push origin wzy')">复制</button>
+                        <pre>git checkout wzy && git pull origin wzy && git merge main && git push origin wzy</pre>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h4>安全合并（包含备份）</h4>
+                    <div class="command-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this, 'git checkout wzy && git tag wzy-before-merge-$(date +%Y%m%d) && git pull origin wzy && git merge main && git push origin wzy')">复制</button>
+                        <pre>git checkout wzy && git tag wzy-before-merge-$(date +%Y%m%d) && git pull origin wzy && git merge main && git push origin wzy</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 验证和检查 -->
+            <div class="section">
+                <h2>🔍 验证和检查</h2>
+
+                <h3>检查分支状态</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git branch -v')">复制</button>
+                    <pre>git branch -v</pre>
+                </div>
+
+                <h3>查看提交历史</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git log --oneline --graph --decorate')">复制</button>
+                    <pre>git log --oneline --graph --decorate</pre>
+                </div>
+
+                <h3>检查是否有未提交的更改</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git status')">复制</button>
+                    <pre>git status</pre>
+                </div>
+
+                <h3>查看最近的提交</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git log --oneline -10')">复制</button>
+                    <pre>git log --oneline -10</pre>
+                </div>
+            </div>
+
+            <!-- 紧急回滚 -->
+            <div class="section">
+                <h2>🚨 紧急回滚（如果出现问题）</h2>
+
+                <div class="warning-box">
+                    <h4>⚠️ 警告：回滚会丢失未提交的更改！</h4>
+                    <p>以下命令用于紧急情况，请谨慎使用。</p>
+                </div>
+
+                <h3>回滚到合并前的状态（如果有备份标签）</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git reset --hard wzy-before-merge-YYYYMMDD')">复制</button>
+                    <pre>git reset --hard wzy-before-merge-YYYYMMDD</pre>
+                </div>
+
+                <h3>强制推送到远程（危险操作）</h3>
+                <div class="command-block">
+                    <button class="copy-btn" onclick="copyToClipboard(this, 'git push origin wzy --force')">复制</button>
+                    <pre>git push origin wzy --force</pre>
+                </div>
+                <div class="status-indicator status-danger">
+                    危险操作！可能影响其他开发者
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="section">
+                <h2>🎯 快速操作</h2>
+                <div class="button-group">
+                    <button class="action-btn success" onclick="executeCommand('git checkout wzy && git pull origin wzy && git merge main && git push origin wzy')">
+                        执行标准合并
+                    </button>
+                    <button class="action-btn" onclick="executeCommand('git checkout wzy')">
+                        切换到 wzy 分支
+                    </button>
+                    <button class="action-btn" onclick="executeCommand('git branch -v')">
+                        查看分支状态
+                    </button>
+                    <button class="action-btn" onclick="executeCommand('git status')">
+                        查看当前状态
+                    </button>
+                    <button class="action-btn danger" onclick="window.location.reload()">
+                        刷新页面
+                    </button>
+                </div>
+            </div>
+
+            <!-- 备忘录 -->
+            <div class="section">
+                <h2>📝 备忘录</h2>
+                <div class="tip-box">
+                    <h4>💡 最佳实践</h4>
+                    <ul>
+                        <li>在合并前，确保当前工作区的更改已经提交或暂存</li>
+                        <li>养成在重要操作前创建备份标签的习惯</li>
+                        <li>合并后及时推送，保持远程仓库的同步</li>
+                        <li>定期执行 <code>git pull</code> 避免分支偏离过远</li>
+                        <li>在团队协作中，合并前先与相关人员沟通</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4>本次合并的主要内容</h4>
+                    <ul>
+                        <li>✅ 真实API登录接口集成</li>
+                        <li>✅ 保留开发环境Mock模式支持</li>
+                        <li>✅ 增强请求拦截器响应格式兼容性</li>
+                        <li>✅ 更新用户信息获取、刷新Token、登出接口</li>
+                        <li>✅ 新增开发工具API模式切换功能</li>
+                        <li>✅ 详细的登录系统分析文档和迁移指南</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(button, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '已复制！';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                button.textContent = '已复制！';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = '复制';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function executeCommand(command) {
+            if (confirm(`确定要执行命令：\n${command}\n\n这将在您的终端中运行Git命令。`)) {
+                // 创建一个包含命令的文本区域，方便用户复制
+                const textArea = document.createElement('textarea');
+                textArea.value = command;
+                textArea.style.position = 'fixed';
+                textArea.style.top = '0';
+                textArea.style.left = '0';
+                textArea.style.width = '100%';
+                textArea.style.height = '100%';
+                textArea.style.zIndex = '9999';
+                textArea.style.fontSize = '16px';
+                textArea.style.padding = '20px';
+                textArea.style.backgroundColor = '#2d3748';
+                textArea.style.color = '#e2e8f0';
+                textArea.readOnly = true;
+
+                document.body.appendChild(textArea);
+                textArea.select();
+
+                // 显示提示
+                alert(`命令已准备就绪：\n\n${command}\n\n请手动复制到终端中执行。`);
+
+                // 3秒后移除文本区域
+                setTimeout(() => {
+                    document.body.removeChild(textArea);
+                }, 3000);
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Git 命令指南页面已加载');
+
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+C 或 Cmd+C 复制当前聚焦的命令块
+                if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                    const focusedElement = document.activeElement;
+                    if (focusedElement && focusedElement.classList.contains('command-block')) {
+                        e.preventDefault();
+                        const copyBtn = focusedElement.querySelector('.copy-btn');
+                        if (copyBtn) {
+                            copyBtn.click();
+                        }
+                    }
+                }
+            });
+
+            // 为所有代码块添加点击复制功能
+            document.querySelectorAll('.command-block pre').forEach(pre => {
+                pre.style.cursor = 'pointer';
+                pre.title = '点击复制命令';
+                pre.addEventListener('click', function() {
+                    const copyBtn = this.parentElement.querySelector('.copy-btn');
+                    if (copyBtn) {
+                        copyBtn.click();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
