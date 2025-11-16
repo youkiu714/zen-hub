@@ -52,25 +52,22 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import type { LoginForm } from '@/types'
-import Starfield from '@/components/Starfield.vue'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 
 const loginFormRef = ref<FormInstance>()
-const captchaCanvas = ref<HTMLCanvasElement>()
 const loading = ref(false)
-const captchaText = ref('')
 
 const loginForm = reactive<LoginForm>({
-  username: 'liaison01',
-  password: '123456',
+  username: '',
+  password: '',
 })
 
 const loginRules: FormRules = {
@@ -81,78 +78,7 @@ const loginRules: FormRules = {
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' }
-  ],
-}
-
-// 生成随机验证码
-const generateCaptcha = () => {
-  const chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678'
-  let result = ''
-  for (let i = 0; i < 4; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
-}
-
-// 绘制验证码
-const drawCaptcha = () => {
-  if (!captchaCanvas.value) return
-
-  const canvas = captchaCanvas.value
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-
-  // 清空画布
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-  // 设置背景
-  ctx.fillStyle = '#f0f0f0'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-  // 生成验证码文本
-  captchaText.value = generateCaptcha()
-
-  // 绘制验证码文本
-  ctx.font = '20px Arial'
-  ctx.fillStyle = '#333'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-
-  for (let i = 0; i < captchaText.value.length; i++) {
-    const char = captchaText.value[i]
-    const x = 20 + i * 20
-    const y = 20 + Math.random() * 10 - 5
-    const angle = (Math.random() - 0.5) * 0.5
-
-    ctx.save()
-    ctx.translate(x, y)
-    ctx.rotate(angle)
-    ctx.fillText(char, 0, 0)
-    ctx.restore()
-  }
-
-  // 添加干扰线
-  for (let i = 0; i < 5; i++) {
-    ctx.strokeStyle = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`
-    ctx.beginPath()
-    ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height)
-    ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height)
-    ctx.stroke()
-  }
-
-  // 添加干扰点
-  for (let i = 0; i < 20; i++) {
-    ctx.fillStyle = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`
-    ctx.beginPath()
-    ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 1, 0, 2 * Math.PI)
-    ctx.fill()
-  }
-}
-
-// 刷新验证码
-const refreshCaptcha = () => {
-  drawCaptcha()
-  loginForm.captcha = ''
+  ]
 }
 
 const handleLogin = async () => {
@@ -161,21 +87,18 @@ const handleLogin = async () => {
   try {
     await loginFormRef.value.validate()
     loading.value = true
-
     await userStore.loginAction(loginForm)
+
+    const redirect = (route.query.redirect as string) || '/'
+    router.replace(redirect)
+    ElMessage.success('登录成功')
   } catch (error) {
-    console.error('Login failed:', error)
-    ElMessage.error('登录失败，请检查用户名和密码')
-    // 登录失败时刷新验证码
-    refreshCaptcha()
+    const message = error instanceof Error ? error.message : '登录失败，请稍后重试'
+    ElMessage.error(message)
   } finally {
     loading.value = false
   }
 }
-
-onMounted(() => {
-  drawCaptcha()
-})
 </script>
 
 <style scoped lang="scss">
@@ -219,27 +142,6 @@ onMounted(() => {
 .login-form {
   .login-btn {
     width: 100%;
-  }
-
-  .captcha-container {
-    display: flex;
-    align-items: center;
-
-    .captcha-image {
-      cursor: pointer;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      background: #fff;
-      transition: border-color 0.3s;
-
-      &:hover {
-        border-color: #409eff;
-      }
-
-      canvas {
-        display: block;
-      }
-    }
   }
 }
 </style>

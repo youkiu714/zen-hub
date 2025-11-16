@@ -3,7 +3,6 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { useUserStore } from '@/store/modules/user'
 import { useTabsStore } from '@/store/modules/tabs'
-import { getToken } from '@/utils'
 
 NProgress.configure({ showSpinner: false })
 
@@ -15,9 +14,9 @@ export function setupRouterGuards(router: Router) {
     NProgress.start()
 
     const userStore = useUserStore()
-    const token = getToken()    
+    const isAuthenticated = userStore.isAuthenticated
 
-    if (token) {
+    if (isAuthenticated) {
       if (to.path === '/login') {
         // 已登录，重定向到首页
         next({ path: '/' })

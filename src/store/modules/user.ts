@@ -1,59 +1,81 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
 import type { User, LoginForm } from '@/types'
 import { login } from '@/api/auth'
-import { getToken, setToken, removeToken, setUserInfo, removeUserInfo } from '@/utils'
-import { ElMessage } from 'element-plus'
-import router from '@/router'
+import {
+  getToken,
+  setToken,
+  removeToken,
+  setUserInfo,
+  removeUserInfo,
+  getUserInfo
+} from '@/utils'
 
-export const useUserStore = defineStore('user', () => {
-  const token = ref<string>(getToken() || '')
-  const user = ref<User | null>(null)
-  const roles = ref<string[]>([])
-  const permissions = ref<string[]>([])
+interface AuthState {
+  token: string
+  user: User | null
+  roles: string[]
+  permissions: string[]
+}
 
-  const loginAction = async (loginForm: LoginForm) => {
-    try {
-      const { token: newToken, user: userInfo } = await login(loginForm)
-
-      console.log('newToken:', newToken)
-      console.log('userInfo:', userInfo)
-
-      token.value = newToken
-      user.value = userInfo
-      roles.value = userInfo.roles || []
-      permissions.value = userInfo.permissions || []
-
-      setToken(newToken, loginForm.remember)
-      setUserInfo(userInfo)
-      
-      ElMessage.success('登录成功')
-      
-      // 登录成功后跳转
-      const redirect = router.currentRoute.value.query.redirect as string
-      router.push(redirect || '/')
-      
-      return Promise.resolve()
-    } catch (error) {
-      return Promise.reject(error)
+export const useUserStore = defineStore('user', {
+  state: (): AuthState => {
+    const cachedUser = getUserInfo()
+    return {
+      token: getToken() || '',
+      user: cachedUser,
+      roles: cachedUser?.roles || [],
+      permissions: cachedUser?.permissions || []
     }
-  }
+  },
+  getters: {
+    isAuthenticated: (state) => Boolean(state.token)
+  },
+  actions: {
+    /**
+     * 调用登录接口并持久化令牌/用户信息
+     */
+    async loginAction(loginForm: LoginForm) {
+      const { token, user } = await login(loginForm)
+      this.persistAuthState(token, user, loginForm.remember)
+      return { token, user }
+    },
 
-  const resetState = () => {
-    token.value = ''
-    user.value = null
-    roles.value = []
-    permissions.value = []
-    removeToken()
-    removeUserInfo()
-  }
+    /**
+     * 将最新的认证数据同步到 Store 和本地存储
+     */
+    persistAuthState(token: string, user: User, remember?: boolean) {
+      this.token = token
+      this.user = user
+      this.roles = user.roles || []
+      this.permissions = user.permissions || []
 
-  return {
-    token,
-    user,
-    roles,
-    permissions,
-    loginAction,
-    resetState
+      setToken(token, remember)
+      setUserInfo(user)
+    },
+
+    /**
+     * 从本地存储恢复认证状态
+     */
+    restoreAuthFromStorage() {
+      const cachedToken = getToken()
+      const cachedUser = getUserInfo()
+
+      this.token = cachedToken || ''
+      this.user = cachedUser
+      this.roles = cachedUser?.roles || []
+      this.permissions = cachedUser?.permissions || []
+    },
+
+    /**
+     * 清空本地和 Store 中的认证信息
+     */
+    resetState() {
+      this.token = ''
+      this.user = null
+      this.roles = []
+      this.permissions = []
+      removeToken()
+      removeUserInfo()
+    }
   }
 })

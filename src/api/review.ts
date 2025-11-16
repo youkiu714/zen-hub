@@ -1,3 +1,13 @@
+/*
+ * @Author: zhaoziying zhaoziying@kuaishou.com
+ * @Date: 2025-11-16 10:21:16
+ * @LastEditors: zhaoziying zhaoziying@kuaishou.com
+ * @LastEditTime: 2025-11-16 11:31:28
+ * @FilePath: /zen-hub/src/api/review.ts
+ * @Description: 
+ * 
+ * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved. 
+ */
 
 import request from '@/utils/request'
 import type { OrderListResponse } from '@/types/review'
@@ -15,7 +25,7 @@ export const getReviews = (
 }
 ): Promise<OrderListResponse> => {
   return request({
-    url: '/reception/reviews',
+    url: '/api/reception/reviews',
     method: 'GET',
     params,
   });

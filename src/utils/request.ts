@@ -20,23 +20,13 @@ const service: AxiosInstance = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    // 优先从 store 获取 token，如果为空则直接从 Cookie 获取
     const userStore = useUserStore()
-    let token = userStore.token
-    
-    // 如果 store 中的 token 为空，直接从 Cookie 读取
-    if (!token) {
-      token = getToken() || ''
-    }
-
-    console.log('request token from store:', userStore.token)
-    console.log('request token from cookie:', getToken())
-    console.log('final token:', token)
+    const token = userStore.token || getToken()
     
     if (token) {
       config.headers = {
         ...config.headers,
-       "X-Auth-Token": `${token}`
+        'X-Auth-Token': token
       }
     }
     
