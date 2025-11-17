@@ -24,27 +24,32 @@ export interface ReviewListResponse {
   timestamp?: number;
 }
 
-// 定义申请类型的映射
-export const ApplicationTypeMap: Record<number, string> = {
-  1: '短住',
-  2: '直通车',
-  3: '僧亲',
-  4: '团队挂单',
-  5: '特殊客人',
-};
+// 审核状态常量定义
+export const REVIEW_STATUS = {
+  PENDING: 10,        // 待审核
+  PENDING_MASTER: 20, // 待法师审核
+  APPROVED: 30,       // 已通过
+  REJECTED: 40,       // 已驳回
+} as const;
+
+// 审核阶段常量定义
+export const REVIEW_STAGE = {
+  VOLUNTEER: 10,      // 客堂义工
+  MASTER: 20,         // 客堂法师
+} as const;
 
 // 定义审核状态的映射
 export const ReviewStatusMap: Record<number, string> = {
-  10: '待审核',
-  20: '待法师审核',
-  30: '已通过',
-  40: '已驳回',
+  [REVIEW_STATUS.PENDING]: '待审核',
+  [REVIEW_STATUS.PENDING_MASTER]: '待法师审核',
+  [REVIEW_STATUS.APPROVED]: '已通过',
+  [REVIEW_STATUS.REJECTED]: '已驳回',
 };
 
 // 定义审核阶段的映射
 export const ReviewStageMap: Record<number, string> = {
-  10: '客堂义工',
-  20: '客堂法师',
+  [REVIEW_STAGE.VOLUNTEER]: '客堂义工',
+  [REVIEW_STAGE.MASTER]: '客堂法师',
 };
 
 // 定义审核结果的映射

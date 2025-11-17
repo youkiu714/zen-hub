@@ -1,10 +1,7 @@
 <template>
   <div class="checkin-management">
-    <!-- 页面标题 -->
-    <div class="page-header">
-      <h2 class="page-title">入住管理</h2>
-      <p class="page-desc">管理客人入住、续住和退住流程</p>
-    </div>
+   
+      <PageHeader title="入住管理" />
 
     <!-- 主要内容卡片 -->
     <el-card class="main-card" shadow="hover">
@@ -510,6 +507,8 @@ import {
   confirmCheckin
 } from '@/api/checkin'
 
+import PageHeader from '@/components/PageHeader.vue'
+
 // 响应式数据
 const activeTab = ref<'pending' | 'checked-in' | 'checked-out'>('pending')
 const loading = ref(false)
@@ -939,23 +938,6 @@ onMounted(() => {
   padding: 24px;
   background-color: #fdf6e3;
   min-height: 100vh;
-
-  .page-header {
-    margin-bottom: 24px;
-
-    .page-title {
-      font-size: 28px;
-      font-weight: 600;
-      color: #303133;
-      margin: 0 0 8px 0;
-    }
-
-    .page-desc {
-      font-size: 16px;
-      color: #606266;
-      margin: 0;
-    }
-  }
 
   .main-card {
     border-radius: 12px;

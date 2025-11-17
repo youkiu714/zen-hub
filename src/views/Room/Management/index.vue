@@ -1,11 +1,7 @@
 <template>
   <div class="room-management-container">
     <!-- 标题区 -->
-    <div class="page-header">
-      <div class="title-section">
-        <h1>床位安排管理</h1>
-        <p>实时管理和分配挂单人员床位</p>
-      </div>
+    <PageHeader title="床位安排管理">
       <div class="action-buttons">
         <el-button type="primary" @click="refreshData" :loading="refreshing">
           <el-icon>
@@ -20,7 +16,7 @@
           导出报表
         </el-button>
       </div>
-    </div>
+    </PageHeader>
 
     <!-- 统计卡片区 -->
     <div class="dashboard-cards">
@@ -368,6 +364,7 @@ import {
 } from '@element-plus/icons-vue';
 import type { DashboardOverviewVO, RoomStatusDashboardVO, RoomWithBedsVO, BedStatusVO } from '@/types/room-bed-management';
 import { getRoomOverview, getRoomStatus } from '@/api/room';
+import PageHeader from '@/components/PageHeader.vue'
 
 // 数据响应式变量
 const dashboardData = ref<DashboardOverviewVO>({
@@ -651,29 +648,6 @@ onMounted(async () => {
   min-height: 100vh;
   padding: 20px;
   font-family: 'Inter', system-ui, sans-serif;
-}
-
-/* 页面标题区 */
-.page-header {
-  padding: 20px;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.title-section h1 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-.title-section p {
-  font-size: 14px;
-  color: #666;
-  margin: 5px 0 0 0;
 }
 
 .action-buttons .el-button {

@@ -2,9 +2,7 @@
 <template>
   <div class="review-list-page">
     <!-- 标题区 -->
-    <div class="page-header">
-      <h1>挂单审核</h1>
-    </div>
+    <PageHeader title="挂单审核" />
 
     <!-- Tabs 区 -->
     <el-tabs v-model="activeTab" class="review-tabs">
@@ -100,6 +98,7 @@ import ReviewDetailDialog from './ReviewDetailDialog.vue';
 import ReviewModal from './ReviewModal.vue';
 import { getReviews } from '@/api/review';
 import type { ReviewListItemVO, ReviewListResponse } from '@/types/review';
+import PageHeader from '@/components/PageHeader.vue'
 
 // =============== 常量 ===============
 const ApplicationTypeMap = {
@@ -272,17 +271,7 @@ onMounted(() => {
   /* 为底部留空间 */
 }
 
-.page-header {
-  text-align: center;
-  padding: 30px 0;
-  margin-left: 20px;
-}
 
-.page-header h1 {
-  color: #8B4513;
-  font-size: 28px;
-  margin: 0;
-}
 
 .review-tabs {
   background-color: #fff;

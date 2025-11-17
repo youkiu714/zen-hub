@@ -1,10 +1,7 @@
 <template>
   <div class="pending-records">
     <!-- 页面标题 -->
-    <div class="page-header">
-      <h2 class="page-title">挂单记录查询</h2>
-      <p class="page-description">展示所有挂单人的基本信息，包括个人资料和挂单记录统计</p>
-    </div>
+    <PageHeader title="挂单记录查询" />
 
     <!-- 搜索和筛选区域 -->
     <el-card class="filter-card" shadow="hover">
@@ -222,6 +219,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Filter, Download } from '@element-plus/icons-vue'
+import PageHeader from '@/components/PageHeader.vue'
 // 保留API接口以备将来使用
 // import {
 //   getPendingRecords,
@@ -587,23 +585,7 @@ onMounted(() => {
 .pending-records {
   padding: 20px;
 
-  .page-header {
-    text-align: center;
-    margin-bottom: 30px;
-
-    .page-title {
-      font-size: 2rem;
-      font-weight: 600;
-      color: #8B5A2B;
-      margin-bottom: 10px;
-    }
-
-    .page-description {
-      color: #666;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-  }
+  
 
   .filter-card {
     margin-bottom: 20px;

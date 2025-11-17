@@ -1,8 +1,7 @@
 <template>
   <div class="room-management-container">
     <!-- 标题区 -->
-    <div class="page-title">房间管理</div>
-    <div class="page-subtitle">管理寺院房间信息，包括房间号码、类型、楼层和床位数量，支持房间的新增和状态管理</div>
+    <PageHeader title="房间管理" />
 
     <!-- Tabs区 -->
     <el-tabs v-model="activeTab" class="room-tabs">
@@ -141,6 +140,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getRooms, createRoom, updateRoom, type CreateRoomRequest } from '@/api/room';
 import type { IPageRoomSummaryVO } from '@/types/room'
+import PageHeader from '@/components/PageHeader.vue'
 
 // 页面数据
 const activeTab = ref('active'); // 默认选中“使用中”
@@ -383,20 +383,7 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-.page-title {
-  font-size: 32px;
-  font-weight: bold;
-  color: #8D6E63;
-  text-align: center;
-  margin-bottom: 10px;
-}
 
-.page-subtitle {
-  font-size: 14px;
-  color: #5D4037;
-  text-align: center;
-  margin-bottom: 30px;
-}
 
 .room-tabs {
   background-color: #fff;
