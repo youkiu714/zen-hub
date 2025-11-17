@@ -2,17 +2,10 @@
 <template>
   <div class="review-list-page">
     <!-- 标题区 -->
-    <div class="page-header">
-      <h1>挂单审核</h1>
-    </div>
+    <PageHeader title="挂单审核">
+    </PageHeader>
 
-    <!-- Tabs 区 -->
-    <el-tabs v-model="activeTab" class="review-tabs">
-      <el-tab-pane label="待审核" name="10" />
-      <el-tab-pane label="待法师审核" name="20" />
-      <el-tab-pane label="已通过" name="30" />
-      <el-tab-pane label="已驳回" name="40" />
-    </el-tabs>
+    <ReviewStatusFilter v-model="filterStatus" @update:modelValue="statusChange" />
 
     <!-- 表格区 -->
     <div class="table-container">
@@ -24,7 +17,8 @@
             style="width: 300px" @keyup.enter="fetchData" @input="handleSearchChange" />
           <el-select v-model="selectedType" placeholder="全部申请类型" style="width: 150px" @change="fetchData" clearable>
             <el-option label="全部申请类型" :value="undefined" />
-            <el-option v-for="(label, value) in ApplicationTypeMap" :key="value" :label="label" :value="Number(value)" />
+            <el-option v-for="(label, value) in ApplicationTypeMap" :key="value" :label="label"
+              :value="Number(value)" />
           </el-select>
           <el-select v-model="selectedDateRange" placeholder="全部日期" style="width: 150px" @change="fetchData" clearable>
             <el-option label="全部日期" value="" />
@@ -38,17 +32,17 @@
 
       <!-- 表格 -->
       <el-table :data="reviewList" :stripe="true" style="width: 100%" :row-class-name="tableRowClassName"
-        @row-dblclick="handleView" :fit="true">
-        <el-table-column prop="applicantName" label="申请人" :min-width="180">
+        @row-dblclick="handleView" :fit="true" class="application-table">
+        <el-table-column prop="applicantName" label="申请人" :min-width="120">
           <template #default="scope">
             <div class="applicant-cell">
-              <el-avatar size="small" :src="getAvatarUrl(scope.row)" />
+              <!-- <el-avatar size="small" :src="getAvatarUrl(scope.row)" /> -->
               <span>{{ scope.row.applicantName }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="idCardMasked" label="身份证号" :min-width="180" />
-        <el-table-column prop="applicationType" label="申请类型" :min-width="120">
+        <el-table-column prop="idCardMasked" label="身份证号" :min-width="120" />
+        <el-table-column prop="applicationType" label="申请类型" :min-width="100">
           <template #default="scope">
             <el-tag :type="getApplicationTypeTagType(scope.row.applicationType)" size="small">
               {{ ApplicationTypeMap[scope.row.applicationType] || '-' }}
@@ -69,10 +63,11 @@
           </template>
         </el-table-column>
         <!-- 操作列设置为固定宽度 -->
-        <el-table-column label="操作" width="120" fixed="right" align="center">
+        <el-table-column label="操作" fixed="right" align="center" :min-width="160">
           <template #default="scope">
             <el-button type="text" @click="handleView(scope.row)">查看</el-button>
-            <el-button v-if="scope.row.reviewStatus === 10" type="text" @click="handleReview(scope.row)">审核</el-button>
+            <el-button type="text" @click="handleWorkflow(scope.row)">流程</el-button>
+            <el-button v-if="(scope.row.reviewStatus === 10 || scope.row.reviewStatus === 20) && userStore.roles == 'MASTER'" type="text" @click="handleReview(scope.row)">审核</el-button>
             <el-button v-else-if="scope.row.reviewStatus === 40" type="text"
               @click="handleReReview(scope.row)">重新审核</el-button>
           </template>
@@ -86,20 +81,38 @@
       </div>
     </div>
 
-    <!-- 弹窗 -->
-    <ReviewDetailDialog v-model="dialogVisible" :current-item="currentItem" :is-view-only="isViewOnly"
-      @close="dialogVisible = false" @review-submitted="fetchData" />
+    <!-- 查看详情 -->
+    <ApplicationDetailDialog
+      v-model="detailVisible"
+      :application-id="currentAppId"
+      @close="onDetailClosed"
+    />
+
+    <!-- 审核流程 -->
+    <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
+
+    <!-- 审核 -->
+    <ReviewModal v-model="showReview" :application-id="currentAppId" @submit-success="handleReviewSuccess" />
+
   </div>
+
+  
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, storeToRefs } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
-import ReviewDetailDialog from './ReviewDetailDialog.vue';
-import ReviewModal from './ReviewModal.vue';
+import ReviewModal from './components/ReviewModal.vue';
 import { getReviews } from '@/api/review';
 import type { ReviewListItemVO, ReviewListResponse } from '@/types/review';
+import PageHeader from '@/components/PageHeader.vue'
+import ReviewStatusFilter from './components/ReviewStatusFilter.vue'
+import { ReviewStatus } from '@/types/review'
+import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
+import ReviewPage from '@/components/ReviewPage.vue'
+import { useUserStore } from '@/store/modules/user'
+const userStore = useUserStore()
 
 // =============== 常量 ===============
 const ApplicationTypeMap = {
@@ -117,6 +130,8 @@ const ReviewStatusMap = {
   40: '已驳回',
 } as const;
 
+const filterStatus = ref(ReviewStatus.WAITING_REVIEW)
+
 // =============== 响应式状态 ===============
 const reviewList = ref<ReviewListItemVO[]>([]);
 const total = ref(0);
@@ -124,24 +139,27 @@ const currentPage = ref(1);
 const searchKeyword = ref('');
 const selectedType = ref<number | undefined>(undefined);
 const selectedDateRange = ref('');
-const activeTab = ref('10');
-const dialogVisible = ref(false);
+
 const currentItem = ref<ReviewListItemVO | null>(null);
+
+const detailVisible = ref(false);
+const currentAppId = ref(0)
+
+const reviewVisible = ref(false);
+const currentReviewId = ref(0)
+
 const isViewOnly = ref(true);
 
-// =============== 计算 ===============
-const statusFilter = computed(() => Number(activeTab.value));
 
 // =============== 审核窗口 ===============
 const showReview = ref(false)
-const currentApplicationId = ref(12345) // 示例ID，实际从数据中获取
 
 
-// ====== 监听 Tab 切换 ======
-watch(activeTab, () => {
+// ====== 筛选状态 切换 ======
+const statusChange = () => {
   currentPage.value = 1; // 切换 Tab 时重置页码
   fetchData(); // 重新加载数据
-});
+};
 
 // =============== 方法 ===============
 const handleSearchChange = () => {
@@ -156,14 +174,22 @@ const handleReviewSuccess = () => {
   fetchData()
 };
 
+const onDetailClosed = () => {
+  console.log('详情窗口已关闭')
+}
+
+const onReviewClosed = () => {
+  console.log('审核流程窗口已关闭')
+}
 
 const fetchData = async () => {
+
   try {
     const params = {
       keyword: searchKeyword.value || undefined,
       pageNo: currentPage.value,
-      pageSize: 10,
-      status: statusFilter.value,
+      pageSize: 5,
+      status: filterStatus.value,
       type: selectedType.value,
       ...getDateRangeParams(selectedDateRange.value),
     };
@@ -236,13 +262,21 @@ const tableRowClassName = ({ row }: { row: ReviewListItemVO }) => {
 
 const handleView = (row: ReviewListItemVO) => {
   currentItem.value = row;
+  currentAppId.value = row.id;
   isViewOnly.value = true;
-  dialogVisible.value = true;
+  detailVisible.value = true;
+};
+
+const handleWorkflow = (row: ReviewListItemVO) => {
+  currentItem.value = row;
+  console.log('审核流程:', row.id);
+  currentReviewId.value = row.id;
+  reviewVisible.value = true;
 };
 
 const handleReview = (row: ReviewListItemVO) => {
-  currentApplicationId.value = row.id
   currentItem.value = row;
+  currentAppId.value = row.id
   isViewOnly.value = false;
   showReview.value = true
 };
@@ -250,7 +284,7 @@ const handleReview = (row: ReviewListItemVO) => {
 const handleReReview = (row: ReviewListItemVO) => {
   currentItem.value = row;
   isViewOnly.value = false;
-  dialogVisible.value = true;
+  detailVisible.value = true;
 };
 
 const handlePageChange = (page: number) => {
@@ -266,7 +300,7 @@ onMounted(() => {
 <style scoped>
 .review-list-page {
   padding: 20px;
-  background-color: #FFF8E7;
+  background-color: #fdf6e3;
   min-height: calc(100vh - 150px);
   /* padding-bottom: 120px; */
   /* 为底部留空间 */
@@ -294,7 +328,6 @@ onMounted(() => {
 
 .table-container {
   background: white;
-  margin: 0 20px;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -459,4 +492,13 @@ onMounted(() => {
   color: rgb(139 90 43 / var(--tw-border-opacity, 1));
 }
 
+.application-table {
+  max-height: calc(100vh - 390px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
 </style>

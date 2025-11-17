@@ -151,8 +151,6 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const filterStatus = ref(ApplicationStatus.DRAFT)
 
-
-
 const detailVisible = ref(false)
 const currentAppId = ref(0)
 

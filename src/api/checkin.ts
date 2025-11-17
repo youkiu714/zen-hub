@@ -29,7 +29,7 @@ export const getPendingCheckinList = (
   params: PendingCheckinRequest
 ): Promise<PendingCheckinResponse> => {
   return request({
-    url: '/api/checkin/pending',
+    url: '/checkin/pending',
     method: 'GET',
     params,
   });
@@ -44,7 +44,7 @@ export const getInhouseList = (
   params: InhouseRequest
 ): Promise<InhouseResponse> => {
   return request({
-    url: '/api/checkin/inhouse',
+    url: '/checkin/inhouse',
     method: 'GET',
     params,
   });
@@ -59,7 +59,7 @@ export const getCheckedOutList = (
   params: any
 ): Promise<CheckInApiResponse<CheckedOutRecord>> => {
   return request({
-    url: '/api/checkin/checked-out',
+    url: '/checkin/checked-out',
     method: 'GET',
     params,
   });
@@ -74,7 +74,7 @@ export const performCheckIn = (
   data: CheckInFormData
 ): Promise<any> => {
   return request({
-    url: '/api/checkin/perform',
+    url: '/checkin/perform',
     method: 'POST',
     data,
   });
@@ -91,7 +91,7 @@ export const performCheckOut = (
   data: CheckOutFormData
 ): Promise<any> => {
   return request({
-    url: `/api/checkin/checkout/${recordId}`,
+    url: `/checkin/checkout/${recordId}`,
     method: 'POST',
     data,
   });
@@ -108,7 +108,7 @@ export const confirmRenewal = (
   data: RenewalFormData
 ): Promise<any> => {
   return request({
-    url: `/api/checkin/renewal/${recordId}`,
+    url: `/checkin/renewal/${recordId}`,
     method: 'POST',
     data,
   });
@@ -125,7 +125,7 @@ export const assignBed = (
   data: BedAssignmentFormData
 ): Promise<any> => {
   return request({
-    url: `/api/checkin/assign-bed/${recordId}`,
+    url: `/checkin/assign-bed/${recordId}`,
     method: 'POST',
     data,
   });
@@ -142,7 +142,7 @@ export const confirmBed = (
   data: BedAssignmentFormData
 ): Promise<any> => {
   return request({
-    url: `/api/checkin/confirm-bed/${recordId}`,
+    url: `/checkin/confirm-bed/${recordId}`,
     method: 'POST',
     data,
   });
@@ -159,7 +159,7 @@ export const submitEvaluation = (
   data: EvaluationFormData
 ): Promise<any> => {
   return request({
-    url: `/api/checkin/evaluation/${recordId}`,
+    url: `/checkin/evaluation/${recordId}`,
     method: 'POST',
     data,
   });
@@ -176,7 +176,7 @@ export const sendLostItemNotification = (
   data: LostItemNotificationFormData
 ): Promise<any> => {
   return request({
-    url: `/api/checkin/lost-item/${recordId}`,
+    url: `/checkin/lost-item/${recordId}`,
     method: 'POST',
     data,
   });
@@ -191,7 +191,7 @@ export const getCheckinDetail = (
   applicationId: number
 ): Promise<CheckinDetailResponse> => {
   return request({
-    url: `/api/checkin/detail/${applicationId}`,
+    url: `/checkin/detail/${applicationId}`,
     method: 'GET',
   });
 };
@@ -205,7 +205,7 @@ export const confirmCheckin = (
   data: CheckinConfirmRequest
 ): Promise<CheckinConfirmResponse> => {
   return request({
-    url: '/api/checkin/confirm',
+    url: '/checkin/confirm',
     method: 'POST',
     data,
   });
@@ -220,7 +220,7 @@ export const getGuestDetails = (
   recordId: string
 ): Promise<any> => {
   return request({
-    url: `/api/checkin/details/${recordId}`,
+    url: `/checkin/details/${recordId}`,
     method: 'GET',
   });
 };

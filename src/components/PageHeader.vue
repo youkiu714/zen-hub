@@ -18,8 +18,9 @@ defineProps<{
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
-  padding-bottom: 0;
+  margin-bottom: 20px!important;
+  padding-bottom: 0!important;
+  padding-top: 0!important;
 }
 
 .page-header h1 {

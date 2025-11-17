@@ -15,7 +15,7 @@ export const getRooms = (
 }
 ): Promise<IPageRoomSummaryVO> => {
   return request({
-    url: '/api/rooms',
+    url: '/rooms',
     method: 'GET',
     params,
   });
@@ -42,7 +42,7 @@ export const createRoom = (
   data: CreateRoomRequest
 ): Promise<ApiResponse<number>> => {
   return request({
-    url: '/api/rooms',
+    url: '/rooms',
     method: 'POST',
     data,
   });
@@ -56,7 +56,7 @@ export const updateRoom = (
   data: CreateRoomRequest
 ): Promise<ApiResponse<number>> => {
   return request({
-    url: `/api/rooms/${id}`,
+    url: `/rooms/${id}`,
     method: 'PUT',
     data,
   });
@@ -66,7 +66,7 @@ export const updateRoom = (
 
 export const getRoomOverview = (): Promise<ApiResponse<DashboardOverviewVO>> => {
   return request({
-    url: '/api/dashboard/overview',
+    url: '/dashboard/overview',
     method: 'GET',
   });
 };
@@ -81,7 +81,7 @@ export const getRoomStatus = (
 }
 ): Promise<ApiResponse<RoomStatusDashboardVO>> => {
   return request({
-    url: '/api/dashboard/room-status',
+    url: '/dashboard/room-status',
     method: 'GET',
     params,
   });

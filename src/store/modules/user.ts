@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { User, LoginForm } from '@/types'
-import { login } from '@/api/auth'
+import { login, logout as logoutApi } from '@/api/auth'
 import {
   getToken,
   setToken,
@@ -64,6 +64,21 @@ export const useUserStore = defineStore('user', {
       this.user = cachedUser
       this.roles = cachedUser?.roles || []
       this.permissions = cachedUser?.permissions || []
+    },
+
+    /**
+     * 退出登录 - 调用API并清理状态
+     */
+    async logout(token?: string) {
+      try {
+        // 调用退出API
+        await logoutApi(token || this.token)
+      } catch (error) {
+        // 即使API失败，也要继续清理本地状态
+      } finally {
+        // 无论API是否成功，都要清理本地状态
+        this.resetState()
+      }
     },
 
     /**
