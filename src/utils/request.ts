@@ -13,7 +13,7 @@ export interface ApiResponse<T = any> {
 
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
-  baseURL: '/',
+  baseURL: '/lodging/api',
   timeout: 10000
 })
 

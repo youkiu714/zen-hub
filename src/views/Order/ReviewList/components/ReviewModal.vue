@@ -54,11 +54,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Promotion } from '@element-plus/icons-vue'
 import axios from 'axios'
-import { receptionVolunteer } from '@/api/review';
+import { reception } from '@/api/review';
+import { useUserStore } from '@/store/modules/user'
+const userStore = useUserStore()
+
+// 获取用户信息的响应式引用
+const currentUser = computed(() => userStore.user)
 
 // 定义 props
 const props = defineProps<{
@@ -133,13 +138,16 @@ const handleSubmit = async () => {
 
     finalComment = `${finalComment}\n\n退回原因：${selectedReasons}`
   }
+  console.log('当前用户信息:', currentUser.value)
+  console.log('用户ID:', currentUser.value?.id)
 
   const params = {
     "pass": formData.pass,
-    "comment": finalComment
+    "comment": finalComment,
+    "operatorId": currentUser.value?.id
   };
-  const res = await receptionVolunteer(params, props.applicationId);
- ElMessage.success('审核提交成功')
+  const res = await reception(params, props.applicationId);
+  ElMessage.success('审核提交成功')
   emit('submitSuccess') // 通知父组件刷新数据或关闭弹窗
   handleClose()
 

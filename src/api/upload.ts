@@ -17,7 +17,7 @@ export const uploadAvatar = (
   }
 
   return request({
-    url: '/api/files/avatar',
+    url: '/files/avatar',
     method: 'POST',
     data: formData,
     headers: {

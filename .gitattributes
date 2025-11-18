@@ -1,0 +1,25 @@
+# .gitattributes
+# Enforce LF for all text files, including config files
+# 强制文本文件使用 LF，无论操作系统
+*.ts text eol=lf
+*.js text eol=lf
+*.d.ts text eol=lf
+*.json text eol=lf
+*.vue text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Important: also enforce LF for config files
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.config.js text eol=lf
+vite.config.ts text eol=lf
+
+# 可选：排除某些二进制文件（虽然 Git 通常能自动识别）
+*.png binary
+*.jpg binary
+*.woff2 binary

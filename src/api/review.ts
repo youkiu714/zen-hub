@@ -14,7 +14,7 @@ export const getReviews = (
 }
 ): Promise<OrderListResponse> => {
   return request({
-    url: '/api/reception/reviews',
+    url: '/reception/reviews',
     method: 'GET',
     params,
   });
@@ -24,15 +24,17 @@ export const getReviews = (
 
 export const reception = (params: {
     pass: true,
-    comment: string
+    comment: string,
+    operatorId: string
 }, id:number): Promise<{ code: number; message: string;  data: boolean; timestamp: string; success:true }> => {
-
-    //   console.log(params);
-    // console.log(id);
+console.log(params);
 
   return request({
-    url: `/reception/${id}/master`,
+    url: `/reception/${id}/review`,
     method: 'POST',
+    headers:{
+      'X-Operator-Id':params.operatorId
+    },
     data:params
   })
 }

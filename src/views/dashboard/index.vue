@@ -109,6 +109,7 @@ import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 
+
 const chartRef = ref<HTMLDivElement>()
 
 const handleQuickAction = (action: string) => {

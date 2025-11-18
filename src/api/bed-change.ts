@@ -12,29 +12,29 @@ import type {
 
 // 获取可申请换床列表
 export function getAvailableForChange(query: BedChangeQuery) {
-  return request.get<ApiResponse<AvailableForChangeResponse>>('/lodging/bed-change/available', {
+  return request.get<ApiResponse<AvailableForChangeResponse>>('/bed-change/available', {
     params: query
   })
 }
 
 // 获取已申请换床列表
 export function getAppliedChange(query: BedChangeQuery) {
-  return request.get<ApiResponse<AppliedChangeResponse>>('/lodging/bed-change/applied', {
+  return request.get<ApiResponse<AppliedChangeResponse>>('/bed-change/applied', {
     params: query
   })
 }
 
 // 提交换床申请
 export function submitBedChangeApplication(application: BedChangeApplication) {
-  return request.post<ApiResponse<any>>('/lodging/bed-change/apply', application)
+  return request.post<ApiResponse<any>>('/bed-change/apply', application)
 }
 
 // 取消换床申请
 export function cancelBedChangeApplication(applicationId: string) {
-  return request.post<ApiResponse<any>>(`/lodging/bed-change/cancel/${applicationId}`)
+  return request.post<ApiResponse<any>>(`/bed-change/cancel/${applicationId}`)
 }
 
 // 获取申请详情
 export function getBedChangeDetail(applicationId: string) {
-  return request.get<ApiResponse<any>>(`/lodging/bed-change/detail/${applicationId}`)
+  return request.get<ApiResponse<any>>(`/bed-change/detail/${applicationId}`)
 }

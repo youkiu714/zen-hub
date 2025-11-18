@@ -56,9 +56,9 @@
               <el-icon><User /></el-icon>
               个人中心
             </el-dropdown-item>
-            <el-dropdown-item command="settings">
-              <el-icon><Setting /></el-icon>
-              系统设置
+            <el-dropdown-item command="logout" divided>
+              <el-icon><SwitchButton /></el-icon>
+              退出登录
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -70,13 +70,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { useAppStore } from '@/store/modules/app'
 import { useUserStore } from '@/store/modules/user'
 
 const router = useRouter()
 const appStore = useAppStore()
 const userStore = useUserStore()
+
+const token = computed(() => userStore.token)
 
 const sidebarCollapsed = computed(() => appStore.sidebarCollapsed)
 const isDark = computed(() => appStore.isDark)
@@ -103,9 +105,39 @@ const handleCommand = async (command: string) => {
     case 'profile':
       ElMessage.info('个人中心功能开发中...')
       break
-    case 'settings':
-      ElMessage.info('系统设置功能开发中...')
+    case 'logout':
+      await handleLogout()
       break
+  }
+}
+
+// 退出登录处理函数
+const handleLogout = async () => {
+  try {
+    // 显示加载状态
+    const loadingInstance = ElLoading.service({
+      text: '正在退出...',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
+
+    // 获取当前token
+    const currentToken = token.value
+
+    // 调用退出API
+    await userStore.logout(currentToken)
+
+    // 退出成功
+    ElMessage.success('已退出登录')
+
+    // 跳转到登录页
+    router.push('/login')
+
+    // 关闭加载状态
+    loadingInstance.close()
+
+  } catch (error) {
+    console.error('退出登录失败:', error)
+    ElMessage.error('退出失败，请稍后重试')
   }
 }
 </script>
