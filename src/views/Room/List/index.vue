@@ -1,12 +1,7 @@
 <template>
   <div class="room-management-container">
     <!-- 标题区 -->
-<<<<<<< HEAD
     <PageHeader title="房间管理" />
-=======
-    <PageHeader title="房间管理">
-    </PageHeader>
->>>>>>> main
 
     <!-- 床位状态过滤器 -->
     <BedStatusFilter v-model="filterStatus" @update:modelValue="statusChange" />

@@ -2,12 +2,7 @@
 <template>
   <div class="review-list-page">
     <!-- 标题区 -->
-<<<<<<< HEAD
     <PageHeader title="挂单审核" />
-=======
-    <PageHeader title="挂单审核">
-    </PageHeader>
->>>>>>> main
 
     <ReviewStatusFilter v-model="filterStatus" @update:modelValue="statusChange" />
 
