@@ -507,3 +507,13 @@ body {
   padding: 12px 10px;
   border-radius: 12px;
 }
+
+.el-dialog  {
+    border-radius: 12px !important;
+}
+.el-dialog__header {
+    font-weight: 600;
+}
+.el-dialog__body {
+    padding-top: 16px !important;
+}
