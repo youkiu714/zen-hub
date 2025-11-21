@@ -170,6 +170,15 @@ export const asyncRoutes: RouteRecordRaw[] = [
           title: '房间及床位编辑',
           icon: 'Edit'
         }
+      },
+      {
+        path: '/accommodation-management/floor-management',
+        name: 'FloorManagement',
+        component: () => import('@/views/Floor/List/index.vue'),
+        meta: {
+          title: '楼层管理',
+          icon: 'List'
+        }
       }
     ]
   },

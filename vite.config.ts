@@ -5,10 +5,18 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
+
 export default defineConfig({
   base: '/', // 部署到根目录，如果是子目录请改为 '/子目录名/'
   build: {
     chunkSizeWarningLimit: 2000
+  },
+    css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern', // 👈 关键：启用 modern Sass API
+      },
+    },
   },
   plugins: [
     vue(),

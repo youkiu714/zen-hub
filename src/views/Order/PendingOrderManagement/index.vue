@@ -432,6 +432,7 @@ const handleEditSubmit = async (data: any, id: number) => {
 :deep(.el-table__fixed .el-table__body-wrapper::-webkit-scrollbar) {
   display: none;
 }
+
 .application-management {
   padding: 20px;
   background-color: #fdf6e3;

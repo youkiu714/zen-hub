@@ -132,7 +132,7 @@
                   </el-tooltip>
 
                   <el-tooltip content="查看详情" placement="top">
-                    <el-button type="default" size="small" circle @click="handleViewDetails(row)">
+                    <el-button type="default" size="small" circle @click="handleViewDetail(row.applicationId)">
                       <el-icon>
                         <View />
                       </el-icon>
@@ -215,12 +215,21 @@
                   </el-tooltip>
 
                   <el-tooltip content="查看详情" placement="top">
-                    <el-button type="default" size="small" circle @click="handleViewDetails(row)">
+                    <el-button type="default" size="small" circle @click="handleViewDetail(row.applicationId)">
                       <el-icon>
                         <View />
                       </el-icon>
                     </el-button>
                   </el-tooltip>
+
+                  <el-tooltip content="审核流程" placement="top">
+                    <el-button type="default" size="small" circle @click="handleReview(row.applicationId)">
+                      <el-icon>
+                        <Operation />
+                      </el-icon>
+                    </el-button>
+                  </el-tooltip>
+
                 </div>
               </template>
             </el-table-column>
@@ -327,130 +336,138 @@
     </el-card>
 
     <!-- 入住登记模态框 -->
-      <el-dialog
-    v-model="checkInModalVisible"
-    :title="`入住登记 - ${selectedRecord?.applicationId || ''}`"
-    width="60%"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
-    @close="resetCheckInForm"
-    custom-class="check-in-dialog"
-    top="5vh"
-  >
-    <!-- 滚动内容区域 -->
-    <div class="dialog-content-wrapper">
-      <!-- 入住人信息 -->
-      <div class="check-in-section">
-        <h3 class="section-title">👤 入住人信息</h3>
-        <div class="info-row">
-          <div class="info-item">
-            <label class="info-label">姓名</label>
-            <div class="info-value">{{ checkInForm.name || '-' }}</div>
-          </div>
-          <div class="info-item">
-            <label class="info-label">身份证号</label>
-            <div class="info-value">{{ checkInForm.idCard || '-' }}</div>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-item">
-            <label class="info-label">申请类型</label>
-            <div class="info-value">
-              <el-tag :type="getOrderTypeTagType(checkInForm.applicationTypeName)" size="small">
-                {{ checkInForm.applicationTypeName || '-' }}
-              </el-tag>
+    <el-dialog
+      v-model="checkInModalVisible"
+      :title="`入住登记 - ${selectedRecord?.applicationId || ''}`"
+      width="60%"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      @close="resetCheckInForm"
+      custom-class="check-in-dialog"
+      top="5vh"
+    >
+      <el-form
+        ref="checkInFormRef"
+        :model="checkInForm"
+        :rules="checkInRules"
+        label-width="120px"
+        label-position="right"
+      >
+        <!-- 滚动内容区域 -->
+        <div class="dialog-content-wrapper">
+          <!-- 入住人信息 -->
+          <div class="check-in-section">
+            <h3 class="section-title">👤 入住人信息</h3>
+            <div class="info-row">
+              <div class="info-item">
+                <label class="info-label">姓名</label>
+                <div class="info-value">{{ checkInForm.name || '-' }}</div>
+              </div>
+              <div class="info-item">
+                <label class="info-label">身份证号</label>
+                <div class="info-value">{{ checkInForm.idCard || '-' }}</div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-item">
+                <label class="info-label">申请类型</label>
+                <div class="info-value">
+                  <el-tag :type="getOrderTypeTagType(checkInForm.applicationTypeName)" size="small">
+                    {{ checkInForm.applicationTypeName || '-' }}
+                  </el-tag>
+                </div>
+              </div>
+              <div class="info-item">
+                <label class="info-label">联系电话</label>
+                <div class="info-value">{{ checkInForm.mobile || '-' }}</div>
+              </div>
             </div>
           </div>
-          <div class="info-item">
-            <label class="info-label">联系电话</label>
-            <div class="info-value">{{ checkInForm.mobile || '-' }}</div>
+
+          <!-- 房间及床位信息 -->
+          <div class="check-in-section">
+            <h3 class="section-title">🏠 房间及床位信息</h3>
+            <div class="info-row">
+              <div class="info-item">
+                <label class="info-label">分配房间</label>
+                <div class="info-value">{{ checkInForm.roomNumber || '-' }}</div>
+              </div>
+              <div class="info-item">
+                <label class="info-label">分配床位</label>
+                <div class="info-value">{{ checkInForm.bedNumber || '-' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 入住日期信息 -->
+          <div class="check-in-section">
+            <h3 class="section-title">📅 入住日期信息</h3>
+            <div class="info-row">
+              <el-form-item label="实际入住日期" prop="actualCheckinDate" required>
+                <el-date-picker
+                  v-model="checkInForm.actualCheckinDate"
+                  type="date"
+                  placeholder="选择实际入住日期"
+                  format="YYYY-MM-DD"
+                  value-format="YYYY-MM-DD"
+                  style="width: 100%"
+                />
+              </el-form-item>
+              <el-form-item label="预计退房日期" prop="expectedCheckoutDate" required>
+                <el-date-picker
+                  v-model="checkInForm.expectedCheckoutDate"
+                  type="date"
+                  placeholder="选择预计退房日期"
+                  format="YYYY-MM-DD"
+                  value-format="YYYY-MM-DD"
+                  style="width: 100%"
+                />
+              </el-form-item>
+            </div>
+          </div>
+
+          <!-- 入住登记信息 -->
+          <div class="check-in-section">
+            <h3 class="section-title">📝 入住登记信息</h3>
+            <el-form-item label="入住备注" prop="remark">
+              <el-input
+                v-model="checkInForm.remark"
+                type="textarea"
+                :rows="3"
+                placeholder="请输入入住备注信息，如特殊需求、注意事项等"
+                maxlength="200"
+                show-word-limit
+              />
+            </el-form-item>
+            <div class="info-row">
+              <el-form-item label="登记人" prop="registeredBy">
+                <el-input v-model="checkInForm.registeredBy" readonly :value="userStore.user.username" />
+              </el-form-item>
+              <el-form-item label="登记时间" prop="registrationTime" required>
+                <el-date-picker
+                  v-model="checkInForm.registrationTime"
+                  type="datetime"
+                  placeholder="选择登记时间"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  style="width: 100%"
+                />
+              </el-form-item>
+            </div>
+          </div>
+
+          <!-- 入住须知 -->
+          <div class="check-in-notice">
+            <h3 class="notice-title">ℹ️ 入住须知</h3>
+            <ul class="notice-list">
+              <li>请核对入住人身份信息与身份证一致</li>
+              <li>请告知入住人寺院作息时间和注意事项</li>
+              <li>请提醒入住人保管好个人财物</li>
+              <li>请引导入住人熟悉寺院环境和安全通道</li>
+            </ul>
           </div>
         </div>
-      </div>
-
-      <!-- 房间及床位信息 -->
-      <div class="check-in-section">
-        <h3 class="section-title">🏠 房间及床位信息</h3>
-        <div class="info-row">
-          <div class="info-item">
-            <label class="info-label">分配房间</label>
-            <div class="info-value">{{ checkInForm.roomNumber || '-' }}</div>
-          </div>
-          <div class="info-item">
-            <label class="info-label">分配床位</label>
-            <div class="info-value">{{ checkInForm.bedNumber || '-' }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 入住日期信息 -->
-      <div class="check-in-section">
-        <h3 class="section-title">📅 入住日期信息</h3>
-        <div class="info-row">
-          <el-form-item label="实际入住日期" prop="actualCheckinDate" required>
-            <el-date-picker
-              v-model="checkInForm.actualCheckinDate"
-              type="date"
-              placeholder="选择实际入住日期"
-              format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD"
-              style="width: 100%"
-            />
-          </el-form-item>
-          <el-form-item label="预计退房日期" prop="expectedCheckoutDate" required>
-            <el-date-picker
-              v-model="checkInForm.expectedCheckoutDate"
-              type="date"
-              placeholder="选择预计退房日期"
-              format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD"
-              style="width: 100%"
-            />
-          </el-form-item>
-        </div>
-      </div>
-
-      <!-- 入住登记信息 -->
-      <div class="check-in-section">
-        <h3 class="section-title">📝 入住登记信息</h3>
-        <el-form-item label="入住备注">
-          <el-input
-            v-model="checkInForm.remark"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入入住备注信息，如特殊需求、注意事项等"
-            maxlength="200"
-            show-word-limit
-          />
-        </el-form-item>
-        <div class="info-row">
-          <el-form-item label="登记人">
-            <el-input v-model="checkInForm.registeredBy" readonly value="客堂义工" />
-          </el-form-item>
-          <el-form-item label="登记时间" prop="registrationTime" required>
-            <el-date-picker
-              v-model="checkInForm.registrationTime"
-              type="datetime"
-              placeholder="选择登记时间"
-              format="YYYY-MM-DD HH:mm:ss"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              style="width: 100%"
-            />
-          </el-form-item>
-        </div>
-      </div>
-
-      <!-- 入住须知 -->
-      <div class="check-in-notice">
-        <h3 class="notice-title">ℹ️ 入住须知</h3>
-        <ul class="notice-list">
-          <li>请核对入住人身份信息与身份证一致</li>
-          <li>请告知入住人寺院作息时间和注意事项</li>
-          <li>请提醒入住人保管好个人财物</li>
-          <li>请引导入住人熟悉寺院环境和安全通道</li>
-        </ul>
-      </div>
-    </div>
+      </el-form>
 
     <template #footer>
       <div class="dialog-footer">
@@ -468,13 +485,25 @@
     </template>
   </el-dialog>
 
-    <!-- 其他模态框可以根据需要继续添加 -->
+
+    <!-- 查看详情 -->
+    <ApplicationDetailDialog
+      v-model="detailVisible"
+      :application-id="currentAppId"
+      @close="onDetailClosed"
+    />
+
+    <!-- 审核流程 -->
+    <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
+import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
+import ReviewPage from '@/components/ReviewPage.vue'
 import {
   Search,
   Filter,
@@ -510,12 +539,21 @@ import {
   confirmCheckin
 } from '@/api/checkin'
 
+import { useUserStore } from '@/store/modules/user'
+const userStore = useUserStore()
+
 // 响应式数据
 const activeTab = ref<'pending' | 'checked-in' | 'checked-out'>('pending')
 const loading = ref(false)
 const searchKeyword = ref('')
 const selectedRoomType = ref('')
 const selectedStatus = ref('')
+
+const detailVisible = ref(false)
+const currentAppId = ref(0)
+
+const reviewVisible = ref(false)
+const currentReviewId = ref(0)
 
 // 分页
 const pagination = reactive<PaginationParams>({
@@ -665,6 +703,15 @@ const handleCurrentChange = (page: number) => {
   loadData()
 }
 
+
+const onDetailClosed = () => {
+  console.log('详情窗口已关闭')
+}
+
+const onReviewClosed = () => {
+  console.log('审核流程窗口已关闭')
+}
+
 // 获取订单类型标签颜色
 const getOrderTypeTagType = (type: string) => {
   switch (type) {
@@ -721,7 +768,7 @@ const handleCheckIn = async (row: PendingCheckinItemVO) => {
     if (row.applicationId) {
       loading.value = true
 
-      const response: CheckinDetailResponse = await getCheckinDetail(12) // row.applicationId
+      const response: CheckinDetailResponse = await getCheckinDetail(row.applicationId) // 12
 
       console.log(response);
       
@@ -736,6 +783,8 @@ const handleCheckIn = async (row: PendingCheckinItemVO) => {
         checkInForm.applicationTypeName = detailData.applicationTypeName || row.applicationTypeName || ''
         checkInForm.roomNumber = detailData.roomNo || '待分配'
         checkInForm.bedNumber = detailData.bedNo || '待分配'
+        checkInForm.bedStayId = detailData.bedStayId
+        
 
         // 处理日期
         const now = new Date()
@@ -747,14 +796,9 @@ const handleCheckIn = async (row: PendingCheckinItemVO) => {
           ? new Date(detailData.expectedCheckoutAt).toISOString().split('T')[0]
           : new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-        checkInForm.registrationTime = now.toISOString().slice(0, 16)
+        checkInForm.registrationTime = now.toISOString().replace('T', ' ').slice(0, 19)
 
         ElMessage.success('获取入住详情成功')
-      // } else {
-      //   // 接口调用失败，使用列表数据
-      //   ElMessage.warning('获取详情失败，使用基本信息')
-      //   fillDefaultData(row)
-      // }
 
     } else {
       // 没有applicationId，使用默认数据
@@ -784,7 +828,13 @@ const fillDefaultData = (row: PendingCheckinItemVO) => {
   const now = new Date()
   checkInForm.actualCheckinDate = now.toISOString().split('T')[0]
   checkInForm.expectedCheckoutDate = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-  checkInForm.registrationTime = now.toISOString().slice(0, 16)
+  checkInForm.registrationTime = now.toISOString().replace('T', ' ').slice(0, 19)
+
+  console.log(now.toISOString().split('T')[0]);
+  
+  
+  // const isoDate = new Date().toISOString().split('T')[0];
+  // console.log(isoDate); // 例如：2025-11-19
 }
 
 const handleBedAssignment = (row: PendingCheckinItemVO) => {
@@ -826,20 +876,28 @@ const handleViewDetails = (row: any) => {
   ElMessage.info('查看详情功能')
 }
 
+const handleViewDetail = (id: number) => {
+  currentAppId.value = id
+  detailVisible.value = true
+}
+
+const handleReview = (id: number) => {
+  console.log('审核流程:', id)
+  currentReviewId.value = id
+  reviewVisible.value = true
+}
+
 // 入住登记相关
 const confirmCheckIn = async () => {
-  if (!checkInFormRef.value || !checkInFormRef2.value) return
+  if (!checkInFormRef.value) return
 
   try {
     // 验证表单
-    await Promise.all([
-      checkInFormRef.value.validate(),
-      checkInFormRef2.value.validate()
-    ])
+    await checkInFormRef.value.validate()
 
     // 验证必填字段
     if (!checkInForm.bedStayId) {
-      ElMessage.warning('缺少床位入住ID，请先进行床位分配')
+      ElMessage.warning('缺少申请ID，无法完成入住确认')
       return
     }
 
@@ -851,6 +909,9 @@ const confirmCheckIn = async () => {
       actualCheckinAt: checkInForm.actualCheckinDate
         ? `${checkInForm.actualCheckinDate} ${new Date().toTimeString().slice(0, 8)}`
         : undefined,
+      expectedCheckoutAt: checkInForm.expectedCheckoutDate
+        ? `${checkInForm.expectedCheckoutDate} ${new Date().toTimeString().slice(0, 8)}`
+        : undefined,
       remark: checkInForm.remark
     }
 
@@ -858,15 +919,19 @@ const confirmCheckIn = async () => {
 
     // 调用确认入住API
     const response: CheckinConfirmResponse = await confirmCheckin(confirmRequest)
+    ElMessage.success('入住确认成功！')
+    checkInModalVisible.value = false
+    resetCheckInForm()
+    loadData() // 刷新列表数据
 
-    if (response.success || response.code === 0) {
-      ElMessage.success('入住确认成功！')
-      checkInModalVisible.value = false
-      resetCheckInForm()
-      loadData() // 刷新列表数据
-    } else {
-      ElMessage.error(`入住确认失败: ${response.message || '未知错误'}`)
-    }
+    // if (response.success || response.code === 0) {
+    //   ElMessage.success('入住确认成功！')
+    //   checkInModalVisible.value = false
+    //   resetCheckInForm()
+    //   loadData() // 刷新列表数据
+    // } else {
+    //   ElMessage.error(`入住确认失败: ${response.message || '未知错误'}`)
+    // }
 
   } catch (error) {
     console.error('入住确认失败:', error)
