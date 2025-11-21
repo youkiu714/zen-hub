@@ -228,7 +228,7 @@ export const applications = (data: ApplicationSubmitRequest): Promise<{
   timestamp: number
 }> => {
   return request({
-    url: '/apply/applications',
+    url: '/api/apply/applications',
     method: 'post',
     data
   })
