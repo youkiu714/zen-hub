@@ -132,10 +132,9 @@
 
     <!-- 审核对话框 -->
     <ReviewDialog
-      :visible="reviewDialogVisible"
-      :order-data="selectedOrder"
-      @close="reviewDialogVisible = false"
-      @confirm="handleReviewConfirm"
+      v-model="reviewDialogVisible"
+      :record="selectedOrder"
+      @submit="handleReviewConfirm"
     />
   </div>
 </template>
@@ -151,6 +150,8 @@ import PageHeader from '@/components/PageHeader.vue'
 import { throttle } from 'lodash-es'
 import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
 import { ApplicationTypeMap, applicationTypeOptions } from '@/utils/constants'
+import RenewalDetailDialog from './components/RenewalDetailDialog.vue'
+// import ReviewDialog from '@/views/Order/components/ReviewDialog.vue'
 
 // 响应式数据
 const loading = ref(false)
@@ -263,24 +264,24 @@ const handleViewDetail = (row: ReviewListItemVO) => {
 
 const handleReview = (row: ReviewListItemVO) => {
   selectedOrder.value = row
-  reviewDialogVisible.value = true
+  detailDialogVisible.value = true
 }
 
-const handleReviewConfirm = async (result: { approved: boolean; comment: string }) => {
+const handleReviewConfirm = async (result: { pass: boolean; comment: string }) => {
   if (selectedOrder.value) {
     try {
       loading.value = true
 
       const response = await reception(
         {
-          pass: result.approved,
+          pass: result.pass,
           comment: result.comment
         },
         selectedOrder.value.id!
       )
 
       if (response.code === 200) {
-        ElMessage.success(`审核${result.approved ? '通过' : '驳回'}成功`)
+        ElMessage.success(`审核${result.pass ? '通过' : '驳回'}成功`)
         reviewDialogVisible.value = false
         selectedOrder.value = null
         fetchData()
