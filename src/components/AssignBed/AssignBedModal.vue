@@ -218,11 +218,9 @@ import type {
   RoomRequest,
   BedRequest,
   AllocateBedRequest,
-  Bed,
-  BedStatus,
-  BedType
+  Bed
 } from '@/types/assignment'
-import { BED_STATUS_MAP, BED_TYPE_MAP, Gender } from '@/types/assignment'
+import { BED_STATUS_MAP, BED_TYPE_MAP, Gender, BedStatus, BedType } from '@/types/assignment'
 
 // Props
 interface Props {

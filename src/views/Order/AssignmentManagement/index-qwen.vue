@@ -1,367 +1,225 @@
 <!-- src/views/Assignment/AssignmentList.vue -->
 <template>
   <div class="assignment-list-container">
-    <!-- Tabs区 -->
-    <el-tabs v-model="activeTab" class="tabs-area" @tab-change="handleTabChange">
-      <el-tab-pane label="待分配" name="pending"></el-tab-pane>
-      <el-tab-pane label="已分配" name="assigned"></el-tab-pane>
-      <el-tab-pane label="已入住" name="checkedIn"></el-tab-pane>
-      <el-tab-pane label="已退住" name="checkedOut"></el-tab-pane>
-    </el-tabs>
+    <PageHeader title="挂单分床">
+    </PageHeader>
 
-    <!-- 标题区和操作区 -->
-    <div class="header-actions">
-      <div class="title-section">
-        <h2>{{ getTabTitle() }}</h2>
-        <p class="subtitle">{{ getTabSubtitle() }}</p>
-      </div>
+    <ApplicationStatusFilter v-model="activeTab" @update:modelValue="handleTabChange" />
 
-      <div class="filter-actions">
+
+    <!-- 数据表格 -->
+    <div class="table-container">
+      <!-- 标题区和操作区 -->
+      <div class="filter-bar">
         <!-- 搜索框 -->
-        <el-input v-model="searchKeyword" placeholder="搜索姓名或房间号..." clearable style="width: 200px; margin-right: 16px;" />
+        <el-input v-model="searchKeyword" placeholder="搜索姓名或房间号..." clearable
+          style="width: 200px; margin-right: 16px;" />
 
         <!-- 性别筛选 - 仅待分配显示 -->
-        <el-select v-if="activeTab === 'pending'" v-model="genderFilter" placeholder="全部性别" clearable style="width: 120px; margin-right: 16px;">
+        <el-select v-if="activeTab === 'pending'" v-model="genderFilter" placeholder="全部性别" clearable
+          style="width: 120px; margin-right: 16px;">
           <el-option label="男" :value="1" />
           <el-option label="女" :value="2" />
         </el-select>
 
         <!-- 分组筛选 - 仅待分配显示 -->
-        <el-select v-if="activeTab === 'pending'" v-model="groupFilter" placeholder="全部分组" clearable style="width: 120px; margin-right: 16px;">
+        <el-select v-if="activeTab === 'pending'" v-model="groupFilter" placeholder="全部分组" clearable
+          style="width: 120px; margin-right: 16px;">
           <el-option v-for="group in groupOptions" :key="group" :label="group" :value="group" />
         </el-select>
 
         <!-- 房间筛选 - 仅已分配显示 -->
-        <el-select v-if="activeTab === 'assigned'" v-model="roomFilter" placeholder="全部房间" clearable style="width: 120px; margin-right: 16px;">
+        <el-select v-if="activeTab === 'assigned'" v-model="roomFilter" placeholder="全部房间" clearable
+          style="width: 120px; margin-right: 16px;">
           <el-option v-for="room in roomOptions" :key="room.value" :label="room.label" :value="room.value" />
         </el-select>
 
         <!-- 性别筛选 - 仅已入住显示 -->
-        <el-select v-if="activeTab === 'checkedIn'" v-model="genderFilter" placeholder="全部性别" clearable style="width: 120px; margin-right: 16px;">
+        <el-select v-if="activeTab === 'checkedIn'" v-model="genderFilter" placeholder="全部性别" clearable
+          style="width: 120px; margin-right: 16px;">
           <el-option label="男" :value="1" />
           <el-option label="女" :value="2" />
         </el-select>
 
         <!-- 部门筛选 - 仅已入住显示 -->
-        <el-select v-if="activeTab === 'checkedIn'" v-model="departmentFilter" placeholder="全部部门" clearable style="width: 120px; margin-right: 16px;">
+        <el-select v-if="activeTab === 'checkedIn'" v-model="departmentFilter" placeholder="全部部门" clearable
+          style="width: 120px; margin-right: 16px;">
           <el-option v-for="dept in departmentOptions" :key="dept.value" :label="dept.label" :value="dept.value" />
         </el-select>
 
         <!-- 姓名筛选 - 仅已退住显示 -->
-        <el-input v-if="activeTab === 'checkedOut'" v-model="checkoutNameFilter" placeholder="姓名筛选" clearable style="width: 120px; margin-right: 16px;" />
+        <el-input v-if="activeTab === 'checkedOut'" v-model="checkoutNameFilter" placeholder="姓名筛选" clearable
+          style="width: 120px; margin-right: 16px;" />
 
         <!-- 房间号筛选 - 仅已退住显示 -->
-        <el-input v-if="activeTab === 'checkedOut'" v-model="checkoutRoomFilter" placeholder="房间号筛选" clearable style="width: 120px; margin-right: 16px;" />
+        <el-input v-if="activeTab === 'checkedOut'" v-model="checkoutRoomFilter" placeholder="房间号筛选" clearable
+          style="width: 120px; margin-right: 16px;" />
 
-        <el-button v-if="activeTab === 'pending'" type="primary" :style="{ backgroundColor: '#8B5E3C', borderColor: '#8B5E3C' }" icon="Plus"
+        <el-button v-if="activeTab === 'pending'" type="primary"
+          :style="{ backgroundColor: '#8B5E3C', borderColor: '#8B5E3C' }" icon="Plus"
           @click="handleBatchAssign">批量分配</el-button>
       </div>
+
+      <!-- 表格区 -->
+      <el-table :data="tableData" stripe style="width: 100%" @selection-change="handleSelectionChange"
+        class="application-table">
+        <!-- 选择列 - 仅待分配表显示 -->
+        <el-table-column v-if="activeTab === 'pending'" type="selection" width="55" />
+
+        <!-- 待分配表格列 -->
+        <template v-if="activeTab === 'pending'">
+          <!-- 人员信息列 -->
+          <el-table-column prop="name" label="人员信息" min-width="100">
+            <template #default="{ row }">
+                <div class="info-text">
+                  <div class="name">{{ row.name }}</div>
+                </div>
+            </template>
+          </el-table-column>
+          <!-- 身份证 -->
+          <el-table-column prop="idCardMasked" label="身份证号" min-width="120">
+            <template #default="{ row }">
+              <div class="id-card">{{ row.idCardMasked }}</div>
+            </template>
+          </el-table-column>
+
+          <!-- 性别列 -->
+          <el-table-column prop="gender" label="性别" min-width="100">
+            <template #default="{ row }">
+              {{ row.gender === 1 ? '男' : row.gender === 2 ? '女' : '-' }}
+            </template>
+          </el-table-column>
+
+          <!-- 年龄列 -->
+          <el-table-column prop="age" label="年龄" min-width="100">
+            <template #default="{ row }">
+              {{ row.age !== null && row.age !== undefined ? row.age : '-' }}
+            </template>
+          </el-table-column>
+
+          <!-- 分组列 -->
+          <el-table-column prop="groupName" label="分组" min-width="100">
+            <template #default="{ row }">
+              <el-tag v-if="row.groupName" size="small" type="info">{{ row.groupName }}</el-tag>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+
+          <!-- 入住时长列 -->
+          <el-table-column prop="stayDays" label="入住时长" min-width="100">
+            <template #default="{ row }">
+              {{ row.stayDays !== null && row.stayDays !== undefined ? `${row.stayDays}天` : '-' }}
+            </template>
+          </el-table-column>
+
+          <!-- 类型列 -->
+          <el-table-column prop="typeName" label="类型" min-width="100">
+            <template #default="{ row }">
+              <el-tag v-if="row.typeName" size="small" :type="getTypeTagType(row.typeName)" effect="light">
+                {{ row.typeName }}
+              </el-tag>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+
+          <!-- 申请日期列 -->
+          <el-table-column prop="applyDate" label="申请日期" min-width="120">
+            <template #default="{ row }">
+              {{ row.applyDate || '-' }}
+            </template>
+          </el-table-column>
+
+          <!-- 操作列 -->
+          <el-table-column label="操作" min-width="180">
+            <template #default="{ row }">
+              <!-- 分配按钮 -->
+              <el-button type="primary" @click="handleAssign(row)" title="分配床位">分配床位
+              </el-button>
+              <!-- 查看详情 -->
+              <el-button type="info" @click="handleViewDetails(row)">查看详情</el-button>
+            </template>
+          </el-table-column>
+        </template>
+
+        <!-- 已分配表格列 -->
+        <template v-if="activeTab === 'assigned'">
+          <!-- 人员信息列 -->
+          <el-table-column prop="name" label="人员信息" min-width="120">
+            <template #default="{ row }">
+                <div class="info-text">
+                  <div class="name">{{ row.name }}</div>
+                </div>
+            </template>
+          </el-table-column>
+
+          <!-- 房间床位列 -->
+          <el-table-column prop="roomAndBed" label="房间/床位" min-width="120">
+            <template #default="{ row }">
+              <el-tag size="small" type="success">{{ row.roomAndBed }}</el-tag>
+            </template>
+          </el-table-column>
+
+          <!-- 分组列 -->
+          <el-table-column prop="group" label="分组" min-width="120">
+            <template #default="{ row }">
+              <el-tag v-if="row.group && row.group !== '-'" size="small" type="info">{{ row.group }}</el-tag>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+
+          <!-- 预计入住日期列 -->
+          <el-table-column prop="expectedCheckinDate" label="预计入住" min-width="120">
+            <template #default="{ row }">
+              {{ row.expectedCheckinDate || '-' }}
+            </template>
+          </el-table-column>
+
+          <!-- 预计离开日期列 -->
+          <el-table-column prop="expectedCheckoutDate" label="预计离开" min-width="120">
+            <template #default="{ row }">
+              {{ row.expectedCheckoutDate || '-' }}
+            </template>
+          </el-table-column>
+
+          <!-- 分配日期列 -->
+          <el-table-column prop="assignedDate" label="分配日期" min-width="120">
+            <template #default="{ row }">
+              <el-tag size="small" type="warning">{{ row.assignedDate }}</el-tag>
+            </template>
+          </el-table-column>
+
+          <!-- 操作列 -->
+          <el-table-column label="操作" min-width="120">
+            <template #default="{ row }">
+              <!-- 查看详情 -->
+              <el-button type="info" @click="handleViewDetails(row)">
+                查看详情
+              </el-button>
+            </template>
+          </el-table-column>
+        </template>
+      </el-table>
+
+      <!-- 分页器 -->
+      <div class="pagination-container">
+        <span class="pagination-info">显示 {{ pagination.startRow }}-{{ pagination.endRow }} 条, 共 {{ pagination.total }}
+          条</span>
+        <el-pagination background layout="prev, pager, next, jumper" :total="pagination.total"
+          :page-size="pagination.pageSize" :current-page="pagination.currentPage" @current-change="handlePageChange" />
+      </div>
     </div>
-
-    <!-- 数据表格 -->
-    <el-table :data="tableData" stripe border style="width: 100%" @selection-change="handleSelectionChange">
-      <!-- 选择列 - 仅待分配表显示 -->
-      <el-table-column v-if="activeTab === 'pending'" type="selection" width="55" />
-
-      <!-- 待分配表格列 -->
-      <template v-if="activeTab === 'pending'">
-        <!-- 人员信息列 -->
-        <el-table-column prop="name" label="人员信息" min-width="200">
-          <template #default="{ row }">
-            <div class="person-info">
-              <el-avatar :size="40" icon="User" />
-              <div class="info-text">
-                <div class="name">{{ row.name }}</div>
-                <div class="id-card">身份证号: {{ row.idCardMasked }}</div>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-
-        <!-- 性别列 -->
-        <el-table-column prop="gender" label="性别" width="80">
-          <template #default="{ row }">
-            {{ row.gender === 1 ? '男' : row.gender === 2 ? '女' : '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 年龄列 -->
-        <el-table-column prop="age" label="年龄" width="80">
-          <template #default="{ row }">
-            {{ row.age !== null && row.age !== undefined ? row.age : '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 分组列 -->
-        <el-table-column prop="groupName" label="分组" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row.groupName" size="small" type="info">{{ row.groupName }}</el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-
-        <!-- 入住时长列 -->
-        <el-table-column prop="stayDays" label="入住时长" width="100">
-          <template #default="{ row }">
-            {{ row.stayDays !== null && row.stayDays !== undefined ? `${row.stayDays}天` : '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 类型列 -->
-        <el-table-column prop="typeName" label="类型" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row.typeName" size="small" :type="getTypeTagType(row.typeName)" effect="light">
-              {{ row.typeName }}
-            </el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-
-        <!-- 申请日期列 -->
-        <el-table-column prop="applyDate" label="申请日期" width="120">
-          <template #default="{ row }">
-            {{ row.applyDate || '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 操作列 -->
-        <el-table-column label="操作" width="120">
-          <template #default="{ row }">
-            <!-- 分配按钮 -->
-            <el-button type="primary" circle @click="handleAssign(row)" title="分配床位">
-              <el-icon>
-                <CirclePlus />
-              </el-icon>
-            </el-button>
-            <!-- 查看详情 -->
-            <el-button type="info" circle @click="handleViewDetails(row)">
-              <el-icon>
-                <InfoFilled />
-              </el-icon>
-            </el-button>
-          </template>
-        </el-table-column>
-      </template>
-
-      <!-- 已分配表格列 -->
-      <template v-if="activeTab === 'assigned'">
-        <!-- 人员信息列 -->
-        <el-table-column prop="name" label="人员信息" min-width="150">
-          <template #default="{ row }">
-            <div class="person-info">
-              <el-avatar :size="40" icon="User" />
-              <div class="info-text">
-                <div class="name">{{ row.name }}</div>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-
-        <!-- 房间床位列 -->
-        <el-table-column prop="roomAndBed" label="房间/床位" width="120">
-          <template #default="{ row }">
-            <el-tag size="small" type="success">{{ row.roomAndBed }}</el-tag>
-          </template>
-        </el-table-column>
-
-        <!-- 分组列 -->
-        <el-table-column prop="group" label="分组" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row.group && row.group !== '-'" size="small" type="info">{{ row.group }}</el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-
-        <!-- 预计入住日期列 -->
-        <el-table-column prop="expectedCheckinDate" label="预计入住" width="120">
-          <template #default="{ row }">
-            {{ row.expectedCheckinDate || '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 预计离开日期列 -->
-        <el-table-column prop="expectedCheckoutDate" label="预计离开" width="120">
-          <template #default="{ row }">
-            {{ row.expectedCheckoutDate || '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 分配日期列 -->
-        <el-table-column prop="assignedDate" label="分配日期" width="120">
-          <template #default="{ row }">
-            <el-tag size="small" type="warning">{{ row.assignedDate }}</el-tag>
-          </template>
-        </el-table-column>
-
-        <!-- 操作列 -->
-        <el-table-column label="操作" width="80">
-          <template #default="{ row }">
-            <!-- 查看详情 -->
-            <el-button type="info" circle @click="handleViewDetails(row)">
-              <el-icon>
-                <InfoFilled />
-              </el-icon>
-            </el-button>
-          </template>
-        </el-table-column>
-      </template>
-
-      <!-- 已入住表格列 -->
-      <template v-if="activeTab === 'checkedIn'">
-        <!-- 人员信息列 -->
-        <el-table-column prop="name" label="人员信息" min-width="200">
-          <template #default="{ row }">
-            <div class="person-info">
-              <el-avatar :size="40" icon="User" />
-              <div class="info-text">
-                <div class="name">{{ row.name }}</div>
-                <div class="id-card">申请ID: {{ row.applicationId }}</div>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-
-        <!-- 性别列 -->
-        <el-table-column prop="gender" label="性别" width="80">
-          <template #default="{ row }">
-            <el-tag v-if="row.gender === 1" size="small" type="primary">男</el-tag>
-            <el-tag v-else-if="row.gender === 2" size="small" type="danger">女</el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-
-        <!-- 年龄列 -->
-        <el-table-column prop="age" label="年龄" width="80">
-          <template #default="{ row }">
-            {{ row.age || '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 分组列 -->
-        <el-table-column prop="group" label="分组" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row.group && row.group !== '-'" size="small" type="info">{{ row.group }}</el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-
-        <!-- 房间床位列 -->
-        <el-table-column prop="roomAndBed" label="房间/床位" width="120">
-          <template #default="{ row }">
-            <el-tag size="small" type="success">{{ row.roomAndBed }}</el-tag>
-          </template>
-        </el-table-column>
-
-        <!-- 实际入住日期列 -->
-        <el-table-column prop="checkinDate" label="实际入住" width="120">
-          <template #default="{ row }">
-            <el-tag size="small" type="warning">{{ row.checkinDate }}</el-tag>
-          </template>
-        </el-table-column>
-
-        <!-- 预计离开日期列 -->
-        <el-table-column prop="expectedCheckoutDate" label="预计离开" width="120">
-          <template #default="{ row }">
-            {{ row.expectedCheckoutDate || '-' }}
-          </template>
-        </el-table-column>
-
-        <!-- 操作列 -->
-        <el-table-column label="操作" width="80">
-          <template #default="{ row }">
-            <!-- 查看详情 -->
-            <el-button type="info" circle @click="handleViewDetails(row)">
-              <el-icon>
-                <InfoFilled />
-              </el-icon>
-            </el-button>
-          </template>
-        </el-table-column>
-      </template>
-
-      <!-- 已退住表格列 -->
-      <template v-if="activeTab === 'checkedOut'">
-        <!-- 姓名列 -->
-        <el-table-column prop="name" label="姓名" min-width="150">
-          <template #default="{ row }">
-            <div class="person-info">
-              <el-avatar :size="40" icon="User" />
-              <div class="info-text">
-                <div class="name">{{ row.name }}</div>
-                <div class="id-card">ID: {{ row.applicationId }}</div>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-
-        <!-- 房间号列 -->
-        <el-table-column prop="roomNo" label="房间号" width="120">
-          <template #default="{ row }">
-            <el-tag size="small" type="info">{{ row.roomNo }}</el-tag>
-          </template>
-        </el-table-column>
-
-        <!-- 退住日期列 -->
-        <el-table-column prop="checkoutDate" label="退住日期" width="140">
-          <template #default="{ row }">
-            <el-tag size="small" type="warning">{{ row.checkoutDate }}</el-tag>
-          </template>
-        </el-table-column>
-
-        <!-- 遗漏物品列 -->
-        <el-table-column prop="lostItemsRemark" label="遗漏物品" min-width="180">
-          <template #default="{ row }">
-            <div v-if="row.lostItemsRemark && row.lostItemsRemark.trim() && row.lostItemsRemark !== '无'"
-                 class="lost-items">
-              <el-tag size="small" type="danger">{{ row.lostItemsRemark }}</el-tag>
-            </div>
-            <span v-else class="no-items">无</span>
-          </template>
-        </el-table-column>
-
-        <!-- 状态列 -->
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row.status === 0" size="small" type="success">正常</el-tag>
-            <el-tag v-else-if="row.status === 1" size="small" type="danger">异常</el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-
-        <!-- 操作列 -->
-        <el-table-column label="操作" width="140">
-          <template #default="{ row }">
-            <!-- 查看详情 -->
-            <el-button type="info" circle @click="handleViewDetails(row)" title="查看详情" style="margin-right: 8px;">
-              <el-icon>
-                <InfoFilled />
-              </el-icon>
-            </el-button>
-            <!-- 上传物品 -->
-            <el-button type="primary" circle @click="handleUploadItems(row)" title="上传物品">
-              <el-icon>
-                <Upload />
-              </el-icon>
-            </el-button>
-          </template>
-        </el-table-column>
-      </template>
-    </el-table>
-
-    <!-- 分页器 -->
-    <div class="pagination-container">
-      <span class="pagination-info">显示 {{ pagination.startRow }}-{{ pagination.endRow }} 条, 共 {{ pagination.total }}
-        条</span>
-      <el-pagination background layout="prev, pager, next, jumper" :total="pagination.total"
-        :page-size="pagination.pageSize" :current-page="pagination.currentPage" @current-change="handlePageChange" />
-    </div>
-
     <!-- 分配床位弹窗 -->
-    <AssignBedModal
-      v-model="showAssignBedModal"
-      :selected-person="selectedPerson"
-      @success="handleAssignSuccess"
+    <AssignBedModal v-model="showAssignBedModal" :selected-person="selectedPerson" @success="handleAssignSuccess" />
+    <!-- 查看详情 -->
+    <ApplicationDetailDialog
+      v-model="detailVisible"
+      :application-id="currentAppId"
+      @close="onDetailClosed"
     />
+
+    <!-- 审核流程 -->
+    <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
+
   </div>
 </template>
 
@@ -370,12 +228,24 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { CirclePlus, InfoFilled, Upload } from '@element-plus/icons-vue'
 // import type { AssignmentListItemVO } from '@/api/types'
+import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
+import ReviewPage from '@/components/ReviewPage.vue'
 
 import { getPendingAssignments, getAssignedList, getCheckedInList, getCheckedOutList } from '@/api/assignment'
-import type { AssignmentListItemVO, AssignmentRequest, AssignedLodgingVO, AssignedRequest, CheckedInLodgingVO, CheckedInRequest, CheckedOutLodgingVO, CheckedOutRequest } from '@/types/assignment'
-import { CHECKOUT_STATUS_MAP } from '@/types/assignment'
-import { TYPE_MAP } from '@/types/assignment'
+import type {
+  AssignmentListItemVO,
+  AssignmentRequest,
+  AssignedLodgingVO,
+  AssignedRequest,
+  CheckedInLodgingVO,
+  CheckedInRequest,
+  CheckedOutLodgingVO,
+  CheckedOutRequest
+} from '@/types/assignment'
+import { AssignmentBedStatus, CHECKOUT_STATUS_MAP, TYPE_MAP } from '@/types/assignment'
 import AssignBedModal from '@/components/AssignBed/AssignBedModal.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
 
 // 定义响应式数据
 const tableData = ref<AssignmentListItemVO[] | AssignedLodgingVO[] | CheckedInLodgingVO[] | CheckedOutLodgingVO[]>([])
@@ -383,6 +253,13 @@ const selectedRows = ref<AssignmentListItemVO[]>([])
 const selectedAssignedRows = ref<AssignedLodgingVO[]>([])
 const selectedCheckedInRows = ref<CheckedInLodgingVO[]>([])
 const selectedCheckedOutRows = ref<CheckedOutLodgingVO[]>([])
+const filterStatus = ref(AssignmentBedStatus.WAITING_ASSIGN)
+
+const detailVisible = ref(false);
+const currentAppId = ref(0)
+
+const reviewVisible = ref(false);
+const currentReviewId = ref(0)
 
 // 分配床位弹窗
 const showAssignBedModal = ref(false)
@@ -407,7 +284,7 @@ const checkoutNameFilter = ref<string>('')
 const checkoutRoomFilter = ref<string>('')
 
 // Tab状态
-const activeTab = ref('pending') // 默认激活"待分配"Tab
+const activeTab = ref(AssignmentBedStatus.PENDING) // 默认激活"待分配"Tab
 
 // 分组选项
 const groupOptions = ref(['第一组', '第二组', '第三组'])
@@ -434,6 +311,18 @@ const paginationRange = computed(() => {
   const end = Math.min(start + pagination.value.pageSize - 1, pagination.value.total)
   return { start, end }
 })
+
+const loadApplications = () => {
+  console.log(filterStatus.value);
+  if (filterStatus.value == AssignmentBedStatus.WAITING_ASSIGN) {
+    fetchData()
+  }
+  if (filterStatus.value == AssignmentBedStatus.ASSIGNED) {
+    fetchData()
+  }
+}
+
+
 
 // 初始化时加载数据
 onMounted(() => {
@@ -468,11 +357,23 @@ const getTabSubtitle = () => {
   return subtitles[activeTab.value] || ''
 }
 
+const onDetailClosed = () => {
+  console.log('详情窗口已关闭')
+}
+
+const onReviewClosed = () => {
+  console.log('审核流程窗口已关闭')
+}
+
+
 // 监听Tab切换
 const handleTabChange = (tabName: string | number) => {
+
+  console.log(tabName);
+
   const tabNameStr = String(tabName)
   console.log(`切换到Tab: ${tabNameStr}`)
-  activeTab.value = tabNameStr as 'pending' | 'assigned' | 'checkedIn' | 'checkedOut'
+
   selectedRows.value = [] // 清空选择
   selectedAssignedRows.value = [] // 清空已分配选择
   selectedCheckedInRows.value = [] // 清空已入住选择
@@ -487,8 +388,10 @@ const handleTabChange = (tabName: string | number) => {
   departmentFilter.value = undefined
   checkoutNameFilter.value = ''
   checkoutRoomFilter.value = ''
-
+  tableData.value = []
+  activeTab.value = tabNameStr as 'pending' | 'assigned' | 'checkedIn' | 'checkedOut'
   fetchData() // 重新加载数据
+  
 }
 
 // 获取数据的方法
@@ -621,7 +524,9 @@ const handleAssign = (row: AssignmentListItemVO | AssignedLodgingVO) => {
 
 // 查看详情按钮点击事件
 const handleViewDetails = (row: AssignmentListItemVO | AssignedLodgingVO | CheckedInLodgingVO | CheckedOutLodgingVO) => {
-  ElMessage.info(`查看 ${row.name} 的详细信息`)
+  // ElMessage.info(`查看 ${row.name} 的详细信息`)
+  currentAppId.value = row.id;
+  detailVisible.value = true;
   // 实际项目中，这里会打开一个详情弹窗或跳转到详情页
 }
 
@@ -655,129 +560,75 @@ const handleAssignSuccess = () => {
 </script>
 
 <style scoped lang="scss">
+.table-container {
+  background-color: white;
+  padding: 12px 10px;
+  border-radius: 12px;
+
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    :deep(.el-select) {
+      .el-input__inner {
+        border-radius: 6px;
+        border-color: #ddd;
+      }
+    }
+
+    :deep(.el-button) {
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 10px 20px;
+    }
+  }
+
+}
+
 .assignment-list-container {
   padding: 20px;
   background-color: #fdf6e3;
-  /* 原型图背景色 */
-  border-radius: 8px;
-  min-height: 100vh;
 
-  .tabs-area {
-    margin-bottom: 24px;
 
-    :deep(.el-tabs__nav-wrap::after) {
-      background-color: #e5e5e5;
-      /* 与原型图一致的浅灰色下划线 */
-    }
+  // :deep(.el-table) {
+  //   background-color: #fff;
+  //   border-radius: 8px;
+  //   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  //   overflow: hidden;
 
-    :deep(.el-tabs__item) {
-      color: #666;
-      /* 原型图Tab文字颜色 */
-      font-size: 15px;
-      font-weight: 500;
-      padding: 0 20px;
+  //   .el-table__header-wrapper {
+  //     th {
+  //       background-color: #f8f9fa;
+  //       color: #333;
+  //       font-weight: 600;
+  //       font-size: 14px;
+  //       border-bottom: 1px solid #e9ecef;
+  //     }
+  //   }
 
-      &.is-active {
-        color: #8B5E3C;
-        /* 原型图选中Tab的文字颜色 */
-        font-weight: 600;
-      }
+  //   .el-table__body-wrapper {
+  //     tr {
+  //       transition: background-color 0.2s;
 
-      &:hover {
-        color: #8B5E3C;
-      }
-    }
+  //       &:hover {
+  //         background-color: #f8f9fa;
+  //       }
+  //     }
 
-    :deep(.el-tabs__active-bar) {
-      background-color: #8B5E3C;
-      /* 原型图选中Tab的下划线颜色 */
-      height: 3px;
-    }
-  }
+  //     td {
+  //       padding: 16px 0;
+  //       border-bottom: 1px solid #f1f3f4;
+  //     }
+  //   }
 
-  .header-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 16px 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-
-    .title-section {
-      h2 {
-        font-size: 22px;
-        color: #333;
-        margin: 0;
-        font-weight: 600;
-      }
-
-      .subtitle {
-        font-size: 14px;
-        color: #666;
-        margin: 6px 0 0;
-        font-weight: 400;
-      }
-    }
-
-    .filter-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      :deep(.el-select) {
-        .el-input__inner {
-          border-radius: 6px;
-          border-color: #ddd;
-        }
-      }
-
-      :deep(.el-button) {
-        border-radius: 6px;
-        font-weight: 500;
-        padding: 10px 20px;
-      }
-    }
-  }
-
-  :deep(.el-table) {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-
-    .el-table__header-wrapper {
-      th {
-        background-color: #f8f9fa;
-        color: #333;
-        font-weight: 600;
-        font-size: 14px;
-        border-bottom: 1px solid #e9ecef;
-      }
-    }
-
-    .el-table__body-wrapper {
-      tr {
-        transition: background-color 0.2s;
-
-        &:hover {
-          background-color: #f8f9fa;
-        }
-      }
-
-      td {
-        padding: 16px 0;
-        border-bottom: 1px solid #f1f3f4;
-      }
-    }
-
-    .el-table__selection-cell {
-      .el-checkbox {
-        margin-left: 8px;
-      }
-    }
-  }
+  //   .el-table__selection-cell {
+  //     .el-checkbox {
+  //       margin-left: 8px;
+  //     }
+  //   }
+  // }
 
   .person-info {
     display: flex;
@@ -829,7 +680,7 @@ const handleAssignSuccess = () => {
   }
 
   :deep(.el-table .cell) {
-    .el-button + .el-button {
+    .el-button+.el-button {
       margin-left: 8px;
     }
   }
@@ -866,13 +717,9 @@ const handleAssignSuccess = () => {
 
   .pagination-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    // margin-top: 20px;
-    padding: 16px 20px;
-    background-color: #fff;
-    // border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    justify-content: center;
+    margin-top: 20px;
+
 
     .pagination-info {
       font-size: 14px;
@@ -902,21 +749,81 @@ const handleAssignSuccess = () => {
   }
 }
 
+/* 隐藏 Webkit 浏览器的滚动条 */
+.table-container::-webkit-scrollbar {
+  display: none;
+}
+
+.application-table {
+  max-height: calc(100vh - 360px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+/* 隐藏表格的 Webkit 滚动条 */
+.application-table::-webkit-scrollbar {
+  display: none;
+}
+
+:deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:deep(.el-table__fixed-header-wrapper) {
+  z-index: 11;
+}
+
+:deep(.el-table__fixed-right) {
+  z-index: 12;
+}
+
+:deep(.el-table__fixed-left) {
+  z-index: 12;
+}
+
+/* 隐藏表格内部各种滚动条 */
+:deep(.el-table__body-wrapper) {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+:deep(.el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏固定列的滚动条 */
+:deep(.el-table__fixed) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:deep(.el-table__fixed::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏固定列内部的滚动条 */
+:deep(.el-table__fixed .el-table__body-wrapper) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:deep(.el-table__fixed .el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .assignment-list-container {
     padding: 16px;
-
-    .header-actions {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-
-      .filter-actions {
-        width: 100%;
-        justify-content: space-between;
-      }
-    }
 
     .pagination-container {
       flex-direction: column;
