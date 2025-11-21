@@ -478,3 +478,21 @@ export const CHECKOUT_STATUS_MAP: Record<CheckoutStatus, { label: string; color:
   [CheckoutStatus.NORMAL]: { label: '正常', color: '#67C23A' },
   [CheckoutStatus.ABNORMAL]: { label: '异常', color: '#F56C6C' }
 };
+
+
+
+// 用于筛选的状态枚举
+export enum AssignmentBedStatus {
+  PENDING = 'pending', // 待分配
+  ASSIGNED = 'assigned', // 已分配
+}
+
+
+
+// 用于展示的状态标签
+export interface StatusTag {
+  value: AssignmentBedStatus;
+  label: string;
+  type: 'success' | 'default' | 'warning' | 'danger' | 'primary';
+  icon: string;
+}

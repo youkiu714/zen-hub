@@ -30,7 +30,7 @@ import type {
 
 export const getPendingAssignments = (params: AssignmentRequest): Promise<AssignmentResponse> => {
   return request({
-    url: '/api/assignments/pending',
+    url: '/assignments/pending',
     method: 'GET',
     params,
   }).catch(() => {
@@ -60,7 +60,7 @@ export const getPendingAssignments = (params: AssignmentRequest): Promise<Assign
  */
 export const getAssignedList = (params: AssignedRequest): Promise<AssignedResponse> => {
   return request({
-    url: '/api/assignments/assigned',
+    url: '/assignments/assigned',
     method: 'GET',
     params,
   }).catch(() => {
@@ -123,7 +123,7 @@ export const getAssignedList = (params: AssignedRequest): Promise<AssignedRespon
  */
 export const getFloors = (params: FloorRequest): Promise<FloorResponse> => {
   return request({
-    url: '/api/rooms/floors',
+    url: '/rooms/floors',
     method: 'GET',
     params,
   }).catch(() => {
@@ -143,7 +143,7 @@ export const getFloors = (params: FloorRequest): Promise<FloorResponse> => {
  */
 export const getRoomsByFloor = (params: RoomRequest): Promise<RoomResponse> => {
   return request({
-    url: '/api/rooms/by-floor',
+    url: '/rooms/by-floor',
     method: 'GET',
     params,
   }).catch(() => {
@@ -167,7 +167,7 @@ export const getRoomsByFloor = (params: RoomRequest): Promise<RoomResponse> => {
  */
 export const getBedsByRoom = (params: BedRequest): Promise<BedResponse> => {
   return request({
-    url: `/api/beds/by-room/${params.roomId}`,
+    url: `/beds/by-room/${params.roomId}`,
     method: 'GET',
   }).catch(() => {
     // 如果API不可用，返回模拟数据
@@ -191,7 +191,7 @@ export const getBedsByRoom = (params: BedRequest): Promise<BedResponse> => {
  */
 export const allocateBed = (data: AllocateBedRequest): Promise<AllocateBedResponse> => {
   return request({
-    url: '/api/assignments/allocate',
+    url: '/assignments/allocate',
     method: 'POST',
     data,
   })
@@ -202,7 +202,7 @@ export const allocateBed = (data: AllocateBedRequest): Promise<AllocateBedRespon
  */
 export const getCheckedInList = (params: CheckedInRequest): Promise<CheckedInResponse> => {
   return request({
-    url: '/api/assignments/checked-in',
+    url: '/assignments/checked-in',
     method: 'GET',
     params,
   }).catch(() => {
@@ -259,7 +259,7 @@ export const getCheckedInList = (params: CheckedInRequest): Promise<CheckedInRes
  */
 export const getCheckedOutList = (params: CheckedOutRequest): Promise<CheckedOutResponse> => {
   return request({
-    url: '/api/assignments/checked-out',
+    url: '/assignments/checked-out',
     method: 'GET',
     params,
   }).catch(() => {

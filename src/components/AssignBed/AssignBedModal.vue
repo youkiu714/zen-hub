@@ -218,11 +218,9 @@ import type {
   RoomRequest,
   BedRequest,
   AllocateBedRequest,
-  Bed,
-  BedStatus,
-  BedType
+  Bed
 } from '@/types/assignment'
-import { BED_STATUS_MAP, BED_TYPE_MAP, Gender } from '@/types/assignment'
+import { BED_STATUS_MAP, BED_TYPE_MAP, Gender, BedStatus, BedType } from '@/types/assignment'
 
 // Props
 interface Props {
@@ -347,7 +345,12 @@ const handleRoomChange = async () => {
       roomId: selectedRoom.value
     }
     const response = await getBedsByRoom(params)
+    console.log(response);
+    console.log(response.data);
+    
     beds.value = response.data || response || []
+    console.log(beds.value);
+
   } catch (error) {
     console.error('获取床位列表失败:', error)
     ElMessage.error('获取床位列表失败')

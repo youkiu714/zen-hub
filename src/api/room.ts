@@ -15,7 +15,7 @@ export const getRooms = (
 }
 ): Promise<IPageRoomSummaryVO> => {
   return request({
-    url: '/api/rooms',
+    url: '/rooms',
     method: 'GET',
     params,
   });
@@ -29,7 +29,7 @@ export interface CreateRoomRequest {
   roomNo: string;      // 房间号
   gender: number;      // 性别：1-男众，2-女众
   roomType: number;    // 房间类型
-  bedCount:number; 
+  // bedCount:number; 
   floor: number;       // 楼层
   status: number;      // 状态
   description?: string; // 房间描述（可选）
@@ -42,7 +42,7 @@ export const createRoom = (
   data: CreateRoomRequest
 ): Promise<ApiResponse<number>> => {
   return request({
-    url: '/api/rooms',
+    url: '/rooms',
     method: 'POST',
     data,
   });
@@ -56,7 +56,7 @@ export const updateRoom = (
   data: CreateRoomRequest
 ): Promise<ApiResponse<number>> => {
   return request({
-    url: `/api/rooms/${id}`,
+    url: `/rooms/${id}`,
     method: 'PUT',
     data,
   });
@@ -66,7 +66,7 @@ export const updateRoom = (
 
 export const getRoomOverview = (): Promise<ApiResponse<DashboardOverviewVO>> => {
   return request({
-    url: '/api/dashboard/overview',
+    url: '/dashboard/overview',
     method: 'GET',
   });
 };
@@ -81,7 +81,7 @@ export const getRoomStatus = (
 }
 ): Promise<ApiResponse<RoomStatusDashboardVO>> => {
   return request({
-    url: '/api/dashboard/room-status',
+    url: '/dashboard/room-status',
     method: 'GET',
     params,
   });
