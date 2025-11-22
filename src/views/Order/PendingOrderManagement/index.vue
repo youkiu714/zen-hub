@@ -91,9 +91,9 @@
         <el-table-column prop="days" label="挂单时长（天）" min-width="130" />
         <el-table-column label="操作" min-width="480" fixed="right">
           <template #default="{ row }">
-            <el-button @click="() => handleViewDetail(row.id)" class="btn-default">
+            <el-button @click="() => handleViewDetail(row.id)" link>
               <el-icon class="btn-icon"><View /></el-icon>
-              查看详情
+              查看
             </el-button>
             <el-button type="success" class="btn-success" @click="() => handleReview(row.id)">
               <el-icon class="btn-icon">
@@ -127,6 +127,22 @@
               class="btn-primary"
               @click="() => handleEditApplication(row)"
               ><el-icon class="btn-icon"><EditPen /></el-icon>修改信息</el-button
+            >
+
+            <el-button
+              v-if="row.status === ApplicationStatus.CHECKED_IN"
+              type="primary"
+              class="btn-primary"
+              @click="() => handleRenewalApplication(row)"
+              ><el-icon class="btn-icon"><EditPen /></el-icon>续单申请</el-button
+            >
+
+            <el-button
+              v-if="row.status === ApplicationStatus.CHECKED_IN"
+              type="primary"
+              class="btn-primary"
+              @click="() => handleCheckoutApplication(row)"
+              ><el-icon class="btn-icon"><EditPen /></el-icon>退单</el-button
             >
           </template>
         </el-table-column>
@@ -168,6 +184,20 @@
       :application-id="currentEditId"
       @submit="handleEditSubmit"
     />
+
+    <!-- 续单申请弹窗 -->
+    <RenewalApplicationDialog
+      v-model="renewalVisible"
+      :order-data="currentRenewalData"
+      @submit="handleRenewalSubmit"
+    />
+
+    <!-- 退单申请弹窗 -->
+    <CheckoutApplicationDialog
+      v-model="checkoutVisible"
+      :order-data="currentCheckoutData"
+      @submit="handleCheckoutSubmit"
+    />
   </div>
 </template>
 
@@ -182,6 +212,8 @@ import { Plus, Search } from '@element-plus/icons-vue'
 import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
 import ReviewPage from '@/components/ReviewPage.vue'
 import EditApplication from './components/EditApplication.vue'
+import RenewalApplicationDialog from './components/RenewalApplicationDialog.vue'
+import CheckoutApplicationDialog from './components/CheckoutApplicationDialog.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import {
   APPLICATION_STATUS_MAP,
@@ -190,7 +222,7 @@ import {
   departmentOptions
 } from '@/utils/constants'
 import { formatDate } from '@/utils/format-date'
-import { throttle, debounce } from 'lodash-es'
+import { throttle } from 'lodash-es'
 
 const router = useRouter()
 
@@ -219,6 +251,20 @@ const currentEditData = ref({
   checkoutDate: '',
   shortStayReason: '',
   selfEvaluation: ''
+})
+
+// 续单申请相关状态
+const renewalVisible = ref(false)
+const currentRenewalData = ref({
+  applicationId: 0,
+  checkoutDate: ''
+})
+
+// 退单申请相关状态
+const checkoutVisible = ref(false)
+const currentCheckoutData = ref({
+  applicationId: 0,
+  checkoutDate: ''
 })
 
 // 加载数据
@@ -325,22 +371,64 @@ const handleEditApplication = (row: any) => {
   editVisible.value = true
 }
 
-// 分页事件处理
-const handleSizeChange = (newPageSize: number) => {
-  pageSize.value = newPageSize
-  currentPage.value = 1 // 重置到第一页
-  loadApplications()
+// 处理续单申请
+const handleRenewalApplication = (row: any) => {
+  // 保存当前续单申请的数据
+  currentRenewalData.value = {
+    applicationId: row.id,
+    checkoutDate: row.checkoutDate || ''
+  }
+  renewalVisible.value = true
 }
 
-const handleCurrentChange = (newCurrentPage: number) => {
+// 处理续单申请提交
+const handleRenewalSubmit = async (data: any) => {
+  try {
+    // 这里应该调用续单申请的API
+    renewalVisible.value = false
+    await loadApplications()
+  } catch (error) {
+    console.error('续单申请失败:', error)
+    ElMessage.error('续单申请失败，请稍后重试')
+  }
+}
+
+// 处理退单申请
+const handleCheckoutApplication = (row: any) => {
+  // 保存当前退单申请的数据
+  currentCheckoutData.value = {
+    applicationId: row.id,
+    checkoutDate: row.checkoutDate || ''
+  }
+  checkoutVisible.value = true
+}
+
+// 处理退单申请提交
+const handleCheckoutSubmit = async () => {
+  try {
+    checkoutVisible.value = false
+    await loadApplications()
+  } catch (error) {
+    ElMessage.error('退单申请失败，请稍后重试')
+  }
+}
+
+// 分页事件处理
+const handleSizeChange = async (newPageSize: number) => {
+  pageSize.value = newPageSize
+  currentPage.value = 1 // 重置到第一页
+  await loadApplications()
+}
+
+const handleCurrentChange = async (newCurrentPage: number) => {
   currentPage.value = newCurrentPage
-  loadApplications()
+  await loadApplications()
 }
 
 // 处理修改提交
 const handleEditSubmit = async (data: any, id: number) => {
   try {
-    loadApplications() // 重新加载数据
+    await loadApplications() // 重新加载数据
   } catch (error) {
     console.error('修改申请信息失败:', error)
     ElMessage.error('修改申请信息失败，请稍后重试')

@@ -64,7 +64,15 @@ export interface StatusTag {
   value: ApplicationStatus;
   label: string;
   type: 'success' | 'default' | 'warning' | 'danger' | 'primary';
-  icon: string;
+  icon?: string;
+}
+
+// 用于展示审核状态的标签
+export interface ReviewStatusTag {
+  value: number;
+  label: string;
+  type: 'success' | 'default' | 'warning' | 'danger' | 'primary';
+  icon?: string;
 }
 
 export interface OrderId {

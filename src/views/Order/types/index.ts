@@ -1,5 +1,5 @@
 export interface OrderApplication {
-  id: string
+  id: number
   applicant: string
   avatar?: string
   applicationType: 'short_stay' | 'express' | 'monk_family' | 'team' | 'special'

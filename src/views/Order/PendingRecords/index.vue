@@ -1,7 +1,7 @@
 <template>
   <div class="pending-records">
-    <PageHeader title="挂单记录查询">
-    </PageHeader>
+    <!-- 页面标题 -->
+    <PageHeader title="挂单记录查询" />
 
     <!-- 搜索和筛选区域 -->
     <div class="table-container">
@@ -317,23 +317,7 @@ onMounted(() => {
 .pending-records {
   padding: 20px;
 
-  .page-header {
-    text-align: center;
-    margin-bottom: 30px;
-
-    .page-title {
-      font-size: 2rem;
-      font-weight: 600;
-      color: #8B5A2B;
-      margin-bottom: 10px;
-    }
-
-    .page-description {
-      color: #666;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-  }
+  
 
   .filter-card {
     margin-bottom: 20px;

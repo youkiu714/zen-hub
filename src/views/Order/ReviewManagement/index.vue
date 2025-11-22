@@ -1,12 +1,7 @@
 <template>
   <div class="evaluation-management">
     <!-- 页面标题 -->
-    <div class="page-header">
-      <h1 class="page-title">在寺表现评价</h1>
-      <p class="page-description">
-        对已退单完成的挂单人进行在寺表现评价，评价内容包括纪律遵守、礼仪规范、活动参与等方面
-      </p>
-    </div>
+    <PageHeader title="在寺表现评价" />
 
     <!-- 状态页签 -->
     <el-card class="tab-card" shadow="never">
@@ -364,6 +359,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Download, User, Star, StarFilled, Menu, Message } from '@element-plus/icons-vue'
+import PageHeader from '@/components/PageHeader.vue'
 
 // 类型定义
 interface EvaluationRecord {
@@ -807,25 +803,7 @@ onMounted(() => {
   min-height: calc(100vh - 64px);
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 32px;
 
-  .page-title {
-    font-size: 32px;
-    font-weight: 600;
-    color: #8b5a2b;
-    margin-bottom: 12px;
-  }
-
-  .page-description {
-    color: #666;
-    font-size: 16px;
-    line-height: 1.6;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-}
 
 .tab-card {
   margin-bottom: 24px;

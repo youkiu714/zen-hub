@@ -1,10 +1,8 @@
 <template>
   <div class="bed-change-application">
     <!-- 页面标题 -->
-    <div class="page-header">
-      <h2 class="page-title">换床申请</h2>
-      <p class="page-description">对已入住的挂单申请进行换床管理，可申请换床的数据为已入住但未离店的申请，需填写换床原因</p>
-    </div>
+   
+          <PageHeader title="换床申请" />
 
     <!-- 状态页签 -->
     <el-card class="tab-card" shadow="never">
@@ -402,6 +400,8 @@ import type {
   BedChangeApplication
 } from '@/types/bed-change'
 
+import PageHeader from '@/components/PageHeader.vue'
+
 // 页签状态
 const activeTab = ref('available')
 
@@ -793,25 +793,6 @@ onMounted(() => {
 <style scoped lang="scss">
 .bed-change-application {
   padding: 20px;
-
-  .page-header {
-    text-align: center;
-    margin-bottom: 30px;
-
-    .page-title {
-      font-size: 2rem;
-      font-weight: 600;
-      color: #8B5A2B;
-      margin-bottom: 10px;
-    }
-
-    .page-description {
-      color: #666;
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-  }
 
   .tab-card {
     margin-bottom: 20px;
