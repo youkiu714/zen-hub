@@ -2,8 +2,7 @@
 <template>
   <div class="review-list-page">
     <!-- 标题区 -->
-    <PageHeader title="挂单审核">
-    </PageHeader>
+    <PageHeader title="挂单审核" />
 
     <ReviewStatusFilter v-model="filterStatus" @update:modelValue="statusChange" />
 
@@ -306,17 +305,7 @@ onMounted(() => {
   /* 为底部留空间 */
 }
 
-.page-header {
-  text-align: center;
-  padding: 30px 0;
-  margin-left: 20px;
-}
 
-.page-header h1 {
-  color: #8B4513;
-  font-size: 28px;
-  margin: 0;
-}
 
 .review-tabs {
   background-color: #fff;

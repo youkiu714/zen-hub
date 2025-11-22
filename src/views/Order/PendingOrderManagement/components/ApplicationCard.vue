@@ -1,4 +1,3 @@
-<!-- components/ApplicationCard.vue -->
 <template>
   <el-card class="application-card" shadow="hover">
     <!-- 卡片头部 -->
@@ -184,8 +183,6 @@ const getStatusTag = (status: number) => {
   return statusMap[status] || { label: '未知状态', type: 'default' };
 };
 
-// 判断应用状态
-const isApplied = computed(() => props.application.status === ApplicationStatus.APPLIED);
 const isPending = computed(() => props.application.status === ApplicationStatus.PENDING);
 const isCheckedIn = computed(() => props.application.status === ApplicationStatus.CHECKED_IN);
 const isCheckedOut = computed(() => props.application.status === ApplicationStatus.CHECKED_OUT);
@@ -206,31 +203,6 @@ const bedInfo = computed(() => {
   if (app.bedInfo) return app.bedInfo;
   return '男众寮房 302室 05床'; // 默认值
 });
-
-
-// 获取进度百分比
-const progressPercentage = computed(() => {
-  const app = props.application;
-  if (!app) return 0;
-  if (app.reviewStatus === 10) return 33;
-  if (app.reviewStatus === 20) return 66;
-  if (app.reviewStatus === 30) return 100;
-  return 0;
-});
-
-// 获取当前进度步骤
-const currentStep = computed(() => {
-  const app = props.application;
-  if (!app) return 0;
-  if (app.reviewStatus === 10) return 1; // 已提交申请
-  if (app.reviewStatus === 20) return 2; // 审核中
-  if (app.reviewStatus === 30) return 3; // 审核完成
-  return 0;
-});
-
-
-// 进度条颜色
-const progressColor = '#8B4513';
 
 // 格式化日期
 const formatDate = (dateStr: string) => {

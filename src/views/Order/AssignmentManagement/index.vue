@@ -1,23 +1,12 @@
 <template>
   <div class="assignment-management">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-content">
-        <div class="header-left">
-          <h1 class="page-title">
-            <el-icon class="title-icon"><House /></el-icon>
-            挂单分房
-          </h1>
-          <p class="page-description">管理待分配房间和床位的人员申请</p>
-        </div>
-        <div class="header-right">
-          <el-button type="primary" size="large" @click="handleBatchAssign" :disabled="selectedRows.length === 0">
-            <el-icon><Plus /></el-icon>
-            批量分配
-          </el-button>
-        </div>
-      </div>
-    </div>
+    <PageHeader title="挂单分房">
+      <el-button type="primary" size="large" @click="handleBatchAssign" :disabled="selectedRows.length === 0">
+        <el-icon><Plus /></el-icon>
+        批量分配
+      </el-button>
+    </PageHeader>
 
     <!-- Tabs区域 -->
     <div class="tabs-container">
@@ -196,6 +185,7 @@ import { getPendingAssignments } from '@/api/assignment'
 import type { AssignmentListItemVO, AssignmentRequest } from '@/types/assignment'
 import { GENDER_MAP, TYPE_MAP } from '@/types/assignment'
 import AssignBedModal from '@/components/AssignBed/AssignBedModal.vue'
+import PageHeader from '@/components/PageHeader.vue'
 
 // 响应式数据
 const loading = ref(false)
@@ -389,45 +379,7 @@ onMounted(() => {
   min-height: 100vh;
 }
 
-/* 页面头部样式 */
-.page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  padding: 30px;
-  margin-bottom: 20px;
-  color: white;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-left {
-  flex: 1;
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.title-icon {
-  font-size: 32px;
-}
-
-.page-description {
-  font-size: 16px;
-  opacity: 0.9;
-  margin: 0;
-  font-weight: 300;
-}
 
 /* Tabs区域样式 */
 .tabs-container {

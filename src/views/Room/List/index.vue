@@ -1,8 +1,7 @@
 <template>
   <div class="room-management-container">
     <!-- 标题区 -->
-    <PageHeader title="房间管理">
-    </PageHeader>
+    <PageHeader title="房间管理" />
 
     <!-- 床位状态过滤器 -->
     <BedStatusFilter v-model="filterStatus" @update:modelValue="statusChange" />
@@ -246,6 +245,14 @@ import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 import { getRooms, createRoom, updateRoom, type CreateRoomRequest } from '@/api/room';
+import type { IPageRoomSummaryVO } from '@/types/room'
+import PageHeader from '@/components/PageHeader.vue'
+
+// 页面数据
+const activeTab = ref('active'); // 默认选中“使用中”
+const searchQuery = ref('');
+const selectedGender = ref<number | string>('');
+const pageSize = ref(5);
 import { getFloors, getAssignedList } from '@/api/assignment'; // 使用 assignment API 中的 getFloors 和已分配床位API
 import { createBed, getBedsByRoomId, deleteBed, updateBed } from '@/api/bed'; // 导入床位相关API
 import type { Bed, AssignedLodgingVO, IPageAssignedLodgingVO } from '@/types/assignment'
@@ -773,6 +780,88 @@ onMounted(() => {
 
 <style scoped>
 .room-management-container {
+  background-color: #FFF8E7;
+  min-height: 100vh;
+  padding: 20px 40px;
+  box-sizing: border-box;
+}
+
+
+
+.room-tabs {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 0 16px;
+  margin: 0 0 30px 0;
+}
+
+/* ====== 修复 Tabs 样式（参考 ReviewList 页面）====== */
+:deep(.el-tabs__header) {
+  background-color: #fff;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 0 16px;
+  margin: 0;
+}
+
+/* 移除 Element Plus 默认的下划线 */
+:deep(.el-tabs__nav-wrap::after) {
+  display: none;
+}
+
+/* 为每个 Tab 项添加样式，平摊宽度 */
+:deep(.el-tabs__item) {
+  color: #5D4037;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  position: relative;
+  margin-right: 0;
+  flex: 1;
+  text-align: center;
+  height: 58px;
+}
+
+/* 确保导航容器是 flex 布局 */
+:deep(.el-tabs__nav) {
+  display: flex;
+  width: 100%;
+  border: none;
+}
+
+/* 确保导航项容器也是 flex 布局 */
+:deep(.el-tabs__nav-scroll) {
+  display: flex;
+}
+
+/* 选中项的样式 */
+:deep(.el-tabs__item.is-active) {
+  color: #8D6E63;
+  background-color: #fff;
+  /* 使用伪元素自定义下划线 */
+}
+
+:deep(.el-tabs__item.is-active::after) {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 3px;
+  background-color: #8D6E63;
+  border-radius: 3px 3px 0 0;
+}
+
+/* 鼠标悬停样式 */
+:deep(.el-tabs__item:hover) {
+  color: #8D6E63;
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: #8D6E63;
   padding: 20px;
   background-color: #fdf6e3;
   min-height: calc(100vh - 150px);

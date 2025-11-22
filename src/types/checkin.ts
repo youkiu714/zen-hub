@@ -151,7 +151,7 @@ export interface CheckOutFormData {
 
 export interface RenewalFormData {
   originalCheckOutDate: string
-  newCheckOutDate: string
+  requestedCheckoutDate: string
   additionalDays: number
   notes?: string
 }

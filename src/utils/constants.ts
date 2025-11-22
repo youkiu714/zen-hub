@@ -91,22 +91,37 @@ export const mealOptions = [
   }
 ]
 
+// 申请类型常量定义
+export const APPLICATION_TYPE = {
+  SHORT_STAY: 1, // 短住
+  DIRECT_BUS: 2, // 团体
+  MONK_RELATIVE: 3, // 直通车
+  SPECIAL_GUEST: 4 // 特殊客人
+} as const
+
+export const ApplicationTypeMap: Record<number, string> = {
+  [APPLICATION_TYPE.SHORT_STAY]: '短住',
+  [APPLICATION_TYPE.DIRECT_BUS]: '团体',
+  [APPLICATION_TYPE.MONK_RELATIVE]: '直通车',
+  [APPLICATION_TYPE.SPECIAL_GUEST]: '特殊客人'
+}
+
 export const applicationTypeOptions = [
   {
     label: '短住',
-    value: 1
+    value: APPLICATION_TYPE.SHORT_STAY
   },
   {
     label: '团体',
-    value: 2
+    value: APPLICATION_TYPE.DIRECT_BUS
   },
   {
     label: '直通车',
-    value: 3
+    value: APPLICATION_TYPE.MONK_RELATIVE
   },
   {
     label: '特殊客人',
-    value: 4
+    value: APPLICATION_TYPE.SPECIAL_GUEST
   }
 ]
 

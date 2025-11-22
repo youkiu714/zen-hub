@@ -495,3 +495,25 @@ body {
     display: none !important;
   }
 }
+
+.page-container {
+    padding: 24px;
+    background: #FFF8E7;
+}
+
+// 列表卡片样式
+.table-container-section {
+  background-color: white;
+  padding: 12px 10px;
+  border-radius: 12px;
+}
+
+.el-dialog  {
+    border-radius: 12px !important;
+}
+.el-dialog__header {
+    font-weight: 600;
+}
+.el-dialog__body {
+    padding-top: 16px !important;
+}
