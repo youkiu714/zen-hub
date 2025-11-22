@@ -565,17 +565,14 @@ const tabs = computed(() => [
   {
     key: 'pending',
     label: '待入住',
-    count: 12
   },
   {
     key: 'checked-in',
     label: '已入住',
-    count: 36
   },
   {
     key: 'checked-out',
     label: '已退住',
-    count: 0
   }
 ])
 

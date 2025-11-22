@@ -91,7 +91,7 @@
         <el-table-column prop="days" label="挂单时长（天）" min-width="130" />
         <el-table-column label="操作" min-width="480" fixed="right">
           <template #default="{ row }">
-            <el-button @click="() => handleViewDetail(row.id)" class="btn-default" type="text">
+            <el-button @click="() => handleViewDetail(row.id)" link>
               <el-icon class="btn-icon"><View /></el-icon>
               查看
             </el-button>

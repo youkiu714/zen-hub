@@ -55,14 +55,7 @@
         class="application-table"
         v-loading="loading"
       >
-        <el-table-column prop="applicantName" label="申请人" width="120"/>
-        <!-- 身份证号 -->
-        <el-table-column label="身份证号" width="180" align="center">
-          <template #default="{ row }">
-            <span class="id-card">{{ formatIdCard(row.idCardMasked) }}</span>
-          </template>
-        </el-table-column>
-
+        <el-table-column prop="applicantName" label="申请人" width="120" />
         <!-- 申请类型 -->
         <el-table-column label="申请类型" width="120" align="center">
           <template #default="{ row }">
@@ -97,9 +90,9 @@
         <el-table-column label="操作" min-width="160">
           <template #default="{ row }">
             <div class="action-buttons">
-              <el-button type="primary" size="small" link @click="handleViewDetail(row)">
+              <!-- <el-button type="primary" size="small" link @click="handleViewDetail(row)">
                 查看
-              </el-button>
+              </el-button> -->
               <el-button
                 v-if="canReview(row.reviewStatus)"
                 type="success"
@@ -115,7 +108,7 @@
       </el-table>
 
       <!-- 分页 -->
-      <div v-if="pagination.total > 10" class="pagination-container">
+      <div v-if="pagination.total > 0" class="pagination-container">
         <el-pagination
           v-model:current-page="pagination.currentPage"
           v-model:page-size="pagination.pageSize"
@@ -128,35 +121,27 @@
       </div>
     </div>
     <!-- 查看详情对话框 -->
-    <RenewalDetailDialog v-model="detailDialogVisible" :order-data="selectedOrder" />
+    <ReviewDialog v-model="reviewDialogVisible" :order-data="selectedOrder" />
 
-    <!-- 审核对话框 -->
-    <ReviewDialog
-      v-model="reviewDialogVisible"
-      :record="selectedOrder"
-      @submit="handleReviewConfirm"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import { getReviews, reception } from '@/api/review'
-import { ReviewListItemVO, ReviewStatusMap, REVIEW_STATUS } from '@/types/review'
+import { getReviews } from '@/api/review'
+import { ReviewListItemVO, REVIEW_STATUS } from '@/types/review'
 
 import PageHeader from '@/components/PageHeader.vue'
 import { throttle } from 'lodash-es'
 import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
 import { ApplicationTypeMap, applicationTypeOptions } from '@/utils/constants'
-import RenewalDetailDialog from './components/RenewalDetailDialog.vue'
-// import ReviewDialog from '@/views/Order/components/ReviewDialog.vue'
+import ReviewDialog from '@/views/Order/RenewalReview/components/RenewalDetailDialog.vue'
 
 // 响应式数据
 const loading = ref(false)
 const activeTab = ref('10') // 使用数字状态码
-const detailDialogVisible = ref(false)
 const reviewDialogVisible = ref(false)
 const selectedOrder = ref<ReviewListItemVO | null>(null)
 const filterStatus = ref(REVIEW_STATUS.PENDING)
@@ -176,13 +161,8 @@ const currentFilters = ref({
   status: '10' // 状态码
 })
 
-// 表格数据
 const tableData = ref<ReviewListItemVO[]>([])
 
-// 所有数据（用于计算标签页计数）
-const allData = ref<ReviewListItemVO[]>([])
-
-// 获取数据
 const fetchData = async () => {
   loading.value = true
 
@@ -221,7 +201,6 @@ const fetchData = async () => {
   }
 }
 
-// 事件处理
 const handleTabChange = (tabName: string) => {
   activeTab.value = tabName
   pagination.currentPage = 1
@@ -257,51 +236,11 @@ const handleSizeChange = (size: number) => {
   fetchData()
 }
 
-const handleViewDetail = (row: ReviewListItemVO) => {
-  selectedOrder.value = row
-  detailDialogVisible.value = true
-}
-
 const handleReview = (row: ReviewListItemVO) => {
   selectedOrder.value = row
-  detailDialogVisible.value = true
+  reviewDialogVisible.value = true
 }
 
-const handleReviewConfirm = async (result: { pass: boolean; comment: string }) => {
-  if (selectedOrder.value) {
-    try {
-      loading.value = true
-
-      const response = await reception(
-        {
-          pass: result.pass,
-          comment: result.comment
-        },
-        selectedOrder.value.id!
-      )
-
-      if (response.code === 200) {
-        ElMessage.success(`审核${result.pass ? '通过' : '驳回'}成功`)
-        reviewDialogVisible.value = false
-        selectedOrder.value = null
-        fetchData()
-      } else {
-        ElMessage.error(response.message || '审核失败')
-      }
-    } catch (error) {
-      console.error('审核失败:', error)
-      ElMessage.error('审核失败，请检查网络连接')
-    } finally {
-      loading.value = false
-    }
-  }
-}
-
-// 工具方法
-const formatIdCard = (idCard?: string) => {
-  if (!idCard || idCard.length < 10) return idCard || '-'
-  return `${idCard.slice(0, 6)}****${idCard.slice(-4)}`
-}
 
 const formatDateRange = (checkinDate?: string, checkoutDate?: string) => {
   if (!checkinDate || !checkoutDate) return '-'
@@ -322,21 +261,6 @@ const getApplicationTypeTag = (type?: number) => {
     5: 'danger' // 特殊客人
   }
   return tagMap[type!] || ''
-}
-
-const getStatusLabel = (status?: number) => {
-  if (!status) return '-'
-  return ReviewStatusMap[status] || '未知'
-}
-
-const getStatusTagType = (status?: number) => {
-  const typeMap: Record<number, string> = {
-    10: 'warning', // 待审核
-    20: 'info', // 待法师审核
-    30: 'success', // 已通过
-    40: 'danger' // 已驳回
-  }
-  return typeMap[status!] || ''
 }
 
 const canReview = (status?: number) => {

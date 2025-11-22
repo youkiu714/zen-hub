@@ -12,7 +12,7 @@ export function getApplications(params: {
   checkinTo?: string
 }) {
   return request.get<IPageApplicationListItemVO, IPageApplicationListItemVO>(
-    '/api/apply/applications',
+    '/apply/applications',
     {
       params
     }
@@ -20,12 +20,12 @@ export function getApplications(params: {
 }
 
 export function getApplicationById(id: number) {
-  return request.get<Request<ApplicationDetailVO>>(`/api/apply/applications/${id}`)
+  return request.get<Request<ApplicationDetailVO>>(`/apply/applications/${id}`)
 }
 
 // 取消申请
 export function cancelApplication(id: number) {
-  return request.post<Request<any>>(`/api/apply/${id}/cancel`)
+  return request.post<Request<any>>(`/apply/${id}/cancel`)
 }
 
 // 修改挂单信息
@@ -46,7 +46,7 @@ export function updateLodgingInfo(
     }
   }
 ) {
-  return request.post<Request<any>>(`/api/apply/${id}/update-lodging`, data)
+  return request.post<Request<any>>(`/apply/${id}/update-lodging`, data)
 }
 
 // 申请续住
@@ -56,7 +56,7 @@ export function applyRenew(params: {
   requestedCheckoutDate: string
   reason: string
 }) {
-  return request.post<Request<any>>(`/api/extensions`, params)
+  return request.post<Request<any>>(`/extensions`, params)
 }
 
 // 申请退单
@@ -65,5 +65,5 @@ export function applyWithdraw(params: {
   originalCheckoutDate: string
   actualCheckoutDate: string
 }) {
-  return request.post<Request<any>>(`/api/checkouts`, params)
+  return request.post<Request<any>>(`/checkouts`, params)
 }
