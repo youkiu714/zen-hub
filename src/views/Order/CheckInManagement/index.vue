@@ -14,8 +14,6 @@
           <button v-for="tab in tabs" :key="tab.key" :class="['tab-btn', { active: activeTab === tab.key }]"
             @click="handleTabChange(tab.key)">
             {{ tab.label }}
-            <el-badge v-if="tab.count !== undefined" :value="tab.count"
-              :type="activeTab === tab.key ? 'primary' : 'info'" class="tab-badge" />
           </button>
         </div>
       </div>
@@ -336,23 +334,11 @@
     </el-card>
 
     <!-- 入住登记模态框 -->
-    <el-dialog
-      v-model="checkInModalVisible"
-      :title="`入住登记 - ${selectedRecord?.applicationId || ''}`"
-      width="60%"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      @close="resetCheckInForm"
-      custom-class="check-in-dialog"
-      top="5vh"
-    >
-      <el-form
-        ref="checkInFormRef"
-        :model="checkInForm"
-        :rules="checkInRules"
-        label-width="120px"
-        label-position="right"
-      >
+    <el-dialog v-model="checkInModalVisible" :title="`入住登记 - ${selectedRecord?.applicationId || ''}`" width="60%"
+      :close-on-click-modal="false" :close-on-press-escape="false" @close="resetCheckInForm"
+      custom-class="check-in-dialog" top="5vh">
+      <el-form ref="checkInFormRef" :model="checkInForm" :rules="checkInRules" label-width="120px"
+        label-position="right">
         <!-- 滚动内容区域 -->
         <div class="dialog-content-wrapper">
           <!-- 入住人信息 -->
@@ -404,24 +390,12 @@
             <h3 class="section-title">📅 入住日期信息</h3>
             <div class="info-row">
               <el-form-item label="实际入住日期" prop="actualCheckinDate" required>
-                <el-date-picker
-                  v-model="checkInForm.actualCheckinDate"
-                  type="date"
-                  placeholder="选择实际入住日期"
-                  format="YYYY-MM-DD"
-                  value-format="YYYY-MM-DD"
-                  style="width: 100%"
-                />
+                <el-date-picker v-model="checkInForm.actualCheckinDate" type="date" placeholder="选择实际入住日期"
+                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
               </el-form-item>
               <el-form-item label="预计退房日期" prop="expectedCheckoutDate" required>
-                <el-date-picker
-                  v-model="checkInForm.expectedCheckoutDate"
-                  type="date"
-                  placeholder="选择预计退房日期"
-                  format="YYYY-MM-DD"
-                  value-format="YYYY-MM-DD"
-                  style="width: 100%"
-                />
+                <el-date-picker v-model="checkInForm.expectedCheckoutDate" type="date" placeholder="选择预计退房日期"
+                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
               </el-form-item>
             </div>
           </div>
@@ -430,28 +404,16 @@
           <div class="check-in-section">
             <h3 class="section-title">📝 入住登记信息</h3>
             <el-form-item label="入住备注" prop="remark">
-              <el-input
-                v-model="checkInForm.remark"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入入住备注信息，如特殊需求、注意事项等"
-                maxlength="200"
-                show-word-limit
-              />
+              <el-input v-model="checkInForm.remark" type="textarea" :rows="3" placeholder="请输入入住备注信息，如特殊需求、注意事项等"
+                maxlength="200" show-word-limit />
             </el-form-item>
             <div class="info-row">
               <el-form-item label="登记人" prop="registeredBy">
                 <el-input v-model="checkInForm.registeredBy" readonly :value="userStore.user.username" />
               </el-form-item>
               <el-form-item label="登记时间" prop="registrationTime" required>
-                <el-date-picker
-                  v-model="checkInForm.registrationTime"
-                  type="datetime"
-                  placeholder="选择登记时间"
-                  format="YYYY-MM-DD HH:mm:ss"
-                  value-format="YYYY-MM-DD HH:mm:ss"
-                  style="width: 100%"
-                />
+                <el-date-picker v-model="checkInForm.registrationTime" type="datetime" placeholder="选择登记时间"
+                  format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
               </el-form-item>
             </div>
           </div>
@@ -469,29 +431,20 @@
         </div>
       </el-form>
 
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="checkInModalVisible = false" size="large">取消</el-button>
-        <el-button
-          type="primary"
-          @click="confirmCheckIn"
-          size="large"
-          :loading="submitting"
-          :style="{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }"
-        >
-          确认入住
-        </el-button>
-      </div>
-    </template>
-  </el-dialog>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="checkInModalVisible = false" size="large">取消</el-button>
+          <el-button type="primary" @click="confirmCheckIn" size="large" :loading="submitting"
+            :style="{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }">
+            确认入住
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
 
 
     <!-- 查看详情 -->
-    <ApplicationDetailDialog
-      v-model="detailVisible"
-      :application-id="currentAppId"
-      @close="onDetailClosed"
-    />
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
 
     <!-- 审核流程 -->
     <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
@@ -505,7 +458,6 @@ import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
 import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
 import ReviewPage from '@/components/ReviewPage.vue'
 import {
-  Search,
   Filter,
   Right,
   Grid,
@@ -514,10 +466,6 @@ import {
   Calendar,
   Message,
   Star,
-  User,
-  House,
-  EditPen,
-  InfoFilled
 } from '@element-plus/icons-vue'
 import type {
   CheckedOutRecord,
@@ -527,7 +475,6 @@ import type {
   InhouseRequest,
   PendingCheckinItemVO,
   InhouseItemVO,
-  CheckinDetailVO,
   CheckinDetailResponse,
   CheckinConfirmRequest,
   CheckinConfirmResponse
@@ -757,7 +704,7 @@ const getSearchPlaceholder = () => {
   }
 }
 
-// 操作处理
+// 入住登记弹窗
 const handleCheckIn = async (row: PendingCheckinItemVO) => {
   try {
     // 设置基础信息
@@ -770,35 +717,32 @@ const handleCheckIn = async (row: PendingCheckinItemVO) => {
 
       const response: CheckinDetailResponse = await getCheckinDetail(row.applicationId) // 12
 
-      console.log(response);
-      
-      // if (response.success && response.data) {
-        const detailData = response
+      const detailData = response
 
-        // 填充表单数据
-        checkInForm.applicationId = detailData.applicationId?.toString() || row.applicationId?.toString() || ''
-        checkInForm.name = detailData.name || row.name || ''
-        checkInForm.idCard = detailData.idCardMasked || row.idCardMasked || ''
-        checkInForm.mobile = detailData.mobile || row.mobile || ''
-        checkInForm.applicationTypeName = detailData.applicationTypeName || row.applicationTypeName || ''
-        checkInForm.roomNumber = detailData.roomNo || '待分配'
-        checkInForm.bedNumber = detailData.bedNo || '待分配'
-        checkInForm.bedStayId = detailData.bedStayId
-        
+      // 填充表单数据
+      checkInForm.applicationId = detailData.applicationId?.toString() || row.applicationId?.toString() || ''
+      checkInForm.name = detailData.name || row.name || ''
+      checkInForm.idCard = detailData.idCardMasked || row.idCardMasked || ''
+      checkInForm.mobile = detailData.mobile || row.mobile || ''
+      checkInForm.applicationTypeName = detailData.applicationTypeName || row.applicationTypeName || ''
+      checkInForm.roomNumber = detailData.roomNo || '待分配'
+      checkInForm.bedNumber = detailData.bedNo || '待分配'
+      checkInForm.bedStayId = detailData.bedStayId
 
-        // 处理日期
-        const now = new Date()
-        checkInForm.actualCheckinDate = detailData.actualCheckinAt
-          ? new Date(detailData.actualCheckinAt).toISOString().split('T')[0]
-          : now.toISOString().split('T')[0]
 
-        checkInForm.expectedCheckoutDate = detailData.expectedCheckoutAt
-          ? new Date(detailData.expectedCheckoutAt).toISOString().split('T')[0]
-          : new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      // 处理日期
+      const now = new Date()
+      checkInForm.actualCheckinDate = detailData.actualCheckinAt
+        ? new Date(detailData.actualCheckinAt).toISOString().split('T')[0]
+        : now.toISOString().split('T')[0]
 
-        checkInForm.registrationTime = now.toISOString().replace('T', ' ').slice(0, 19)
+      checkInForm.expectedCheckoutDate = detailData.expectedCheckoutAt
+        ? new Date(detailData.expectedCheckoutAt).toISOString().split('T')[0]
+        : new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-        ElMessage.success('获取入住详情成功')
+      checkInForm.registrationTime = now.toISOString().replace('T', ' ').slice(0, 19)
+
+      ElMessage.success('获取入住详情成功')
 
     } else {
       // 没有applicationId，使用默认数据
@@ -831,11 +775,52 @@ const fillDefaultData = (row: PendingCheckinItemVO) => {
   checkInForm.registrationTime = now.toISOString().replace('T', ' ').slice(0, 19)
 
   console.log(now.toISOString().split('T')[0]);
-  
-  
-  // const isoDate = new Date().toISOString().split('T')[0];
-  // console.log(isoDate); // 例如：2025-11-19
+
 }
+
+// 入住登记 提交操作
+const confirmCheckIn = async () => {
+  if (!checkInFormRef.value) return
+console.log(checkInFormRef.value);
+
+  try {
+    // 验证表单
+    await checkInFormRef.value.validate()
+
+    // 验证必填字段
+    if (!checkInForm.bedStayId) {
+      ElMessage.warning('缺少申请ID，无法完成入住确认')
+      return
+    }
+
+    submitting.value = true
+
+    // 构建确认入住请求参数
+    const confirmRequest: CheckinConfirmRequest = {
+      bedStayId: checkInForm.bedStayId,
+      actualCheckinAt: checkInForm.actualCheckinDate
+        ? `${checkInForm.actualCheckinDate} ${new Date().toTimeString().slice(0, 8)}`
+        : undefined,
+      remark: checkInForm.remark
+    }
+
+    console.log('确认入住请求参数:', confirmRequest)
+
+    // 调用确认入住API
+    const response: CheckinConfirmResponse = await confirmCheckin(confirmRequest)
+    ElMessage.success('入住确认成功！')
+    checkInModalVisible.value = false
+    resetCheckInForm()
+    loadData() // 刷新列表数据
+
+  } catch (error) {
+    console.error('入住确认失败:', error)
+    ElMessage.error('入住确认失败，请稍后重试')
+  } finally {
+    submitting.value = false
+  }
+}
+
 
 const handleBedAssignment = (row: PendingCheckinItemVO) => {
   ElMessage.info('分床功能')
@@ -887,59 +872,7 @@ const handleReview = (id: number) => {
   reviewVisible.value = true
 }
 
-// 入住登记相关
-const confirmCheckIn = async () => {
-  if (!checkInFormRef.value) return
 
-  try {
-    // 验证表单
-    await checkInFormRef.value.validate()
-
-    // 验证必填字段
-    if (!checkInForm.bedStayId) {
-      ElMessage.warning('缺少申请ID，无法完成入住确认')
-      return
-    }
-
-    submitting.value = true
-
-    // 构建确认入住请求参数
-    const confirmRequest: CheckinConfirmRequest = {
-      bedStayId: checkInForm.bedStayId,
-      actualCheckinAt: checkInForm.actualCheckinDate
-        ? `${checkInForm.actualCheckinDate} ${new Date().toTimeString().slice(0, 8)}`
-        : undefined,
-      expectedCheckoutAt: checkInForm.expectedCheckoutDate
-        ? `${checkInForm.expectedCheckoutDate} ${new Date().toTimeString().slice(0, 8)}`
-        : undefined,
-      remark: checkInForm.remark
-    }
-
-    console.log('确认入住请求参数:', confirmRequest)
-
-    // 调用确认入住API
-    const response: CheckinConfirmResponse = await confirmCheckin(confirmRequest)
-    ElMessage.success('入住确认成功！')
-    checkInModalVisible.value = false
-    resetCheckInForm()
-    loadData() // 刷新列表数据
-
-    // if (response.success || response.code === 0) {
-    //   ElMessage.success('入住确认成功！')
-    //   checkInModalVisible.value = false
-    //   resetCheckInForm()
-    //   loadData() // 刷新列表数据
-    // } else {
-    //   ElMessage.error(`入住确认失败: ${response.message || '未知错误'}`)
-    // }
-
-  } catch (error) {
-    console.error('入住确认失败:', error)
-    ElMessage.error('入住确认失败，请稍后重试')
-  } finally {
-    submitting.value = false
-  }
-}
 
 const resetCheckInForm = () => {
   if (checkInFormRef.value) {
