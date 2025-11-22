@@ -14,7 +14,9 @@
       "Bash(tasklist:*)",
       "Bash(findstr node)",
       "Bash(pnpm build:*)",
-      "Bash(pnpm preview:*)"
+      "Bash(pnpm preview:*)",
+      "Read(//c/share/挂单记录/**)",
+      "Read(//c/share/人员档案/**)"
     ],
     "deny": [],
     "ask": []

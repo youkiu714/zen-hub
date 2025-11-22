@@ -14,6 +14,7 @@ export default defineConfig({
     css: {
     preprocessorOptions: {
       scss: {
+        additionalData: `@use "@/styles/element/index.scss" as *;`,
         api: 'modern', // 👈 关键：启用 modern Sass API
       },
     },
@@ -33,13 +34,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
-    }
-  },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@use "@/styles/element/index.scss" as *;`
-      }
     }
   },
   server: {

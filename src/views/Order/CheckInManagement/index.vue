@@ -5,65 +5,29 @@
     <TabNavigation :tabs="tabs" :active-tab="activeTab" @change="handleTabChange" />
 
     <div class="main-card" shadow="hover">
-      <FilterSection
-        v-model:keyword="searchKeyword"
-        v-model:roomType="selectedRoomType"
-        v-model:status="selectedStatus"
-        :search-placeholder="searchPlaceholder"
-        :room-options="ROOM_TYPE_OPTIONS"
-        :status-options="STATUS_OPTIONS"
-        @search="handleSearchInput"
-        @filter="handleFilterChange"
-      />
+      <FilterSection v-model:keyword="searchKeyword" v-model:roomType="selectedRoomType" v-model:status="selectedStatus"
+        :search-placeholder="searchPlaceholder" :room-options="ROOM_TYPE_OPTIONS" :status-options="STATUS_OPTIONS"
+        @search="handleSearchInput" @filter="handleFilterChange" />
 
       <div class="table-content">
-        <UnifiedTable
-          :data="getCurrentTableData()"
-          :loading="loading"
-          :status="activeTab"
-          @check-in="handleCheckIn"
-          @assign-bed="handleBedAssignment"
-          @confirm-bed="handleBedConfirmation"
-          @view-application="handleViewDetail"
-          @renewal="handleRenewal"
-          @checkout="handleCheckout"
-          @view-detail="handleViewDetail"
-          @review="handleReview"
-          @lost-notice="handleLostItemNotification"
-          @evaluate="handleEvaluation"
-        />
+        <UnifiedTable :data="getCurrentTableData()" :loading="loading" :status="activeTab" @check-in="handleCheckIn"
+          @assign-bed="handleBedAssignment" @confirm-bed="handleBedConfirmation" @view-application="handleViewDetail"
+          @renewal="handleRenewal" @checkout="handleCheckout" @view-detail="handleViewDetail" @review="handleReview"
+          @lost-notice="handleLostItemNotification" @evaluate="handleEvaluation" />
       </div>
 
-      <div class="pagination-container" v-if="pagination.total > 0" >
-        <el-pagination
-          v-model:current-page="pagination.current"
-          v-model:page-size="pagination.pageSize"
-          :total="pagination.total"
-          :page-sizes="PAGE_SIZE_OPTIONS"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handlePageSizeChange"
-          @current-change="handleCurrentChange"
-        />
+      <div class="pagination-container" v-if="pagination.total > 0">
+        <el-pagination v-model:current-page="pagination.current" v-model:page-size="pagination.pageSize"
+          :total="pagination.total" :page-sizes="PAGE_SIZE_OPTIONS" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handlePageSizeChange" @current-change="handleCurrentChange" />
       </div>
     </div>
 
-    <el-dialog
-      v-model="checkInModalVisible"
-      :title="`入住登记 - ${checkInForm.applicationId || ''}`"
-      width="60%"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      @close="resetCheckInForm"
-      custom-class="check-in-dialog"
-      top="5vh"
-    >
-      <el-form
-        ref="checkInFormRef"
-        :model="checkInForm"
-        :rules="checkInRules"
-        label-width="120px"
-        label-position="right"
-      >
+    <el-dialog v-model="checkInModalVisible" :title="`入住登记 - ${checkInForm.applicationId || ''}`" width="60%"
+      :close-on-click-modal="false" :close-on-press-escape="false" @close="resetCheckInForm"
+      custom-class="check-in-dialog" top="5vh">
+      <el-form ref="checkInFormRef" :model="checkInForm" :rules="checkInRules" label-width="120px"
+        label-position="right">
         <div class="dialog-content-wrapper">
           <div class="check-in-section">
             <h3 class="section-title">👤 入住人信息</h3>
@@ -153,30 +117,17 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="checkInModalVisible = false" size="large">取消</el-button>
-          <el-button
-            type="primary"
-            @click="confirmCheckIn"
-            size="large"
-            :loading="submitting"
-            :style="{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }"
-          >
+          <el-button type="primary" @click="confirmCheckIn" size="large" :loading="submitting"
+            :style="{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }">
             确认入住
           </el-button>
         </div>
       </template>
     </el-dialog>
 
-    <ApplicationDetailDialog
-      v-model="detailVisible"
-      :application-id="currentAppId"
-      @close="detailVisible = false"
-    />
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="detailVisible = false" />
 
-    <ReviewPage
-      v-model="reviewVisible"
-      :application-id="currentReviewId"
-      @close="reviewVisible = false"
-    />
+    <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="reviewVisible = false" />
   </div>
 </template>
 

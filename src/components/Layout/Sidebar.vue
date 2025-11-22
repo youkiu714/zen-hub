@@ -175,6 +175,24 @@ const menuList = ref([
         }
       }
     ]
+  },
+  {
+    path: '/person-management',
+    name: 'PersonManagement',
+    meta: {
+      title: '人员管理界面',
+      icon: 'School'
+    },
+    children: [
+      {
+        path: '/person-management/list',
+        name: 'personManagementList',
+        meta: {
+          title: '人员管理',
+          icon: 'List'
+        }
+      }
+    ]
   }
 ])
 </script>
