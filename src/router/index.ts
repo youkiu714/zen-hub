@@ -103,7 +103,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'CheckInRegistration',
         component: () => import('@/views/Order/CheckInManagement/index.vue'),
         meta: {
-          title: '入住管理',
+          title: '入住登记',
           icon: 'House'
         }
       },

@@ -143,6 +143,7 @@ import {
   getInhouseList,
   getPendingCheckinList
 } from '@/api/checkin'
+import { checkout } from '@/api/assignment'
 import type {
   CheckedOutRecord,
   CheckinConfirmRequest,
@@ -359,15 +360,31 @@ const handleRenewal = (_row: InhouseItemVO) => {
   ElMessage.info('续单确认功能')
 }
 
-const handleCheckout = (row: InhouseItemVO) => {
-  ElMessageBox.confirm(`确认办理 ${row.name} 的退房手续？`, '退单处理', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
+const handleCheckout = async (row: InhouseItemVO) => {
+  try {
+    await ElMessageBox.confirm(`确认办理 ${row.name} 的退房手续？`, '退房处理', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    if (!row.bedStayId) {
+      ElMessage.error('缺少床位居住ID，无法办理退房')
+      return
+    }
+
+    loading.value = true
+    await checkout(row.bedStayId)
     ElMessage.success('退房办理成功')
     loadData()
-  })
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('退房办理失败:', error)
+      ElMessage.error('退房办理失败，请稍后重试')
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleLostItemNotification = (_row: CheckedOutRecord) => {

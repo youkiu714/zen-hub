@@ -104,7 +104,7 @@ const menuList = ref([
         path: '/hall-management/check-in-registration',
         name: 'CheckInRegistration',
         meta: {
-          title: '入住管理',
+          title: '入住登记',
           icon: 'House'
         }
       },

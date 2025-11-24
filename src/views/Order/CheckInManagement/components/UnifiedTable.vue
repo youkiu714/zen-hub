@@ -169,7 +169,7 @@
                 <el-icon><Calendar /></el-icon>
               </el-button>
             </el-tooltip>
-            <el-tooltip content="退单处理" placement="top">
+            <el-tooltip content="退房处理" placement="top">
               <el-button type="danger" size="small" circle @click="emit('checkout', row)">
                 <el-icon><Right /></el-icon>
               </el-button>

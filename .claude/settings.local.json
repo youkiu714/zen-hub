@@ -16,7 +16,8 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm preview:*)",
       "Read(//c/share/挂单记录/**)",
-      "Read(//c/share/人员档案/**)"
+      "Read(//c/share/人员档案/**)",
+      "Read(//c/share/入住登记/已入住/**)"
     ],
     "deny": [],
     "ask": []
