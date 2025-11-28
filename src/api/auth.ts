@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 import type { LoginForm, User, ApiResponse } from '@/types'
-import { DEV_CONFIG, MOCK_USERS, generateMockToken, mockDelay } from '@/utils/dev-tools'
+import { DEV_CONFIG, generateMockToken, mockDelay } from '@/utils/dev-tools'
 
 // 登录接口
 export const login = async (data: LoginForm): Promise<{ token: string; user: User }> => {

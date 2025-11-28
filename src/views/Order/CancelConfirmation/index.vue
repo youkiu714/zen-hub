@@ -98,8 +98,9 @@
       <el-table
         v-loading="loading"
         :data="tableData"
-        size="large"
         style="width: 100%"
+        size="large"
+        :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
@@ -158,17 +159,13 @@
       </el-table>
 
       <!-- 分页 -->
-      <div class="pagination-container">
-        <div class="pagination-info">
-          显示 {{ (currentPage - 1) * pageSize + 1 }} 到
-          {{ Math.min(currentPage * pageSize, total) }} 条，共 {{ total }} 条记录
-        </div>
+      <div v-if="total > 10" class="pagination-container">
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
           :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           :total="total"
-          layout="sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
@@ -273,7 +270,6 @@ const fetchCheckoutList = async () => {
     tableData.value = response.records
     total.value = response.total
     currentPage.value = response.current
-
   } catch (error) {
     console.error('获取退单记录失败:', error)
     ElMessage.error('获取退单记录失败')
@@ -573,11 +569,25 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+:deep(.el-form-item) {
+  margin-bottom: 0;
+}
+:deep(.el-card__body) {
+  padding: 19px;
+}
+:deep(.el-card__header) {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.table-card {
+  border-radius: 12px;
+}
 .cancel-confirmation {
   padding: 20px;
 
   .filter-card {
     margin-bottom: 20px;
+    border-radius: 12px;
   }
 
   .table-card {
@@ -656,8 +666,6 @@ onMounted(() => {
       align-items: center;
       margin-top: 20px;
       padding-top: 20px;
-      border-top: 1px solid #f0f0f0;
-
       .pagination-info {
         color: #666;
         font-size: 14px;
@@ -697,5 +705,10 @@ onMounted(() => {
       }
     }
   }
+}
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 </style>

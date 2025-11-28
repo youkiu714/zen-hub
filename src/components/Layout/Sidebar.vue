@@ -42,14 +42,14 @@ const defaultOpeneds = computed(() => {
 
 // 菜单数据 (保留 icon 属性)
 const menuList = ref([
-//   {
-//     path: '/dashboard',
-//     name: 'Dashboard',
-//     meta: {
-//       title: '首页',
-//       icon: 'House'
-//     }
-//   },
+  //   {
+  //     path: '/dashboard',
+  //     name: 'Dashboard',
+  //     meta: {
+  //       title: '首页',
+  //       icon: 'House'
+  //     }
+  //   },
   {
     path: '/contact-application',
     name: 'ContactApplication',
@@ -139,15 +139,7 @@ const menuList = ref([
           title: '挂单记录',
           icon: 'Document'
         }
-      },
-      {
-        path: '/hall-management/assignment-management',
-        name: 'AssignmentManagement',
-        meta: {
-          title: '挂单分床',
-          icon: 'House'
-        }
-      },
+      }
     ]
   },
   {
@@ -158,6 +150,14 @@ const menuList = ref([
       icon: 'School'
     },
     children: [
+      {
+        path: '/hall-management/assignment-management',
+        name: 'AssignmentManagement',
+        meta: {
+          title: '挂单分床',
+          icon: 'House'
+        }
+      },
       {
         path: '/accommodation-management/room-bed-management',
         name: 'RoomBedManagement',

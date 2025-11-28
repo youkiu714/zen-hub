@@ -54,22 +54,38 @@ export const getApplicationStatusType = (
   }
 }
 
+// 部门常量定义
+export const DEPARTMENT = {
+  PROJECT: 'PROJECT',
+  READING: 'READING',
+  COMPILATION: 'COMPILATION',
+  OTHER: 'OTHER'
+} as const
+
+// 部门文字映射
+export const DepartmentMap: Record<string, string> = {
+  [DEPARTMENT.PROJECT]: '项目部',
+  [DEPARTMENT.READING]: '读书会',
+  [DEPARTMENT.COMPILATION]: '汇编',
+  [DEPARTMENT.OTHER]: '其他'
+}
+
 export const departmentOptions = [
   {
     label: '项目部',
-    value: 'PROJECT'
+    value: DEPARTMENT.PROJECT
   },
   {
     label: '读书会',
-    value: 'READING'
+    value: DEPARTMENT.READING
   },
   {
     label: '汇编',
-    value: 'COMPILATION'
+    value: DEPARTMENT.COMPILATION
   },
   {
     label: '其他',
-    value: 'OTHER'
+    value: DEPARTMENT.OTHER
   }
 ]
 export const mealOptions = [

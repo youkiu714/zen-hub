@@ -44,7 +44,6 @@ service.interceptors.response.use(
 
     // 兼容多种响应格式
     if (typeof data === 'object' && data !== null) {
-      // 格式1: { code: 0, message: '', data: {...} }
       if (data.code !== undefined) {
         if (data.code === 0) {
           return data.data
@@ -53,8 +52,6 @@ service.interceptors.response.use(
         }
       }
 
-      // 格式2: 直接返回数据 { token: '', user: {...} }
-      // 格式3: 其他成功响应格式
       if (data.token || data.user || data.id) {
         return data
       }

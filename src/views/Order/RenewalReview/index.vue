@@ -45,7 +45,6 @@
           />
         </div>
       </div>
-
       <!-- 数据表格 -->
       <el-table
         :data="tableData"
@@ -64,25 +63,37 @@
             </el-tag>
           </template>
         </el-table-column>
-
-        <!-- 原挂单日期 -->
-        <el-table-column label="原挂单日期" width="220" align="center">
+        <el-table-column label="性别" width="120" align="center">
           <template #default="{ row }">
-            <span>{{ formatDateRange(row.checkinDate, row.checkoutDate) }}</span>
+            {{ getGenderText(row.gender) }}
           </template>
         </el-table-column>
 
-        <!-- 续单日期 -->
-        <el-table-column label="续单日期" width="220" align="center">
+        <!-- 所属部门 -->
+        <el-table-column label="所属部门" width="120" align="center">
           <template #default="{ row }">
-            <span>{{ formatDateRange(row.checkinDate, row.checkoutDate) }}</span>
+            {{ getDepartmentLabel(row.departmentCode) }}
           </template>
         </el-table-column>
+
+        <el-table-column
+          label="原退单日期"
+          width="220"
+          align="center"
+          prop="originalCheckoutDate"
+        />
+
+        <el-table-column
+          label="新退单日期"
+          width="220"
+          align="center"
+          prop="requestedCheckoutDate"
+        />
 
         <!-- 续住天数 -->
         <el-table-column label="续住天数" width="100" align="center">
           <template #default="{ row }">
-            <span class="stay-days">{{ row.days || 0 }}天</span>
+            <span class="stay-days">{{ row.stayDays || 0 }}天</span>
           </template>
         </el-table-column>
 
@@ -90,11 +101,8 @@
         <el-table-column label="操作" min-width="160">
           <template #default="{ row }">
             <div class="action-buttons">
-              <!-- <el-button type="primary" size="small" link @click="handleViewDetail(row)">
-                查看
-              </el-button> -->
               <el-button
-                v-if="canReview(row.reviewStatus)"
+                v-if="canReview(row.status)"
                 type="success"
                 size="small"
                 link
@@ -105,6 +113,10 @@
             </div>
           </template>
         </el-table-column>
+        <!-- 空状态 -->
+        <template #empty>
+          <el-empty description="暂无数据" />
+        </template>
       </el-table>
 
       <!-- 分页 -->
@@ -122,7 +134,6 @@
     </div>
     <!-- 查看详情对话框 -->
     <ReviewDialog v-model="reviewDialogVisible" :order-data="selectedOrder" />
-
   </div>
 </template>
 
@@ -130,20 +141,21 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import { getReviews } from '@/api/review'
-import { ReviewListItemVO, REVIEW_STATUS } from '@/types/review'
+import { getExtensionReviews, ExtensionReviewItem } from '@/api/extensions'
+import { REVIEW_STATUS } from '@/types/review'
 
 import PageHeader from '@/components/PageHeader.vue'
 import { throttle } from 'lodash-es'
 import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
-import { ApplicationTypeMap, applicationTypeOptions } from '@/utils/constants'
+import { ApplicationTypeMap, applicationTypeOptions, DepartmentMap } from '@/utils/constants'
+import { getGenderText } from '@/utils/index.ts'
 import ReviewDialog from '@/views/Order/RenewalReview/components/RenewalDetailDialog.vue'
 
 // 响应式数据
 const loading = ref(false)
 const activeTab = ref('10') // 使用数字状态码
 const reviewDialogVisible = ref(false)
-const selectedOrder = ref<ReviewListItemVO | null>(null)
+const selectedOrder = ref<ExtensionReviewItem | null>(null)
 const filterStatus = ref(REVIEW_STATUS.PENDING)
 
 // 分页配置
@@ -161,10 +173,12 @@ const currentFilters = ref({
   status: '10' // 状态码
 })
 
-const tableData = ref<ReviewListItemVO[]>([])
+const tableData = ref<ExtensionReviewItem[]>([])
 
 const fetchData = async () => {
+  console.log('1')
   loading.value = true
+
 
   try {
     const params: any = {
@@ -180,49 +194,57 @@ const fetchData = async () => {
 
     // 添加申请类型筛选
     if (currentFilters.value.type) {
-      params.type = currentFilters.value.type
+      params.applicationType = currentFilters.value.type
     }
 
     // 处理日期范围筛选
     if (currentFilters.value.dateRange && currentFilters.value.dateRange.length === 2) {
-      params.startFrom = currentFilters.value.dateRange[0]
-      params.startTo = currentFilters.value.dateRange[1]
+      params.startDate = currentFilters.value.dateRange[0]
+      params.endDate = currentFilters.value.dateRange[1]
     }
 
-    const response = await getReviews(params)
-    console.log(response)
-    tableData.value = response
+    const response = await getExtensionReviews(params)
+
+    console.log("请求参数:", params)
+    console.log("响应数据:", response)
+    console.log("当前状态:", activeTab.value)
+
+    // 直接从响应根级别获取数据
+    tableData.value = response.records || []
+    pagination.total = response.total || 0
   } catch (error) {
     console.error('获取续单审核数据失败:', error)
-    ElMessage.error('获取数据失败，请检查网络连接')
     tableData.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
 }
 
 const handleTabChange = (tabName: string) => {
+  console.log("状态切换:", tabName)
   activeTab.value = tabName
+  filterStatus.value = parseInt(tabName) // 同步状态
   pagination.currentPage = 1
   fetchData()
 }
 
 const handleFilterChange = () => {
   pagination.currentPage = 1
-  fetchData()
+//   fetchData()
 }
 
 const throttledKeywordSearch = throttle(
   () => {
     pagination.currentPage = 1
-    fetchData()
+    // fetchData()
   },
   500,
   { leading: false, trailing: true }
 )
 
 const handleKeywordInput = () => {
-  throttledKeywordSearch()
+//   throttledKeywordSearch()
 }
 
 const handlePageChange = (page: number) => {
@@ -233,14 +255,13 @@ const handlePageChange = (page: number) => {
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.currentPage = 1
-  fetchData()
+//   fetchData()
 }
 
-const handleReview = (row: ReviewListItemVO) => {
+const handleReview = (row: ExtensionReviewItem) => {
   selectedOrder.value = row
   reviewDialogVisible.value = true
 }
-
 
 const formatDateRange = (checkinDate?: string, checkoutDate?: string) => {
   if (!checkinDate || !checkoutDate) return '-'
@@ -261,6 +282,11 @@ const getApplicationTypeTag = (type?: number) => {
     5: 'danger' // 特殊客人
   }
   return tagMap[type!] || ''
+}
+
+const getDepartmentLabel = (departmentCode?: string) => {
+  if (!departmentCode) return '-'
+  return DepartmentMap[departmentCode] || departmentCode
 }
 
 const canReview = (status?: number) => {

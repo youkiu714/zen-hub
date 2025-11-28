@@ -4,30 +4,30 @@
     <PageHeader title="在寺表现评价" />
 
     <!-- 状态页签 -->
-    <el-card class="tab-card" shadow="never">
-      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-        <el-tab-pane label="待评价" name="pending">
-          <template #label>
-            <span class="tab-label">
-              <el-badge :value="pendingCount" class="tab-badge" v-if="pendingCount > 0">
-                待评价
-              </el-badge>
-              <span v-else>待评价</span>
-            </span>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane label="已评价" name="completed">
-          <template #label>
-            <span class="tab-label">
-              <el-badge :value="completedCount" class="tab-badge" type="success" v-if="completedCount > 0">
-                已评价
-              </el-badge>
-              <span v-else>已评价</span>
-            </span>
-          </template>
-        </el-tab-pane>
-      </el-tabs>
-    </el-card>
+    <div class="status-filter">
+      <div>
+        <el-button
+          round
+          type="default"
+          :plain="activeTab !== 'pending'"
+          @click="handleTabChange('pending')"
+          :class="{ active: activeTab === 'pending' }"
+          class="status-btn"
+        >
+          待评价 <el-badge v-if="pendingCount > 0" :value="pendingCount" class="tab-badge" />
+        </el-button>
+        <el-button
+          round
+          type="default"
+          :plain="activeTab !== 'completed'"
+          @click="handleTabChange('completed')"
+          :class="{ active: activeTab === 'completed' }"
+          class="status-btn"
+        >
+          已评价 <el-badge v-if="completedCount > 0" :value="completedCount" class="tab-badge" type="success" />
+        </el-button>
+      </div>
+    </div>
 
     <!-- 评价列表 -->
     <el-card class="list-card" shadow="never">
@@ -805,13 +805,29 @@ onMounted(() => {
 
 
 
-.tab-card {
-  margin-bottom: 24px;
+.status-filter {
+  margin-bottom: 20px;
+  background-color: white;
+  border-radius: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+  box-shadow:
+    var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
 
-  .tab-label {
-    font-weight: 500;
+.active {
+  background-color: rgb(139 90 43 / var(--tw-bg-opacity, 1));
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+}
+
+.status-btn {
+  &:hover {
+    color: rgb(221, 190, 125);
+    border: 1px solid #d8b08c;
   }
-
+  
   .tab-badge {
     margin-left: 8px;
   }

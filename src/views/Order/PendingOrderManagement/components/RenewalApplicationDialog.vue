@@ -159,7 +159,7 @@ form.requestedCheckoutDate = ''
 }
 
 const handleSubmit = debounce(async () => {
-  const applicationId = props.orderData?.id
+  const applicationId = props.orderData?.applicationId
 
   if (!formRef.value || !applicationId) return
 
