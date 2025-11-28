@@ -194,7 +194,7 @@ const handleSubmit = debounce(async () => {
       scoreRemark: formData.scoreRemark
     }
 
-    const response = await reviewExtension(props.orderData.id, submitData)
+    const response = await reviewExtension(props.orderData.applicationId, submitData)
     console.log('response:', response)
 
     if (response.data.code === 0) {

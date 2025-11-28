@@ -1,6 +1,7 @@
 // types.ts
 export interface ReviewListItemVO {
   id?: number;
+  applicationId: number;
   applicantName?: string;
   idCardMasked?: string;
   applicationType?: number;
