@@ -103,7 +103,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: 'CheckInRegistration',
         component: () => import('@/views/Order/CheckInManagement/index.vue'),
         meta: {
-          title: '入住管理',
+          title: '入住登记',
           icon: 'House'
         }
       },
@@ -179,7 +179,16 @@ export const asyncRoutes: RouteRecordRaw[] = [
           title: '楼层管理',
           icon: 'List'
         }
-      }
+      },
+      {
+        path: '/person-management/list',
+        name: 'personManagementList',
+        component: () => import('@/views/Person/Management/index.vue'),
+        meta: {
+          title: '人员管理',
+          icon: 'List'
+        }
+      },
     ]
   },
   {

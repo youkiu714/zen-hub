@@ -44,3 +44,17 @@ export interface CheckoutListResponse {
 export const getCheckouts = (params: CheckoutQueryParams = {}) => {
   return request.get<CheckoutListResponse>('/checkouts', { params })
 }
+
+export type CancelConfirmationTabKey = 'pending' | 'refund-confirmation'
+
+export const CANCEL_CONFIRMATION_MAP: Record<CancelConfirmationTabKey, string> = {
+  pending: '搜索姓名、证件号或申请编号',
+  'refund-confirmation': '搜索姓名、订单号或退单编号'
+}
+
+
+export interface PaginationParams {
+  current: number
+  pageSize: number
+  total: number
+}

@@ -305,3 +305,15 @@ export const getCheckedOutList = (params: CheckedOutRequest): Promise<CheckedOut
   });
 };
 
+/**
+ * 办理退房
+ * @param bedStayId 床位居住ID
+ * @returns Promise<any>
+ */
+export const checkout = (bedStayId: number): Promise<any> => {
+  return request({
+    url: `/assignments/checkout/${bedStayId}`,
+    method: 'POST',
+  });
+};
+
