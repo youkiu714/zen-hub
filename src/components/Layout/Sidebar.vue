@@ -104,7 +104,7 @@ const menuList = ref([
         path: '/hall-management/check-in-registration',
         name: 'CheckInRegistration',
         meta: {
-          title: '入住管理',
+          title: '入住登记',
           icon: 'House'
         }
       },
@@ -172,6 +172,24 @@ const menuList = ref([
         meta: {
           title: '房间及床位编辑',
           icon: 'Edit'
+        }
+      }
+    ]
+  },
+  {
+    path: '/person-management',
+    name: 'PersonManagement',
+    meta: {
+      title: '人员管理界面',
+      icon: 'School'
+    },
+    children: [
+      {
+        path: '/person-management/list',
+        name: 'personManagementList',
+        meta: {
+          title: '人员管理',
+          icon: 'List'
         }
       }
     ]

@@ -245,13 +245,9 @@ import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
 import { getRooms, createRoom, updateRoom, type CreateRoomRequest } from '@/api/room';
-import type { IPageRoomSummaryVO } from '@/types/room'
-import PageHeader from '@/components/PageHeader.vue'
 
 // 页面数据
 const activeTab = ref('active'); // 默认选中“使用中”
-const searchQuery = ref('');
-const selectedGender = ref<number | string>('');
 const pageSize = ref(5);
 import { getFloors, getAssignedList } from '@/api/assignment'; // 使用 assignment API 中的 getFloors 和已分配床位API
 import { createBed, getBedsByRoomId, deleteBed, updateBed } from '@/api/bed'; // 导入床位相关API

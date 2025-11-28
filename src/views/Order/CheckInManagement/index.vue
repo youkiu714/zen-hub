@@ -5,65 +5,29 @@
     <TabNavigation :tabs="tabs" :active-tab="activeTab" @change="handleTabChange" />
 
     <div class="main-card" shadow="hover">
-      <FilterSection
-        v-model:keyword="searchKeyword"
-        v-model:roomType="selectedRoomType"
-        v-model:status="selectedStatus"
-        :search-placeholder="searchPlaceholder"
-        :room-options="ROOM_TYPE_OPTIONS"
-        :status-options="STATUS_OPTIONS"
-        @search="handleSearchInput"
-        @filter="handleFilterChange"
-      />
+      <FilterSection v-model:keyword="searchKeyword" v-model:roomType="selectedRoomType" v-model:status="selectedStatus"
+        :search-placeholder="searchPlaceholder" :room-options="ROOM_TYPE_OPTIONS" :status-options="STATUS_OPTIONS"
+        @search="handleSearchInput" @filter="handleFilterChange" />
 
       <div class="table-content">
-        <UnifiedTable
-          :data="getCurrentTableData()"
-          :loading="loading"
-          :status="activeTab"
-          @check-in="handleCheckIn"
-          @assign-bed="handleBedAssignment"
-          @confirm-bed="handleBedConfirmation"
-          @view-application="handleViewDetail"
-          @renewal="handleRenewal"
-          @checkout="handleCheckout"
-          @view-detail="handleViewDetail"
-          @review="handleReview"
-          @lost-notice="handleLostItemNotification"
-          @evaluate="handleEvaluation"
-        />
+        <UnifiedTable :data="getCurrentTableData()" :loading="loading" :status="activeTab" @check-in="handleCheckIn"
+          @assign-bed="handleBedAssignment" @confirm-bed="handleBedConfirmation" @view-application="handleViewDetail"
+          @renewal="handleRenewal" @checkout="handleCheckout" @view-detail="handleViewDetail" @review="handleReview"
+          @lost-notice="handleLostItemNotification" @evaluate="handleEvaluation" />
       </div>
 
-      <div class="pagination-container" v-if="pagination.total > 0" >
-        <el-pagination
-          v-model:current-page="pagination.current"
-          v-model:page-size="pagination.pageSize"
-          :total="pagination.total"
-          :page-sizes="PAGE_SIZE_OPTIONS"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handlePageSizeChange"
-          @current-change="handleCurrentChange"
-        />
+      <div class="pagination-container" v-if="pagination.total > 0">
+        <el-pagination v-model:current-page="pagination.current" v-model:page-size="pagination.pageSize"
+          :total="pagination.total" :page-sizes="PAGE_SIZE_OPTIONS" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handlePageSizeChange" @current-change="handleCurrentChange" />
       </div>
     </div>
 
-    <el-dialog
-      v-model="checkInModalVisible"
-      :title="`入住登记 - ${checkInForm.applicationId || ''}`"
-      width="60%"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      @close="resetCheckInForm"
-      custom-class="check-in-dialog"
-      top="5vh"
-    >
-      <el-form
-        ref="checkInFormRef"
-        :model="checkInForm"
-        :rules="checkInRules"
-        label-width="120px"
-        label-position="right"
-      >
+    <el-dialog v-model="checkInModalVisible" :title="`入住登记 - ${checkInForm.applicationId || ''}`" width="60%"
+      :close-on-click-modal="false" :close-on-press-escape="false" @close="resetCheckInForm"
+      custom-class="check-in-dialog" top="5vh">
+      <el-form ref="checkInFormRef" :model="checkInForm" :rules="checkInRules" label-width="120px"
+        label-position="right">
         <div class="dialog-content-wrapper">
           <div class="check-in-section">
             <h3 class="section-title">👤 入住人信息</h3>
@@ -111,24 +75,12 @@
             <h3 class="section-title">📅 入住日期信息</h3>
             <div class="info-row">
               <el-form-item label="实际入住日期" prop="actualCheckinDate" required>
-                <el-date-picker
-                  v-model="checkInForm.actualCheckinDate"
-                  type="date"
-                  placeholder="选择实际入住日期"
-                  format="YYYY-MM-DD"
-                  value-format="YYYY-MM-DD"
-                  style="width: 100%"
-                />
+                <el-date-picker v-model="checkInForm.actualCheckinDate" type="date" placeholder="选择实际入住日期"
+                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
               </el-form-item>
               <el-form-item label="预计退房日期" prop="expectedCheckoutDate" required>
-                <el-date-picker
-                  v-model="checkInForm.expectedCheckoutDate"
-                  type="date"
-                  placeholder="选择预计退房日期"
-                  format="YYYY-MM-DD"
-                  value-format="YYYY-MM-DD"
-                  style="width: 100%"
-                />
+                <el-date-picker v-model="checkInForm.expectedCheckoutDate" type="date" placeholder="选择预计退房日期"
+                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
               </el-form-item>
             </div>
           </div>
@@ -136,28 +88,16 @@
           <div class="check-in-section">
             <h3 class="section-title">📝 入住登记信息</h3>
             <el-form-item label="入住备注" prop="remark">
-              <el-input
-                v-model="checkInForm.remark"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入入住备注信息，如特殊需求、注意事项等"
-                maxlength="200"
-                show-word-limit
-              />
+              <el-input v-model="checkInForm.remark" type="textarea" :rows="3" placeholder="请输入入住备注信息，如特殊需求、注意事项等"
+                maxlength="200" show-word-limit />
             </el-form-item>
             <div class="info-row">
               <el-form-item label="登记人" prop="registeredBy">
                 <el-input v-model="checkInForm.registeredBy" readonly />
               </el-form-item>
               <el-form-item label="登记时间" prop="registrationTime" required>
-                <el-date-picker
-                  v-model="checkInForm.registrationTime"
-                  type="datetime"
-                  placeholder="选择登记时间"
-                  format="YYYY-MM-DD HH:mm:ss"
-                  value-format="YYYY-MM-DD HH:mm:ss"
-                  style="width: 100%"
-                />
+                <el-date-picker v-model="checkInForm.registrationTime" type="datetime" placeholder="选择登记时间"
+                  format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
               </el-form-item>
             </div>
           </div>
@@ -177,30 +117,17 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="checkInModalVisible = false" size="large">取消</el-button>
-          <el-button
-            type="primary"
-            @click="confirmCheckIn"
-            size="large"
-            :loading="submitting"
-            :style="{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }"
-          >
+          <el-button type="primary" @click="confirmCheckIn" size="large" :loading="submitting"
+            :style="{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }">
             确认入住
           </el-button>
         </div>
       </template>
     </el-dialog>
 
-    <ApplicationDetailDialog
-      v-model="detailVisible"
-      :application-id="currentAppId"
-      @close="detailVisible = false"
-    />
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="detailVisible = false" />
 
-    <ReviewPage
-      v-model="reviewVisible"
-      :application-id="currentReviewId"
-      @close="reviewVisible = false"
-    />
+    <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="reviewVisible = false" />
   </div>
 </template>
 
@@ -216,6 +143,7 @@ import {
   getInhouseList,
   getPendingCheckinList
 } from '@/api/checkin'
+import { checkout } from '@/api/assignment'
 import type {
   CheckedOutRecord,
   CheckinConfirmRequest,
@@ -432,15 +360,31 @@ const handleRenewal = (_row: InhouseItemVO) => {
   ElMessage.info('续单确认功能')
 }
 
-const handleCheckout = (row: InhouseItemVO) => {
-  ElMessageBox.confirm(`确认办理 ${row.name} 的退房手续？`, '退单处理', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
+const handleCheckout = async (row: InhouseItemVO) => {
+  try {
+    await ElMessageBox.confirm(`确认办理 ${row.name} 的退房手续？`, '退房处理', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    if (!row.bedStayId) {
+      ElMessage.error('缺少床位居住ID，无法办理退房')
+      return
+    }
+
+    loading.value = true
+    await checkout(row.bedStayId)
     ElMessage.success('退房办理成功')
     loadData()
-  })
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('退房办理失败:', error)
+      ElMessage.error('退房办理失败，请稍后重试')
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleLostItemNotification = (_row: CheckedOutRecord) => {
