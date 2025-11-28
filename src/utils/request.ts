@@ -80,7 +80,11 @@ service.interceptors.response.use(
           ElMessage.error('登录已过期，请重新登录')
           const userStore = useUserStore()
           userStore.resetState()
-          router.push('/login')
+          router.push('/login?force=1').then(() => {
+            console.log('成功跳转到登录页')
+          }).catch(err => {
+            console.error('跳转到登录页失败:', err)
+          })
           break
         case 403:
           ElMessage.error('没有权限访问')
