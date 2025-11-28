@@ -77,7 +77,18 @@ export const ReviewResultMap: Record<number, string> = {
 
 
 
+export enum EvaluationStatus {
+  PENDING = 10,    // 待评价
+  COMPLETED = 20   // 已评价
+}
 
+// 用于展示的状态标签
+export interface EvaluationStatusTag {
+  value: EvaluationStatus;
+  label: string;
+  type: 'success' | 'default' | 'warning' | 'danger' | 'primary';
+  icon: string;
+}
 
 
 // types.ts
