@@ -130,17 +130,22 @@
     </el-table-column>
 
     <!-- 操作列 - 根据状态显示不同按钮 -->
-    <el-table-column label="操作" :width="getActionColumnWidth()" align="right">
+    <el-table-column label="操作" :width="getActionColumnWidth()" align="center">
       <template #default="{ row }">
         <div class="action-buttons">
           <!-- 待入住状态的操作按钮 -->
           <template v-if="status === 'pending'">
-            <el-tooltip content="入住登记" placement="top">
-              <el-button type="primary" size="small" circle @click="emit('check-in', row)">
-                <el-icon><Right /></el-icon>
+            <el-tooltip content="查看详情" placement="top">
+              <el-button  type="default" size="small" @click="emit('view-application', row.applicationId)">
+                查看详情
               </el-button>
             </el-tooltip>
-            <el-tooltip content="分床" placement="top">
+            <el-tooltip content="入住登记" placement="top">
+              <el-button type="primary" size="small" @click="emit('check-in', row)">
+                入住登记
+              </el-button>
+            </el-tooltip>
+            <!-- <el-tooltip content="分床" placement="top">
               <el-button type="info" size="small" circle @click="emit('assign-bed', row)">
                 <el-icon><Grid /></el-icon>
               </el-button>
@@ -149,39 +154,24 @@
               <el-button type="warning" size="small" circle @click="emit('confirm-bed', row)">
                 <el-icon><Check /></el-icon>
               </el-button>
-            </el-tooltip>
-            <el-tooltip content="查看详情" placement="top">
-              <el-button
-                type="default"
-                size="small"
-                circle
-                @click="emit('view-application', row.applicationId)"
-              >
-                <el-icon><View /></el-icon>
-              </el-button>
-            </el-tooltip>
+            </el-tooltip> -->
           </template>
 
           <!-- 已入住状态的操作按钮 -->
           <template v-if="status === 'checked-in'">
-            <el-tooltip content="续单确认" placement="top">
-              <el-button type="primary" size="small" circle @click="emit('renewal', row)">
-                <el-icon><Calendar /></el-icon>
+            <el-tooltip content="查看详情" placement="top">
+              <el-button type="default" size="small" @click="emit('view-detail', row.applicationId)">
+                查看详情
               </el-button>
             </el-tooltip>
             <el-tooltip content="退房处理" placement="top">
-              <el-button type="danger" size="small" circle @click="emit('checkout', row)">
-                <el-icon><Right /></el-icon>
+              <el-button type="danger" size="small" @click="emit('checkout', row)">
+                退房
               </el-button>
             </el-tooltip>
-            <el-tooltip content="查看详情" placement="top">
-              <el-button
-                type="default"
-                size="small"
-                circle
-                @click="emit('view-detail', row.applicationId)"
-              >
-                <el-icon><View /></el-icon>
+            <!-- <el-tooltip content="续单确认" placement="top">
+              <el-button type="primary" size="small" circle @click="emit('renewal', row)">
+                <el-icon><Calendar /></el-icon>
               </el-button>
             </el-tooltip>
             <el-tooltip content="审核流程" placement="top">
@@ -193,7 +183,7 @@
               >
                 <el-icon><Operation /></el-icon>
               </el-button>
-            </el-tooltip>
+            </el-tooltip> -->
           </template>
 
           <!-- 已退房状态的操作按钮 -->

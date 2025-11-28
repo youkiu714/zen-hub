@@ -16,11 +16,20 @@ export function setupRouterGuards(router: Router) {
     const userStore = useUserStore()
     const isAuthenticated = userStore.isAuthenticated
 
+    console.log('路由守卫:', { to: to.path, from: from.path, isAuthenticated })
+
     if (isAuthenticated) {
       if (to.path === '/login') {
-        // 已登录，重定向到首页
-        next({ path: '/' })
-        NProgress.done()
+        // 检查是否是强制登录（401过期后跳转）
+        if (to.query.force === '1') {
+          console.log('检测到force参数，允许访问登录页')
+          next()
+        } else {
+          // 已登录，重定向到首页
+          console.log('用户已登录但访问登录页，重定向到首页')
+          next({ path: '/' })
+          NProgress.done()
+        }
       } else {
         // 有token，直接放行
         next()
@@ -28,9 +37,11 @@ export function setupRouterGuards(router: Router) {
     } else {
       // 未登录
       if (whiteList.includes(to.path)) {
+        console.log('用户未登录但访问白名单路由，放行:', to.path)
         next()
       } else {
         // 重定向到登录页
+        console.log('用户未登录，重定向到登录页')
         next(`/login?redirect=${to.path}`)
         NProgress.done()
       }

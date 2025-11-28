@@ -23,180 +23,107 @@
       </div>
     </div>
 
-    <el-dialog
-    v-model="checkInModalVisible"
-    :title="`入住登记 - ${checkInForm.applicationId || ''}`"
-    width="800px"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
-    @close="resetCheckInForm"
-    class="check-in-dialog"
-    top="5vh"
-  >
-    <template #header>
-      <div class="custom-header">
-        入住登记 - {{ checkInForm.applicationId }}
-      </div>
-    </template>
-
-    <el-form
-      ref="checkInFormRef"
-      :model="checkInForm"
-      :rules="checkInRules"
-      label-width="100px"
-      label-position="top"
-      class="check-in-form"
-    >
-      <div class="dialog-content-wrapper">
-        
-        <div class="check-in-section">
-          <h3 class="section-title">
-            <el-icon><User /></el-icon> 入住人信息
-          </h3>
-          <el-row :gutter="24">
-            <el-col :span="12">
+    <el-dialog v-model="checkInModalVisible" :title="`入住登记 - ${checkInForm.applicationId || ''}`" width="60%"
+      :close-on-click-modal="false" :close-on-press-escape="false" @close="resetCheckInForm"
+      custom-class="check-in-dialog" top="5vh">
+      <el-form ref="checkInFormRef" :model="checkInForm" :rules="checkInRules" label-width="120px"
+        label-position="right">
+        <div class="dialog-content-wrapper">
+          <div class="check-in-section">
+            <h3 class="section-title">👤 入住人信息</h3>
+            <div class="info-row">
               <div class="info-item">
                 <label class="info-label">姓名</label>
-                <div class="info-value font-bold">{{ checkInForm.name || '-' }}</div>
+                <div class="info-value">{{ checkInForm.name || '-' }}</div>
               </div>
-            </el-col>
-            <el-col :span="12">
               <div class="info-item">
                 <label class="info-label">身份证号</label>
                 <div class="info-value">{{ checkInForm.idCard || '-' }}</div>
               </div>
-            </el-col>
-            <el-col :span="12">
+            </div>
+            <div class="info-row">
               <div class="info-item">
                 <label class="info-label">申请类型</label>
-                <div class="info-value">{{ checkInForm.applicationTypeName || '-' }}</div>
+                <div class="info-value">
+                  <el-tag :type="getOrderTypeTagType(checkInForm.applicationTypeName)" size="small">
+                    {{ checkInForm.applicationTypeName || '-' }}
+                  </el-tag>
+                </div>
               </div>
-            </el-col>
-            <el-col :span="12">
               <div class="info-item">
                 <label class="info-label">联系电话</label>
                 <div class="info-value">{{ checkInForm.mobile || '-' }}</div>
               </div>
-            </el-col>
-          </el-row>
-        </div>
+            </div>
+          </div>
 
-        <el-divider border-style="dashed" />
-
-        <div class="check-in-section">
-          <h3 class="section-title">
-            <el-icon><OfficeBuilding /></el-icon> 房间及床位信息
-          </h3>
-          <el-row :gutter="24">
-            <el-col :span="12">
+          <div class="check-in-section">
+            <h3 class="section-title">🏠 房间及床位信息</h3>
+            <div class="info-row">
               <div class="info-item">
                 <label class="info-label">分配房间</label>
                 <div class="info-value">{{ checkInForm.roomNumber || '-' }}</div>
               </div>
-            </el-col>
-            <el-col :span="12">
               <div class="info-item">
                 <label class="info-label">分配床位</label>
                 <div class="info-value">{{ checkInForm.bedNumber || '-' }}</div>
               </div>
-            </el-col>
-            <el-col :span="12">
-               <el-form-item label="实际入住日期" prop="actualCheckinDate" required>
-                <el-date-picker
-                  v-model="checkInForm.actualCheckinDate"
-                  type="date"
-                  placeholder="选择实际入住日期"
-                  format="YYYY/MM/DD"
-                  value-format="YYYY-MM-DD"
-                  style="width: 100%"
-                />
+            </div>
+          </div>
+
+          <div class="check-in-section">
+            <h3 class="section-title">📅 入住日期信息</h3>
+            <div class="info-row">
+              <el-form-item label="实际入住日期" prop="actualCheckinDate" required>
+                <el-date-picker v-model="checkInForm.actualCheckinDate" type="date" placeholder="选择实际入住日期"
+                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
               <el-form-item label="预计退房日期" prop="expectedCheckoutDate" required>
-                <el-date-picker
-                  v-model="checkInForm.expectedCheckoutDate"
-                  type="date"
-                  placeholder="yyyy/mm/dd"
-                  format="YYYY/MM/DD"
-                  value-format="YYYY-MM-DD"
-                  style="width: 100%"
-                />
+                <el-date-picker v-model="checkInForm.expectedCheckoutDate" type="date" placeholder="选择预计退房日期"
+                  format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
               </el-form-item>
-            </el-col>
-          </el-row>
-        </div>
+            </div>
+          </div>
 
-        <el-divider border-style="dashed" />
-
-        <div class="check-in-section">
-          <h3 class="section-title">
-            <el-icon><List /></el-icon> 入住登记信息
-          </h3>
-          <el-row :gutter="24">
-            <el-col :span="24">
-              <el-form-item label="入住备注" prop="remark">
-                <el-input
-                  v-model="checkInForm.remark"
-                  type="textarea"
-                  :rows="3"
-                  placeholder="请输入入住备注信息"
-                  maxlength="200"
-                  show-word-limit
-                  resize="none"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
+          <div class="check-in-section">
+            <h3 class="section-title">📝 入住登记信息</h3>
+            <el-form-item label="入住备注" prop="remark">
+              <el-input v-model="checkInForm.remark" type="textarea" :rows="3" placeholder="请输入入住备注信息，如特殊需求、注意事项等"
+                maxlength="200" show-word-limit />
+            </el-form-item>
+            <div class="info-row">
               <el-form-item label="登记人" prop="registeredBy">
-                <el-input v-model="checkInForm.registeredBy" readonly disabled />
+                <el-input v-model="checkInForm.registeredBy" readonly />
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="登记时间" prop="registrationTime">
-                <el-date-picker
-                  v-model="checkInForm.registrationTime"
-                  type="datetime"
-                  placeholder="选择登记时间"
-                  format="YYYY/MM/DD HH:mm"
-                  value-format="YYYY-MM-DD HH:mm:ss"
-                  style="width: 100%"
-                  disabled
-                />
+              <el-form-item label="登记时间" prop="registrationTime" required>
+                <el-date-picker v-model="checkInForm.registrationTime" type="datetime" placeholder="选择登记时间"
+                  format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
               </el-form-item>
-            </el-col>
-          </el-row>
+            </div>
+          </div>
+
+          <div class="check-in-notice">
+            <h3 class="notice-title">ℹ️ 入住须知</h3>
+            <ul class="notice-list">
+              <li>请核对入住人身份信息与身份证一致</li>
+              <li>请告知入住人寺院作息时间和注意事项</li>
+              <li>请提醒入住人保管好个人财物</li>
+              <li>请引导入住人熟悉寺院环境和安全通道</li>
+            </ul>
+          </div>
         </div>
+      </el-form>
 
-        <div class="notice-box">
-          <h4 class="notice-title">
-            <el-icon class="icon-warning"><InfoFilled /></el-icon> 入住须知
-          </h4>
-          <ul class="notice-list">
-            <li>请核对入住人身份信息与身份证一致</li>
-            <li>请告知入住人寺院作息时间和注意事项</li>
-            <li>请提醒入住人保管好个人财物</li>
-            <li>请引导入住人熟悉寺院环境和安全通道</li>
-          </ul>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="checkInModalVisible = false" size="large">取消</el-button>
+          <el-button type="primary" @click="confirmCheckIn" size="large" :loading="submitting"
+            :style="{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }">
+            确认入住
+          </el-button>
         </div>
-
-      </div>
-    </el-form>
-
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="checkInModalVisible = false" class="btn-cancel">取消</el-button>
-        <el-button 
-          type="success" 
-          @click="confirmCheckIn" 
-          :loading="submitting"
-          class="btn-confirm"
-        >
-          确认入住
-        </el-button>
-      </div>
-    </template>
-  </el-dialog>
+      </template>
+    </el-dialog>
 
     <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="detailVisible = false" />
 
@@ -557,9 +484,6 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-/* =========================================
-   1. 页面整体布局样式 (Page Layout)
-   ========================================= */
 .checkin-management {
   padding: 24px;
   background-color: #fdf6e3;
@@ -578,18 +502,17 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-/* Tab 导航样式覆盖 */
 :deep(.tab-navigation) {
   border-bottom: 1px solid #f0f2f5;
   padding: 12px 24px;
 
-  .tab-buttons {
+  :deep(.tab-buttons) {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
   }
 
-  .tab-btn {
+  :deep(.tab-btn) {
     background: #f5f7fa;
     border: 1px solid #ebeef5;
     border-radius: 20px;
@@ -600,28 +523,25 @@ onMounted(() => {
     align-items: center;
     gap: 6px;
     transition: all 0.2s;
-    
-    &.active {
-      background: #ecf5ff;
-      color: #409eff;
-      border-color: #d9ecff;
-    }
   }
-}
 
-/* 筛选区样式覆盖 */
-:deep(.filter-section) {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 24px;
-}
+  :deep(.tab-btn.active) {
+    background: #ecf5ff;
+    color: #409eff;
+    border-color: #d9ecff;
+  }
 
-/* 表格内容区域 */
-.table-content {
-  padding: 0 24px;
-  
-  /* 表格内部文字样式 */
+  :deep(.filter-section) {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .table-content {
+    padding: 0 24px;
+  }
+
   :deep(.guest-info) {
     display: flex;
     align-items: center;
@@ -649,169 +569,111 @@ onMounted(() => {
     gap: 8px;
     justify-content: flex-end;
   }
-}
 
-/* =========================================
-   2. 弹窗样式 (Dialog & Form)
-   ========================================= */
-.check-in-dialog {
-  /* 覆盖 Header */
-  :deep(.el-dialog__header) {
-    margin: 0;
-    padding: 20px 24px;
-    border-bottom: 1px solid #f0f0f0;
-    
-    .custom-header {
-      font-size: 18px;
-      font-weight: 600;
-      color: #8b5e3c; /* 截图中的棕金色标题 */
-    }
-    
-    /* 调整关闭按钮颜色 */
-    .el-dialog__headerbtn .el-dialog__close {
+  .pagination-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-top: 1px solid #f0f2f5;
+
+    .pagination-info {
+      font-size: 14px;
       color: #909399;
-      &:hover {
-        color: #8b5e3c;
-      }
     }
   }
 
-  /* 覆盖 Body */
-  :deep(.el-dialog__body) {
-    padding: 24px 32px;
-    max-height: 70vh;
-    overflow-y: auto;
+  .check-in-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid #ebeef5;
+    border-radius: 8px;
+    background-color: #fff;
   }
-
-  /* 覆盖 Footer */
-  :deep(.el-dialog__footer) {
-    padding: 16px 24px;
-    border-top: 1px solid #f0f0f0;
-    background-color: #fcfcfc;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-}
-
-/* 表单样式覆盖 */
-.check-in-form {
-  :deep(.el-form-item__label) {
-    color: #606266;
-    padding-bottom: 4px;
-    line-height: 1.5;
-  }
-}
-
-/* 分区标题 */
-.check-in-section {
-  margin-bottom: 24px;
 
   .section-title {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: bold;
     color: #333;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
-
-    :deep(.el-icon) {
-      color: #8b5e3c;
-    }
   }
-}
 
-/* 信息展示项 (只读信息) */
-.info-item {
-  margin-bottom: 16px;
-  
+  .info-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+  }
+
+  .info-item {
+    flex: 1;
+    min-width: 0;
+  }
+
   .info-label {
     display: block;
     font-size: 14px;
-    color: #909399;
-    margin-bottom: 4px;
+    color: #666;
+    margin-bottom: 5px;
   }
 
   .info-value {
-    font-size: 15px;
-    color: #303133;
-    min-height: 24px;
-    line-height: 24px;
-
-    &.font-bold {
-      font-weight: 600;
-      font-size: 16px;
-    }
+    font-size: 14px;
+    color: #333;
   }
-}
 
-/* 入住须知 (黄色警告框) */
-.notice-box {
-  background-color: #fffbe6;
-  border: 1px solid #ffe58f;
-  border-radius: 4px;
-  padding: 16px;
-  margin-top: 10px;
+  .check-in-notice {
+    margin-top: 12px;
+    padding: 15px;
+    background-color: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 8px;
+  }
 
   .notice-title {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #8b5e3c;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff9800;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
 
   .notice-list {
-    margin: 0;
+    list-style-type: disc;
     padding-left: 20px;
-    
+    margin: 0;
+
     li {
-      font-size: 13px;
-      color: #d48806;
-      line-height: 22px;
-      margin-bottom: 2px;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 5px;
     }
   }
-}
 
-/* 弹窗底部按钮 */
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.btn-confirm {
-  padding-left: 30px;
-  padding-right: 30px;
-
-  :deep(span) {
-    font-weight: 500;
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #ebeef5;
+    background-color: #f5f7fa;
   }
-  
-  /* 针对 type="success" 进行特定颜色微调，匹配设计图 */
-  &.el-button--success {
-    --el-button-bg-color: #52c41a;
-    --el-button-border-color: #52c41a;
-    --el-button-hover-bg-color: #73d13d;
-    --el-button-hover-border-color: #73d13d;
-    --el-button-active-bg-color: #389e0d;
-    --el-button-active-border-color: #389e0d;
-  }
-}
 
-.btn-cancel {
-  padding-left: 30px;
-  padding-right: 30px;
-  background-color: #f5f5f5;
-  border-color: #d9d9d9;
-  
-  &:hover {
-    background-color: #e6e6e6;
-    border-color: #d9d9d9;
-    color: #606266;
+  :deep(.el-form-item) {
+    margin-bottom: 15px;
+  }
+
+  :deep(.el-form-item__label) {
+    font-size: 14px;
+    color: #666;
+  }
+
+  :deep(.el-form-item__content) {
+    line-height: normal;
   }
 }
 </style>
