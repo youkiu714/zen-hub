@@ -5,32 +5,6 @@
 
     <EvaluationStatusFilter v-model="filterStatus" @update:modelValue="statusChange" />
 
-    <!-- 状态页签 -->
-    <!-- <el-card class="tab-card" shadow="never">
-      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-        <el-tab-pane label="待评价" name="pending">
-          <template #label>
-            <span class="tab-label">
-              <el-badge :value="pendingCount" class="tab-badge" v-if="pendingCount > 0">
-                待评价
-              </el-badge>
-              <span v-else>待评价</span>
-            </span>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane label="已评价" name="completed">
-          <template #label>
-            <span class="tab-label">
-              <el-badge :value="completedCount" class="tab-badge" type="success" v-if="completedCount > 0">
-                已评价
-              </el-badge>
-              <span v-else>已评价</span>
-            </span>
-          </template>
-        </el-tab-pane>
-      </el-tabs>
-    </el-card> -->
-
     <!-- 评价列表 -->
     <div class="table-container">
       <!-- 搜索和筛选区域 -->
@@ -47,11 +21,6 @@
               </template>
             </el-input>
           </div>
-
-          <el-button type="primary" @click="handleExport">
-            <el-icon><Download /></el-icon>
-            导出
-          </el-button>
       </div>
 
       <!-- 表格 -->
