@@ -128,7 +128,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
       {
         path: '/hall-management/evaluation-management',
         name: 'EvaluationManagement',
-        component: () => import('@/views/Order/ReviewManagement/index.vue'),
+        component: () => import('@/views/Order/EvaluationManagement/index.vue'),
         meta: {
           title: '评价管理',
           icon: 'Star'

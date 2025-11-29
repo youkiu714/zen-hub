@@ -68,6 +68,103 @@ export interface ResultBoolean {
   timestamp?: number;
 }
 
+// 评价列表查询参数接口
+export interface EvaluationsQuery {
+  /** 挂单类型 */
+  applicationType?: number;
+  /** 退单日期-结束 */
+  checkoutEndDate?: string;
+  /** 退单日期-开始 */
+  checkoutStartDate?: string;
+  /** 关键字，匹配姓名/手机号/身份证 */
+  keyword?: string;
+  /** 挂单日期模式：all/today/week/month/quarter */
+  lodgingDateMode?: string;
+  /** 挂单日期-结束（当模式=all时生效） */
+  lodgingEndDate?: string;
+  /** 挂单日期-开始（当模式=all时生效） */
+  lodgingStartDate?: string;
+  /** 页码，从1开始 */
+  pageNo?: number;
+  /** 每页数量 */
+  pageSize?: number;
+  /** 状态：10待评价 20已评价 */
+  status?: number;
+}
+
+// 评价列表项接口
+export interface EvaluationListItemVO {
+  /** 实际退住日期 */
+  actualCheckoutDate?: string;
+  /** 姓名 */
+  applicantName?: string;
+  /** 申请ID */
+  applicationId?: number;
+  /** 挂单类型 */
+  applicationType?: number;
+  /** 挂单类型名称 */
+  applicationTypeName?: string;
+  /** 挂单日期 */
+  checkinDate?: string;
+  /** 评价ID */
+  evaluationId?: number;
+  /** 性别 1男 2女 */
+  gender?: number;
+  /** 身份证号（脱敏） */
+  idCardMasked?: string;
+  /** 手机号（脱敏） */
+  mobileMasked?: string;
+  /** 计划退住日期 */
+  plannedCheckoutDate?: string;
+  /** 状态编码 */
+  status?: number;
+  /** 状态名称 */
+  statusDesc?: string;
+}
+
+// 分页响应数据接口
+export interface IPageEvaluationListItemVO {
+  asc?: string[];
+  ascs?: string[];
+  countId?: string;
+  current?: number;
+  desc?: string[];
+  descs?: string[];
+  hitCount?: boolean;
+  isSearchCount?: boolean;
+  maxLimit?: number;
+  optimizeCountSql?: boolean;
+  pages?: number;
+  records?: EvaluationListItemVO[];
+  searchCount?: boolean;
+  size?: number;
+  total?: number;
+}
+
+// 评价列表响应接口
+export interface EvaluationsResponse {
+  /** 业务码：约定 0=成功，非0=失败 */
+  code?: number;
+  /** 返回数据 */
+  data?: IPageEvaluationListItemVO;
+  /** 提示信息 */
+  message?: string;
+  success?: boolean;
+  /** 时间戳（毫秒） */
+  timestamp?: number;
+}
+
+// 获取评价列表
+export const getEvaluations = (
+  params: EvaluationsQuery
+): Promise<EvaluationsResponse> => {
+  return request({
+    url: '/evaluations',
+    method: 'GET',
+    params,
+  });
+};
+
 export const submitEvaluation = (
   id: number,
   params: EvaluationSubmitRequest

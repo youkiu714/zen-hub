@@ -66,7 +66,8 @@
           <template #default="scope">
             <el-button type="text" @click="handleView(scope.row)">查看</el-button>
             <el-button type="text" @click="handleWorkflow(scope.row)">流程</el-button>
-            <el-button v-if="(scope.row.reviewStatus === 10 || scope.row.reviewStatus === 20) && userStore.roles == 'MASTER'" type="text" @click="handleReview(scope.row)">审核</el-button>
+            <!-- <el-button v-if="(scope.row.reviewStatus === 10 || scope.row.reviewStatus === 20) && userStore.roles == 'MASTER'" type="text" @click="handleReview(scope.row)">审核</el-button> -->
+            <el-button v-if="scope.row" type="text" @click="handleReview(scope.row)">审核</el-button>
             <el-button v-else-if="scope.row.reviewStatus === 40" type="text"
               @click="handleReReview(scope.row)">重新审核</el-button>
           </template>

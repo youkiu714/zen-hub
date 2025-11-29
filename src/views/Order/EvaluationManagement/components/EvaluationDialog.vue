@@ -38,7 +38,7 @@
           在寺表现评价
         </h4>
 
-        <el-form :model="form" label-width="140px">
+        <el-form :model="form" label-width="140px" label-position="top">
           <!-- 评分项 -->
           <div class="rating-sections">
             <div
@@ -55,9 +55,9 @@
                   :class="{ active: form.ratings[index] === option.value }"
                   @click="setRating(index, option.value)"
                 >
-                  <el-icon :size="24" :color="option.color">
-                    <component :is="option.icon" />
-                  </el-icon>
+                  <span class="rating-emoji" :style="{ color: option.color, fontSize: '24px' }">
+                    {{ option.icon }}
+                  </span>
                   <span>{{ option.label }}</span>
                 </div>
               </div>
@@ -70,6 +70,7 @@
               v-model="form.comments"
               type="textarea"
               :rows="4"
+              style="width: 80%" 
               placeholder="请输入对挂单人在寺表现的具体评价和建议"
             />
           </el-form-item>
@@ -99,19 +100,34 @@
         </h4>
         <el-descriptions :column="1" border>
           <el-descriptions-item label="纪律遵守情况">
-            <el-rate v-model="viewEvaluationData.discipline" disabled />
+            <div class="rating-display">
+              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.discipline) }}</span>
+              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.discipline) }}</span>
+            </div>
           </el-descriptions-item>
           <el-descriptions-item label="礼仪规范情况">
-            <el-rate v-model="viewEvaluationData.etiquette" disabled />
+            <div class="rating-display">
+              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.etiquette) }}</span>
+              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.etiquette) }}</span>
+            </div>
           </el-descriptions-item>
           <el-descriptions-item label="集体活动参与">
-            <el-rate v-model="viewEvaluationData.activity" disabled />
+            <div class="rating-display">
+              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.activity) }}</span>
+              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.activity) }}</span>
+            </div>
           </el-descriptions-item>
           <el-descriptions-item label="环境维护与卫生">
-            <el-rate v-model="viewEvaluationData.environment" disabled />
+            <div class="rating-display">
+              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.environment) }}</span>
+              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.environment) }}</span>
+            </div>
           </el-descriptions-item>
           <el-descriptions-item label="与人相处情况">
-            <el-rate v-model="viewEvaluationData.interaction" disabled />
+            <div class="rating-display">
+              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.interaction) }}</span>
+              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.interaction) }}</span>
+            </div>
           </el-descriptions-item>
           <el-descriptions-item label="评价意见">
             {{ viewEvaluationData.comments }}
@@ -154,6 +170,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { User, Star, StarFilled, Menu, Message, Download } from '@element-plus/icons-vue'
+// 使用 Element Plus 的表情图标替代 FontAwesome
+const Frown = '👎' // 差
+const Meh = '👎🏻' // 较差
+const MehRollingEyes = '😑' // 一般
+const Smile = '😊' // 良好
+const GrinStars = '🤩' // 优秀
 import type {
   EvaluationRecord as Profile,
   EvaluationForm,
@@ -274,6 +296,42 @@ const getOverallTagType = (overall: string) => {
   }
   return types[overall] || 'info'
 }
+
+// 根据评分值获取对应的表情图标
+const getRatingEmoji = (score: number): string => {
+  switch (score) {
+    case 1:
+      return '👎' // 差
+    case 2:
+      return '😐' // 较差
+    case 3:
+      return '😑' // 一般
+    case 4:
+      return '😊' // 良好
+    case 5:
+      return '🤩' // 优秀
+    default:
+      return '😐' // 默认为较差
+  }
+}
+
+// 根据评分值获取对应的标签文本
+const getRatingLabel = (score: number): string => {
+  switch (score) {
+    case 1:
+      return '差'
+    case 2:
+      return '较差'
+    case 3:
+      return '一般'
+    case 4:
+      return '良好'
+    case 5:
+      return '优秀'
+    default:
+      return '未评分'
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -334,19 +392,31 @@ const getOverallTagType = (overall: string) => {
             padding: 8px;
             border-radius: 8px;
             transition: all 0.3s;
+            border: 2px solid transparent;
 
             &:hover {
               background: #f5f7fa;
+              transform: translateY(-2px);
             }
 
             &.active {
               background: #e8f5e8;
               border: 2px solid #67c23a;
+              transform: scale(1.05);
             }
 
-            span {
+            .rating-emoji {
+              font-size: 24px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.3s;
+            }
+
+            span:not(.rating-emoji) {
               font-size: 12px;
               color: #666;
+              font-weight: 500;
             }
           }
         }
@@ -363,6 +433,22 @@ const getOverallTagType = (overall: string) => {
       font-weight: 600;
       color: #8b5a2b;
       margin-bottom: 16px;
+    }
+
+    .rating-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .rating-emoji {
+        font-size: 20px;
+        display: inline-block;
+      }
+
+      .rating-label {
+        font-weight: 500;
+        color: #333;
+      }
     }
   }
 }
