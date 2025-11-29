@@ -2,6 +2,7 @@
   <el-dialog
     v-model="visible"
     :title="title"
+    top="2vh"
     width="800"
     :before-close="handleClose"
     class="evaluation-dialog"
@@ -48,18 +49,14 @@
             >
               <label class="rating-label">{{ index + 1 }}. {{ item.label }}</label>
               <div class="rating-options">
-                <div
-                  v-for="option in item.options"
-                  :key="option.value"
-                  class="rating-option"
-                  :class="{ active: form.ratings[index] === option.value }"
-                  @click="setRating(index, option.value)"
-                >
-                  <span class="rating-emoji" :style="{ color: option.color, fontSize: '24px' }">
-                    {{ option.icon }}
-                  </span>
-                  <span>{{ option.label }}</span>
-                </div>
+                <el-rate
+                  v-model="form.ratings[index]"
+                  :colors="['#f56565', '#ed8936', '#ecc94b', '#48bb78', '#38a169']"
+                  show-score
+                  score-template="{value}分"
+                  :texts="['差', '较差', '一般', '良好', '优秀']"
+                  @change="(value) => setRating(index, value)"
+                />
               </div>
             </div>
           </div>
@@ -100,34 +97,49 @@
         </h4>
         <el-descriptions :column="1" border>
           <el-descriptions-item label="纪律遵守情况">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.discipline) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.discipline) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.discipline"
+              disabled
+              :colors="['#f56565', '#ed8936', '#ecc94b', '#48bb78', '#38a169']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="礼仪规范情况">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.etiquette) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.etiquette) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.etiquette"
+              disabled
+              :colors="['#f56565', '#ed8936', '#ecc94b', '#48bb78', '#38a169']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="集体活动参与">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.activity) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.activity) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.activity"
+              disabled
+              :colors="['#f56565', '#ed8936', '#ecc94b', '#48bb78', '#38a169']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="环境维护与卫生">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.environment) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.environment) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.environment"
+              disabled
+              :colors="['#f56565', '#ed8936', '#ecc94b', '#48bb78', '#38a169']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="与人相处情况">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.interaction) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.interaction) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.interaction"
+              disabled
+              :colors="['#f56565', '#ed8936', '#ecc94b', '#48bb78', '#38a169']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="评价意见">
             {{ viewEvaluationData.comments }}
@@ -157,25 +169,13 @@
           <el-button @click="handleClose">关闭</el-button>
         </div>
       </div>
-      <div class="dialog-footer-bottom">
-        <el-button type="primary" @click="$emit('download-profile')">
-          <el-icon><Download /></el-icon>
-          下载挂单记录
-        </el-button>
-      </div>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { User, Star, StarFilled, Menu, Message, Download } from '@element-plus/icons-vue'
-// 使用 Element Plus 的表情图标替代 FontAwesome
-const Frown = '👎' // 差
-const Meh = '👎🏻' // 较差
-const MehRollingEyes = '😑' // 一般
-const Smile = '😊' // 良好
-const GrinStars = '🤩' // 优秀
+import { User, Star, Download } from '@element-plus/icons-vue'
 import type {
   EvaluationRecord as Profile,
   EvaluationForm,
@@ -297,45 +297,11 @@ const getOverallTagType = (overall: string) => {
   return types[overall] || 'info'
 }
 
-// 根据评分值获取对应的表情图标
-const getRatingEmoji = (score: number): string => {
-  switch (score) {
-    case 1:
-      return '👎' // 差
-    case 2:
-      return '😐' // 较差
-    case 3:
-      return '😑' // 一般
-    case 4:
-      return '😊' // 良好
-    case 5:
-      return '🤩' // 优秀
-    default:
-      return '😐' // 默认为较差
-  }
-}
-
-// 根据评分值获取对应的标签文本
-const getRatingLabel = (score: number): string => {
-  switch (score) {
-    case 1:
-      return '差'
-    case 2:
-      return '较差'
-    case 3:
-      return '一般'
-    case 4:
-      return '良好'
-    case 5:
-      return '优秀'
-    default:
-      return '未评分'
-  }
-}
 </script>
 
 <style scoped lang="scss">
 .evaluation-dialog {
+  margin-top: 2vh;
   .dialog-content {
     max-height: 70vh;
     overflow-y: auto;

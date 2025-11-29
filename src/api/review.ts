@@ -165,6 +165,118 @@ export const getEvaluations = (
   });
 };
 
+// 评价详情接口
+export interface EvaluationDetailRequest {
+  evaluationId: number;
+}
+
+// 评价详情响应接口
+export interface EvaluationDetailResponse {
+  /** 业务码：约定 0=成功，非0=失败 */
+  code?: number;
+  /** 返回数据 */
+  data?: EvaluationDetailVO;
+  /** 提示信息 */
+  message?: string;
+  /** 时间戳（毫秒） */
+  timestamp?: number;
+  success?: boolean;
+}
+
+// 评价详情数据接口
+export interface EvaluationDetailVO {
+  /** 评价内容 */
+  evaluation?: EvaluationInfo;
+  /** 挂单信息 */
+  lodging?: LodgingInfo;
+  /** 人员信息 */
+  person?: PersonInfo;
+  [property: string]: any;
+}
+
+// 评价信息接口
+export interface EvaluationInfo {
+  /** 纪律遵守评分 */
+  disciplineScore?: number;
+  /** 礼仪规范评分 */
+  etiquetteScore?: number;
+  /** 集体活动参与评分 */
+  activityScore?: number;
+  /** 评价意见 */
+  comment?: string;
+  /** 综合评价等级 */
+  overallGrade?: number;
+  /** 综合评价等级描述 */
+  overallGradeDesc?: string;
+  /** 与人相处评分 */
+  relationshipScore?: number;
+  /** 评价时间 */
+  evaluatedAt?: string;
+  /** 评价人ID */
+  evaluatorId?: number;
+  /** 环境维护与卫生评分 */
+  hygieneScore?: number;
+  /** 状态编码 */
+  status?: number;
+  /** 状态描述 */
+  statusDesc?: string;
+  [property: string]: any;
+}
+
+// 挂单信息接口
+export interface LodgingInfo {
+  /** 实际退单日期 */
+  actualCheckoutDate?: string;
+  /** 申请ID */
+  applicationId?: number;
+  /** 挂单类型 */
+  applicationType?: number;
+  /** 挂单类型名称 */
+  applicationTypeName?: string;
+  /** 入住日期 */
+  checkinDate?: string;
+  /** 计划退单日期 */
+  plannedCheckoutDate?: string;
+  /** 备注 */
+  remark?: string;
+  /** 房间号 */
+  roomNo?: string;
+  /** 床位号 */
+  bedNo?: string;
+  [property: string]: any;
+}
+
+// 人员信息接口
+export interface PersonInfo {
+  /** 年龄 */
+  age?: number;
+  /** 性别名称 */
+  genderName?: string;
+  /** 身份证号 */
+  idCard?: string;
+  /** 手机号 */
+  mobile?: string;
+  /** 姓名 */
+  name?: number;
+  /** 民族 */
+  nation?: string;
+  /** 人员ID */
+  personId?: number;
+  /** 微信号 */
+  wechat?: string;
+  [property: string]: any;
+}
+
+// 获取评价详情
+export const getEvaluationDetail = (
+  id: number
+): Promise<EvaluationDetailResponse> => {
+  return request({
+    url: `/evaluations/${id}`,
+    method: 'GET',
+  });
+};
+
 export const submitEvaluation = (
   id: number,
   params: EvaluationSubmitRequest

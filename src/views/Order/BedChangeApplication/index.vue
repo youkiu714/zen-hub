@@ -1,8 +1,8 @@
 <template>
   <div class="bed-change-application">
     <!-- 页面标题 -->
-   
-          <PageHeader title="换床申请" />
+
+    <PageHeader title="换床申请" />
 
     <!-- 状态页签 -->
     <el-card class="tab-card" shadow="never">
@@ -27,24 +27,16 @@
           <div class="card-header">
             <h3 class="card-title">可申请换床列表</h3>
             <div class="card-actions">
-              <el-input
-                v-model="availableQuery.keyword"
-                placeholder="搜索申请人姓名或房间号"
-                clearable
-                style="width: 250px"
-                @input="handleAvailableSearch"
-              >
+              <el-input v-model="availableQuery.keyword" placeholder="搜索申请人姓名或房间号" clearable style="width: 250px"
+                @input="handleAvailableSearch">
                 <template #prefix>
-                  <el-icon><Search /></el-icon>
+                  <el-icon>
+                    <Search />
+                  </el-icon>
                 </template>
               </el-input>
-              <el-select
-                v-model="availableQuery.roomType"
-                placeholder="全部房型"
-                clearable
-                style="width: 150px"
-                @change="handleAvailableSearch"
-              >
+              <el-select v-model="availableQuery.roomType" placeholder="全部房型" clearable style="width: 150px"
+                @change="handleAvailableSearch">
                 <el-option label="全部房型" value="" />
                 <el-option label="常规" value="regular" />
                 <el-option label="单人间" value="single" />
@@ -56,23 +48,25 @@
           </div>
         </template>
 
-        <el-table
-          v-loading="availableLoading"
-          :data="availableData"
-          stripe
-          style="width: 100%"
-        >
+        <el-table v-loading="availableLoading" :data="availableData" stripe style="width: 100%">
           <el-table-column label="申请人" min-width="150">
             <template #default="{ row }">
               <div class="applicant-info">
                 <el-avatar :size="40" :src="row.avatar" class="applicant-avatar">
-                  <el-icon><User /></el-icon>
+                  <el-icon>
+                    <User />
+                  </el-icon>
                 </el-avatar>
                 <div class="applicant-details">
                   <div class="applicant-name">{{ row.name }}</div>
                   <div class="applicant-id">{{ maskIdCard(row.idCard) }}</div>
                 </div>
               </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="性别/年龄" min-width="120">
+            <template #default="{ row }">
+              <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
             </template>
           </el-table-column>
           <el-table-column label="房间信息" min-width="120">
@@ -83,21 +77,19 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="checkinDate" label="入住日期" width="120" />
-          <el-table-column prop="expectedCheckout" label="预计离店" width="120" />
-          <el-table-column label="当前状态" width="100">
+          <el-table-column prop="checkinDate" label="入住日期" min-width="120" />
+          <el-table-column prop="expectedCheckout" label="预计离店" min-width="120" />
+          <el-table-column label="当前状态" min-width="100">
             <template #default="{ row }">
               <el-tag type="success" size="small">{{ row.status }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="150" fixed="right">
             <template #default="{ row }">
-              <el-button
-                type="primary"
-                link
-                @click="handleApplyChange(row)"
-              >
-                <el-icon><RefreshRight /></el-icon>
+              <el-button type="primary" link @click="handleApplyChange(row)">
+                <el-icon>
+                  <RefreshRight />
+                </el-icon>
                 申请换床
               </el-button>
             </template>
@@ -107,17 +99,13 @@
         <!-- 分页 -->
         <div class="pagination-container">
           <div class="pagination-info">
-            显示 {{ (availableCurrentPage - 1) * availablePageSize + 1 }} 到 {{ Math.min(availableCurrentPage * availablePageSize, availableTotal) }} 条，共 {{ availableTotal }} 条
+            显示 {{ (availableCurrentPage - 1) * availablePageSize + 1 }} 到 {{ Math.min(availableCurrentPage *
+              availablePageSize,
+            availableTotal) }} 条，共 {{ availableTotal }} 条
           </div>
-          <el-pagination
-            v-model:current-page="availableCurrentPage"
-            v-model:page-size="availablePageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :total="availableTotal"
-            layout="sizes, prev, pager, next, jumper"
-            @size-change="handleAvailableSizeChange"
-            @current-change="handleAvailableCurrentChange"
-          />
+          <el-pagination v-model:current-page="availableCurrentPage" v-model:page-size="availablePageSize"
+            :page-sizes="[10, 20, 50, 100]" :total="availableTotal" layout="sizes, prev, pager, next, jumper"
+            @size-change="handleAvailableSizeChange" @current-change="handleAvailableCurrentChange" />
         </div>
       </el-card>
     </div>
@@ -129,33 +117,27 @@
           <div class="card-header">
             <h3 class="card-title">已申请换床列表</h3>
             <div class="card-actions">
-              <el-input
-                v-model="appliedQuery.keyword"
-                placeholder="搜索申请人姓名或申请编号"
-                clearable
-                style="width: 250px"
-                @input="handleAppliedSearch"
-              >
+              <el-input v-model="appliedQuery.keyword" placeholder="搜索申请人姓名或申请编号" clearable style="width: 250px"
+                @input="handleAppliedSearch">
                 <template #prefix>
-                  <el-icon><Search /></el-icon>
+                  <el-icon>
+                    <Search />
+                  </el-icon>
                 </template>
               </el-input>
             </div>
           </div>
         </template>
 
-        <el-table
-          v-loading="appliedLoading"
-          :data="appliedData"
-          stripe
-          style="width: 100%"
-        >
+        <el-table v-loading="appliedLoading" :data="appliedData" stripe style="width: 100%">
           <el-table-column prop="applicationId" label="申请编号" width="150" />
           <el-table-column label="申请人" min-width="150">
             <template #default="{ row }">
               <div class="applicant-info">
                 <el-avatar :size="40" :src="row.avatar" class="applicant-avatar">
-                  <el-icon><User /></el-icon>
+                  <el-icon>
+                    <User />
+                  </el-icon>
                 </el-avatar>
                 <div class="applicant-details">
                   <div class="applicant-name">{{ row.applicantName }}</div>
@@ -198,19 +180,11 @@
           </el-table-column>
           <el-table-column label="操作" width="150" fixed="right">
             <template #default="{ row }">
-              <el-button
-                type="primary"
-                link
-                @click="handleViewDetail(row)"
-              >
+              <el-button type="primary" link @click="handleViewDetail(row)">
                 查看
               </el-button>
-              <el-button
-                type="danger"
-                link
-                :disabled="row.applicationStatus !== 'pending'"
-                @click="handleCancelApplication(row)"
-              >
+              <el-button type="danger" link :disabled="row.applicationStatus !== 'pending'"
+                @click="handleCancelApplication(row)">
                 取消申请
               </el-button>
             </template>
@@ -220,41 +194,35 @@
         <!-- 分页 -->
         <div class="pagination-container">
           <div class="pagination-info">
-            显示 {{ (appliedCurrentPage - 1) * appliedPageSize + 1 }} 到 {{ Math.min(appliedCurrentPage * appliedPageSize, appliedTotal) }} 条，共 {{ appliedTotal }} 条
+            显示 {{ (appliedCurrentPage - 1) * appliedPageSize + 1 }} 到 {{ Math.min(appliedCurrentPage * appliedPageSize,
+            appliedTotal) }} 条，共 {{ appliedTotal }} 条
           </div>
-          <el-pagination
-            v-model:current-page="appliedCurrentPage"
-            v-model:page-size="appliedPageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :total="appliedTotal"
-            layout="sizes, prev, pager, next, jumper"
-            @size-change="handleAppliedSizeChange"
-            @current-change="handleAppliedCurrentChange"
-          />
+          <el-pagination v-model:current-page="appliedCurrentPage" v-model:page-size="appliedPageSize"
+            :page-sizes="[10, 20, 50, 100]" :total="appliedTotal" layout="sizes, prev, pager, next, jumper"
+            @size-change="handleAppliedSizeChange" @current-change="handleAppliedCurrentChange" />
         </div>
       </el-card>
     </div>
 
     <!-- 换床申请弹窗 -->
-    <el-dialog
-      v-model="changeBedVisible"
-      :title="`换床申请 - ${currentApplicant?.name}`"
-      width="800px"
-      :before-close="handleChangeBedClose"
-    >
+    <el-dialog v-model="changeBedVisible" :title="`换床申请 - ${currentApplicant?.name}`" width="800px"
+      :before-close="handleChangeBedClose">
       <div v-if="currentApplicant" class="change-bed-form">
         <!-- 申请人信息 -->
         <el-card class="info-card" shadow="never">
           <template #header>
             <div class="info-header">
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
               <span>申请人信息</span>
             </div>
           </template>
           <el-descriptions :column="2" border>
             <el-descriptions-item label="姓名">{{ currentApplicant.name }}</el-descriptions-item>
             <el-descriptions-item label="当前房间床位">
-              {{ currentApplicant.roomInfo.buildingName }} {{ currentApplicant.roomInfo.roomNumber }} - {{ currentApplicant.roomInfo.bedNumber }}
+              {{ currentApplicant.roomInfo.buildingName }} {{ currentApplicant.roomInfo.roomNumber }} - {{
+                currentApplicant.roomInfo.bedNumber }}
             </el-descriptions-item>
             <el-descriptions-item label="入住日期">{{ currentApplicant.checkinDate }}</el-descriptions-item>
             <el-descriptions-item label="预计离店">{{ currentApplicant.expectedCheckout }}</el-descriptions-item>
@@ -265,7 +233,9 @@
         <el-card class="form-card" shadow="never">
           <template #header>
             <div class="info-header">
-              <el-icon><House /></el-icon>
+              <el-icon>
+                <House />
+              </el-icon>
               <span>换床申请信息</span>
             </div>
           </template>
@@ -318,21 +288,11 @@
             </el-form-item>
 
             <el-form-item v-show="changeForm.changeReason === 'other'" label="详细原因说明" prop="otherReason">
-              <el-input
-                v-model="changeForm.otherReason"
-                type="textarea"
-                :rows="3"
-                placeholder="请详细说明换床原因"
-              />
+              <el-input v-model="changeForm.otherReason" type="textarea" :rows="3" placeholder="请详细说明换床原因" />
             </el-form-item>
 
             <el-form-item label="其他补充说明">
-              <el-input
-                v-model="changeForm.additionalInfo"
-                type="textarea"
-                :rows="2"
-                placeholder="如有其他需要说明的情况，请在此填写"
-              />
+              <el-input v-model="changeForm.additionalInfo" type="textarea" :rows="2" placeholder="如有其他需要说明的情况，请在此填写" />
             </el-form-item>
           </el-form>
         </el-card>
@@ -349,11 +309,7 @@
     </el-dialog>
 
     <!-- 申请详情弹窗 -->
-    <el-dialog
-      v-model="detailVisible"
-      title="申请详情"
-      width="600px"
-    >
+    <el-dialog v-model="detailVisible" title="申请详情" width="600px">
       <div v-if="currentDetail">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="申请编号">{{ currentDetail.applicationId }}</el-descriptions-item>

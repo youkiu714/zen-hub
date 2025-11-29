@@ -619,7 +619,7 @@ onMounted(() => {
 
 /* 表格内容区域 */
 .table-content {
-  padding: 0 24px;
+  padding: 0;
   
   /* 表格内部文字样式 */
   :deep(.guest-info) {

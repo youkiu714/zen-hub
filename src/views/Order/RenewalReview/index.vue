@@ -6,92 +6,66 @@
 
     <div class="table-container-section">
       <div class="filter-bar">
-        <el-input
-          v-model="currentFilters.keyword"
-          placeholder="搜索申请人姓名或身份证号"
-          clearable
-          :suffix-icon="Search"
-          @clear="handleKeywordInput"
-          @keyup.enter="handleKeywordInput"
-          style="width: 240px"
-        />
+        <el-input v-model="currentFilters.keyword" placeholder="搜索申请人姓名或身份证号" clearable :suffix-icon="Search"
+          @clear="handleKeywordInput" @keyup.enter="handleKeywordInput" style="width: 240px" />
 
-        <el-select
-          v-model="currentFilters.type"
-          placeholder="全部申请类型"
-          clearable
-          class="filter-select"
-          @change="handleFilterChange"
-        >
-          <el-option
-            v-for="option in applicationTypeOptions"
-            :key="option.value"
-            :label="option.label"
-            :value="option.value"
-          />
+        <el-select v-model="currentFilters.type" placeholder="全部申请类型" clearable class="filter-select"
+          @change="handleFilterChange">
+          <el-option v-for="option in applicationTypeOptions" :key="option.value" :label="option.label"
+            :value="option.value" />
         </el-select>
         <div style="width: 340px">
-          <el-date-picker
-            v-model="currentFilters.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-            class="filter-date-picker"
-            @change="handleFilterChange"
-            style="width: 340px"
-          />
+          <el-date-picker v-model="currentFilters.dateRange" type="daterange" range-separator="至"
+            start-placeholder="开始日期" end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
+            class="filter-date-picker" @change="handleFilterChange" style="width: 340px" />
         </div>
       </div>
       <!-- 数据表格 -->
-      <el-table
-        :data="tableData"
-        style="width: 100%"
-        size="large"
-        :header-cell-style="{ backgroundColor: '#f5f7fa' }"
-        class="application-table"
-        v-loading="loading"
-      >
-        <el-table-column prop="applicantName" label="申请人" width="120" />
+      <el-table :data="tableData" style="width: 100%" size="large" :header-cell-style="{ backgroundColor: '#f5f7fa' }"
+        class="application-table" v-loading="loading">
+        <!-- <el-table-column prop="applicantName" label="申请人" min-width="120" /> -->
+        <el-table-column label="挂单人" min-width="150">
+          <template #default="{ row }">
+            <div class="applicant-info">
+              <el-avatar :size="40" class="applicant-avatar">
+                <el-icon>
+                  <User />
+                </el-icon>
+              </el-avatar>
+              <div class="applicant-details">
+                <div class="applicant-name">{{ row.applicantName }}</div>
+                <div class="applicant-id">{{ row.idCardMasked }}</div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="性别/年龄" min-width="100">
+          <template #default="{ row }">
+            <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
+          </template>
+        </el-table-column>
         <!-- 申请类型 -->
-        <el-table-column label="申请类型" width="120" align="center">
+        <el-table-column label="申请类型" min-width="120" align="center">
           <template #default="{ row }">
             <el-tag :type="getApplicationTypeTag(row.applicationType)">
               {{ getApplicationTypeLabel(row.applicationType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="性别" width="120" align="center">
-          <template #default="{ row }">
-            {{ getGenderText(row.gender) }}
-          </template>
-        </el-table-column>
 
         <!-- 所属部门 -->
-        <el-table-column label="所属部组" width="120" align="center">
+        <el-table-column label="所属部组" min-idth="120" align="center">
           <template #default="{ row }">
             {{ getDepartmentLabel(row.departmentCode) }}
           </template>
         </el-table-column>
 
-        <el-table-column
-          label="原退单日期"
-          width="220"
-          align="center"
-          prop="originalCheckoutDate"
-        />
+        <el-table-column label="原退单日期" min-width="120" align="center" prop="originalCheckoutDate" />
 
-        <el-table-column
-          label="新退单日期"
-          width="220"
-          align="center"
-          prop="requestedCheckoutDate"
-        />
+        <el-table-column label="新退单日期" min-width="120" align="center" prop="requestedCheckoutDate" />
 
         <!-- 续住天数 -->
-        <el-table-column label="续住天数" width="100" align="center">
+        <el-table-column label="续住天数" min-width="100" align="center">
           <template #default="{ row }">
             <span class="stay-days">{{ row.stayDays || 0 }}天</span>
           </template>
@@ -101,13 +75,7 @@
         <el-table-column label="操作" min-width="160">
           <template #default="{ row }">
             <div class="action-buttons">
-              <el-button
-                v-if="canReview(row.status)"
-                type="success"
-                size="small"
-                link
-                @click="handleReview(row)"
-              >
+              <el-button v-if="canReview(row.status)" type="success" size="small" link @click="handleReview(row)">
                 审核
               </el-button>
             </div>
@@ -121,15 +89,9 @@
 
       <!-- 分页 -->
       <div v-if="pagination.total > 0" class="pagination-container">
-        <el-pagination
-          v-model:current-page="pagination.currentPage"
-          v-model:page-size="pagination.pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="pagination.total"
-          @size-change="handleSizeChange"
-          @current-change="handlePageChange"
-        />
+        <el-pagination v-model:current-page="pagination.currentPage" v-model:page-size="pagination.pageSize"
+          :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" :total="pagination.total"
+          @size-change="handleSizeChange" @current-change="handlePageChange" />
       </div>
     </div>
     <!-- 查看详情对话框 -->
@@ -209,7 +171,7 @@ const fetchData = async () => {
     console.log("响应数据:", response)
     console.log("当前状态:", activeTab.value)
     console.log("records数据:", response.records)
-    
+
     // 检查数据一致性
     if (response.records && response.records.length > 0) {
       console.log("第一条记录ID:", response.records[0].id)
@@ -238,7 +200,7 @@ const handleTabChange = (tabName: string) => {
 
 const handleFilterChange = () => {
   pagination.currentPage = 1
-//   fetchData()
+  //   fetchData()
 }
 
 const throttledKeywordSearch = throttle(
@@ -251,7 +213,7 @@ const throttledKeywordSearch = throttle(
 )
 
 const handleKeywordInput = () => {
-//   throttledKeywordSearch()
+  //   throttledKeywordSearch()
 }
 
 const handlePageChange = (page: number) => {
@@ -262,7 +224,7 @@ const handlePageChange = (page: number) => {
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.currentPage = 1
-//   fetchData()
+  //   fetchData()
 }
 
 const handleReview = (row: ExtensionReviewItem) => {
@@ -322,5 +284,28 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+
+.applicant-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .applicant-avatar {
+    flex-shrink: 0;
+  }
+
+  .applicant-details {
+    .applicant-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .applicant-id {
+      font-size: 12px;
+      color: #999;
+    }
+  }
 }
 </style>

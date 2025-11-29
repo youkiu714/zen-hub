@@ -1,11 +1,6 @@
 <template>
-  <el-table
-    :data="data"
-    stripe
-    :loading="loading"
-    size="large"
-    :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
-  >
+  <el-table :data="data" stripe :loading="loading" size="large"
+    :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }">
     <!-- 客人信息列 - 所有状态都有 -->
     <el-table-column label="客人信息" min-width="200">
       <template #default="{ row }">
@@ -21,6 +16,12 @@
       </template>
     </el-table-column>
 
+    <el-table-column label="性别/年龄" min-width="100">
+      <template #default="{ row }">
+        <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
+      </template>
+    </el-table-column>
+
     <!-- 申请类型列 - 仅待入住状态显示 -->
     <el-table-column v-if="status === 'pending'" label="申请类型" min-width="120">
       <template #default="{ row }">
@@ -31,7 +32,7 @@
     </el-table-column>
 
     <!-- 房间信息列 - 已入住和已退房状态显示 -->
-     <!-- todo：未入住的 会不会有入住信息呢？ 有可能未入住的还没有分床 -->
+    <!-- todo：未入住的 会不会有入住信息呢？ 有可能未入住的还没有分床 -->
     <el-table-column v-if="status === 'checked-in'" label="房间信息" min-width="120">
       <template #default="{ row }">
         <div class="room-info">
@@ -136,7 +137,7 @@
           <!-- 待入住状态的操作按钮 -->
           <template v-if="status === 'pending'">
             <el-tooltip content="查看详情" placement="top">
-              <el-button  type="default" size="small" @click="emit('view-application', row.applicationId)">
+              <el-button type="default" size="small" @click="emit('view-application', row.applicationId)">
                 查看详情
               </el-button>
             </el-tooltip>
@@ -190,17 +191,23 @@
           <template v-if="status === 'checked-out'">
             <el-tooltip content="发送遗漏物品通知" placement="top">
               <el-button type="primary" size="small" circle @click="emit('lost-notice', row)">
-                <el-icon><Message /></el-icon>
+                <el-icon>
+                  <Message />
+                </el-icon>
               </el-button>
             </el-tooltip>
             <el-tooltip content="表现评价" placement="top">
               <el-button type="warning" size="small" circle @click="emit('evaluate', row)">
-                <el-icon><Star /></el-icon>
+                <el-icon>
+                  <Star />
+                </el-icon>
               </el-button>
             </el-tooltip>
             <el-tooltip content="查看详情" placement="top">
               <el-button type="default" size="small" circle @click="emit('view-detail', row)">
-                <el-icon><View /></el-icon>
+                <el-icon>
+                  <View />
+                </el-icon>
               </el-button>
             </el-tooltip>
           </template>
