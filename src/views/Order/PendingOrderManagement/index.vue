@@ -56,7 +56,7 @@
             }}
           </template>
         </el-table-column>
-        <el-table-column prop="departmentCode" label="所属部族" min-width="90">
+        <el-table-column prop="departmentCode" label="所属部组" min-width="90">
           <template #default="{ row }">
             {{
               departmentOptions.find((item) => item.value === row.departmentCode)?.label ?? '其他'

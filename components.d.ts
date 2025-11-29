@@ -60,6 +60,7 @@ declare module 'vue' {
     ElTimelineItem: typeof import('element-plus/es')['ElTimelineItem']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     ElUpload: typeof import('element-plus/es')['ElUpload']
+    FilterTab: typeof import('./src/components/FilterTab.vue')['default']
     Header: typeof import('./src/components/Layout/Header.vue')['default']
     Layout: typeof import('./src/components/Layout/index.vue')['default']
     PageHeader: typeof import('./src/components/PageHeader.vue')['default']

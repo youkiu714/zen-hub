@@ -285,7 +285,7 @@ const handleProvinceCityChange = (val: CascaderValue | null | undefined) => {
 
 /** 选项 */
 const ethnicOptions = ['汉族', '满族', '回族', '藏族', '维吾尔族', '苗族', '彝族', '壮族']
-const maritalOptions = ['未婚', '已婚']
+const maritalOptions = ['未婚', '已婚', '离异']
 const educationOptions = ['高中及以下', '大专', '本科', '硕士', '博士及以上']
 const genderOptions = [{
     label: '男',

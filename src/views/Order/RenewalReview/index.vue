@@ -70,7 +70,7 @@
         </el-table-column>
 
         <!-- 所属部门 -->
-        <el-table-column label="所属部门" width="120" align="center">
+        <el-table-column label="所属部组" width="120" align="center">
           <template #default="{ row }">
             {{ getDepartmentLabel(row.departmentCode) }}
           </template>
@@ -208,6 +208,13 @@ const fetchData = async () => {
     console.log("请求参数:", params)
     console.log("响应数据:", response)
     console.log("当前状态:", activeTab.value)
+    console.log("records数据:", response.records)
+    
+    // 检查数据一致性
+    if (response.records && response.records.length > 0) {
+      console.log("第一条记录ID:", response.records[0].id)
+      console.log("第一条记录详情:", response.records[0])
+    }
 
     // 直接从响应根级别获取数据
     tableData.value = response.records || []

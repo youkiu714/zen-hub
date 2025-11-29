@@ -73,8 +73,8 @@
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="所属部族" prop="departmentCode">
-            <el-select v-model="form.departmentCode" placeholder="请选择所属部族" clearable>
+          <el-form-item label="所属部组" prop="departmentCode">
+            <el-select v-model="form.departmentCode" placeholder="请选择所属部组" clearable>
               <el-option
                 v-for="item in departmentOptions"
                 :key="item.value"
@@ -86,7 +86,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="用斋选择" prop="mealPreference">
-            <el-select v-model="form.mealPreference" placeholder="请选择所属部族" clearable>
+            <el-select v-model="form.mealPreference" placeholder="请选择所属部组" clearable>
               <el-option
                 v-for="item in mealOptions"
                 :key="item.value"
@@ -241,7 +241,7 @@ const rules = reactive<FormRules>({
   recommenderComment: [{ required: true, message: '请输入推荐人评价', trigger: 'blur' }],
   selfEvaluation: [{ required: true, message: '请输入自我评价', trigger: 'blur' }],
   recommenderName: [{ required: true, message: '请输入推荐人姓名', trigger: 'blur' }],
-  departmentCode: [{ required: true, message: '请选择所属部族', trigger: 'change' }],
+  departmentCode: [{ required: true, message: '请选择所属部组', trigger: 'change' }],
   mealPreference: [{ required: true, message: '请选择用斋类型', trigger: 'change' }],
   applicationTypeOptions: [{ required: true, message: '请申请挂单类型', trigger: 'change' }]
 })

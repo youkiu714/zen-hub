@@ -30,6 +30,14 @@ export interface CheckoutRecord {
   actualCheckoutDate: string
 }
 
+// 确认退单表单
+export interface ConfirmCheckoutPayload {
+  actualCheckoutDate: string
+  performanceLevel: number
+  performanceRemark?: string
+  remark?: string
+}
+
 // 退单记录列表响应
 export interface CheckoutListResponse {
   total: number
@@ -43,6 +51,11 @@ export interface CheckoutListResponse {
 // 获取退单记录列表
 export const getCheckouts = (params: CheckoutQueryParams = {}) => {
   return request.get<CheckoutListResponse>('/checkouts', { params })
+}
+
+// 确认退单
+export const confirmCheckout = (checkoutId: number, data: ConfirmCheckoutPayload) => {
+  return request.post(`/checkouts/${checkoutId}/confirm`, data)
 }
 
 export type CancelConfirmationTabKey = 'pending' | 'refund-confirmation'

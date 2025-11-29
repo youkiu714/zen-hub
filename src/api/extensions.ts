@@ -64,6 +64,21 @@ export interface ExtensionReviewListResponse {
 
 // 获取续单审核列表
 export const getExtensionReviews = (params: ExtensionReviewListParams): Promise<ExtensionReviewListResponse> => {
-  return service.get('/extensions/reviews', { params })
+  // 添加时间戳防止缓存
+  const requestParams = {
+    ...params,
+  }
+  
+  console.log('API请求参数:', requestParams)
+  console.log('请求URL:', '/extensions/reviews')
+  
+  return service.get('/extensions/reviews', { 
+    params: requestParams,
+    // 禁用缓存
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    }
+  })
 }
 

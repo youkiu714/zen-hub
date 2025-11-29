@@ -9,12 +9,6 @@
           </el-icon>
           刷新数据
         </el-button>
-        <el-button type="primary" @click="exportReport" :loading="exporting">
-          <el-icon>
-            <Download />
-          </el-icon>
-          导出报表
-        </el-button>
       </div>
     </PageHeader>
 
@@ -101,7 +95,12 @@
             <span class="text-sm">筛选:</span>
             <el-select v-model="selectedFloor" placeholder="所有楼层" style="width: 120px;">
               <el-option label="所有楼层" value="" />
-              <el-option v-for="floor in floorOptions" :key="floor" :label="'第' + floor + '层'" :value="floor" />
+              <el-option
+                v-for="floor in floorOptions"
+                :key="floor"
+                :label="'第' + floor + '层'"
+                :value="floor"
+              />
             </el-select>
             <el-select v-model="selectedGender" placeholder="所有性别" style="width: 120px;">
               <el-option label="所有性别" value="" />
@@ -116,18 +115,27 @@
               <Calendar />
             </el-icon>
             <span class="date-label">开始日期:</span>
-            <el-date-picker v-model="dateRange[0]" type="date" value-format="YYYY-MM-DD" placeholder="选择开始日期" />
+            <el-date-picker
+              v-model="dateRange[0]"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="选择开始日期"
+            />
             <span class="date-separator">至</span>
             <span class="date-label">结束日期:</span>
-            <el-date-picker v-model="dateRange[1]" type="date" value-format="YYYY-MM-DD" placeholder="选择结束日期" />
+            <el-date-picker
+              v-model="dateRange[1]"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="选择结束日期"
+            />
             <el-button type="primary" @click="applyFilters">
-            <el-icon>
-              <Filter />
-            </el-icon>
-            筛选
-          </el-button>
+              <el-icon>
+                <Filter />
+              </el-icon>
+              筛选
+            </el-button>
           </div>
-          
         </div>
       </div>
 
@@ -138,19 +146,60 @@
           男众房间 ({{ getTotalRooms(maleRooms) }}个房间, 共{{ getTotalBeds(maleRooms) }}个床位)
         </h4>
         <div class="rooms-grid-1" style="grid-template-columns: repeat(1, 1fr);">
-          <div v-for="floor in maleRooms" :key="floor.floor" class="floor-section">
+          <div
+            v-for="floor in maleRooms"
+            :key="floor.floor"
+            class="floor-section"
+          >
             <h5 class="floor-title">第{{ floor.floor }}层</h5>
             <div class="rooms-grid-3">
-              <div v-for="room in floor.rooms" :key="room.roomId" class="room-card" @click="viewRoomDetails(room)">
+              <div
+                v-for="room in floor.rooms"
+                :key="room.roomId"
+                class="room-card"
+                @click="viewRoomDetails(room)"
+              >
                 <div class="room-header">
                   <h5 class="room-name">{{ room.roomNo }}室</h5>
                   <span class="room-type">{{ room.roomTypeName }}</span>
                 </div>
-                <div class="beds-container">
+
+                <!-- 房间汇总信息 -->
+                <div class="room-summary">
+                  <span class="occupancy-info">
+                    已占用: {{ room.occupiedCount || 0 }}/{{ room.capacity || 0 }}
+                  </span>
+                  <span v-if="room.capacity">
+                    剩余: {{ Math.max((room.capacity || 0) - (room.occupiedCount || 0), 0) }} 床
+                  </span>
+
+                  <el-button
+                    v-if="room.beds && room.beds.length"
+                    text
+                    size="small"
+                    class="toggle-beds-btn"
+                    @click.stop="toggleRoomBeds(room)"
+                  >
+                    {{ isRoomExpanded(room) ? '收起床位' : '查看床位' }}
+                  </el-button>
+                </div>
+
+                <!-- 床位区域：有床位且展开时才显示 -->
+                <div
+                  v-if="room.beds && room.beds.length && isRoomExpanded(room)"
+                  class="beds-container"
+                >
                   <div class="beds-grid">
-                    <div v-for="bed in room.beds" :key="bed.bedId" class="bed-item" :class="getBedClass(bed)"
-                      @click.stop="handleBedClick(bed, room)">
-                      <div class="bed-number">{{ bed.bedNo }}({{ bed.bedTypeName }})</div>
+                    <div
+                      v-for="bed in room.beds"
+                      :key="bed.bedId"
+                      class="bed-item"
+                      :class="getBedClass(bed)"
+                      @click.stop="handleBedClick(bed, room)"
+                    >
+                      <div class="bed-number">
+                        {{ bed.bedNo }}（{{ bed.bedTypeName }}）
+                      </div>
                       <div class="bed-status">
                         <el-icon>
                           <User v-if="bed.occupied" />
@@ -163,11 +212,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="room-footer">
-                  <span class="occupancy-info">已占用: {{ room.occupiedCount || 0 }}/{{ room.capacity }}</span>
-                  <button class="details-btn" @click.stop="viewRoomDetails(room)">查看详情</button>
-                </div>
-              </div>
+              </div> <!-- room-card -->
             </div>
           </div>
         </div>
@@ -180,19 +225,69 @@
           女众房间 ({{ getTotalRooms(femaleRooms) }}个房间, 共{{ getTotalBeds(femaleRooms) }}个床位)
         </h4>
         <div class="rooms-grid-1">
-          <div v-for="floor in femaleRooms" :key="floor.floor" class="floor-section">
+          <div
+            v-for="floor in femaleRooms"
+            :key="floor.floor"
+            class="floor-section"
+          >
             <h5 class="floor-title">第{{ floor.floor }}层</h5>
             <div class="rooms-grid-3">
-              <div v-for="room in floor.rooms" :key="room.roomId" class="room-card" @click="viewRoomDetails(room)">
+              <div
+                v-for="room in floor.rooms"
+                :key="room.roomId"
+                class="room-card"
+              >
                 <div class="room-header">
                   <h5 class="room-name">{{ room.roomNo }}室</h5>
                   <span class="room-type">{{ room.roomTypeName }}</span>
                 </div>
-                <div class="beds-container">
+
+                <!-- 房间汇总信息 -->
+                <div class="room-summary">
+                  <span class="occupancy-info">
+                    已占用: {{ room.occupiedCount || 0 }}/{{ room.capacity || 0 }}
+                  </span>
+                  <span v-if="room.capacity">
+                    剩余: {{ Math.max((room.capacity || 0) - (room.occupiedCount || 0), 0) }} 床
+                  </span>
+
+                  <div class="room-summary-actions">
+                    <el-button
+                      v-if="room.beds && room.beds.length"
+                      text
+                      size="small"
+                      class="toggle-beds-btn"
+                      @click.stop="toggleRoomBeds(room)"
+                    >
+                      {{ isRoomExpanded(room) ? '收起床位' : '查看床位' }}
+                    </el-button>
+                    <!-- <el-button
+                      text
+                      size="small"
+                      class="details-link-btn"
+                      @click.stop="viewRoomDetails(room)"
+                    >
+                      详情
+                    </el-button> -->
+                  </div>
+                </div>
+
+                <!-- 床位区域：有床位且展开时才显示 -->
+                <div
+                  v-if="room.beds && room.beds.length && isRoomExpanded(room)"
+                  class="beds-container"
+                >
                   <div class="beds-grid">
-                    <div v-for="bed in room.beds" :key="bed.bedId" class="bed-item" :class="getBedClass(bed)"
-                      @click.stop="handleBedClick(bed, room)">
-                      <div class="bed-number">{{ bed.bedNo }}({{ bed.bedTypeName }})</div>
+                    <div
+                      v-for="bed in room.beds"
+                      :key="bed.bedId"
+                      class="bed-item"
+                      :class="getBedClass(bed)"
+                      @click.stop="handleBedClick(bed, room)"
+                    >
+                      <div class="bed-number">
+                        {{ bed.bedNo }}（{{ bed.bedTypeName }}）
+                      </div>
                       <div class="bed-status">
                         <el-icon>
                           <User v-if="bed.occupied" />
@@ -205,11 +300,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="room-footer">
-                  <span class="occupancy-info">已占用: {{ room.occupiedCount || 0 }}/{{ room.capacity }}</span>
-                  <button class="details-btn" @click.stop="viewRoomDetails(room)">查看详情</button>
-                </div>
-              </div>
+              </div> <!-- room-card -->
             </div>
           </div>
         </div>
@@ -227,7 +318,12 @@
     </div>
 
     <!-- 床位分配弹窗 -->
-    <el-dialog v-model="bedAllocationVisible" title="分配床位" width="600px" @close="resetAllocationForm">
+    <el-dialog
+      v-model="bedAllocationVisible"
+      title="分配床位"
+      width="600px"
+      @close="resetAllocationForm"
+    >
       <template #header>
         <div class="flex items-center">
           <h3>分配床位 - {{ currentBed?.bedNo }}</h3>
@@ -238,8 +334,13 @@
         <div class="form-section">
           <label class="form-label">待分配人员列表</label>
           <div class="person-list">
-            <div v-for="person in pendingPersons" :key="person.id" class="person-item"
-              :class="{ selected: selectedPerson?.id === person.id }" @click="selectPerson(person)">
+            <div
+              v-for="person in pendingPersons"
+              :key="person.id"
+              class="person-item"
+              :class="{ selected: selectedPerson?.id === person.id }"
+              @click="selectPerson(person)"
+            >
               <div class="person-avatar">
                 <el-icon>
                   <User />
@@ -247,8 +348,11 @@
               </div>
               <div class="person-info">
                 <div class="person-name">{{ person.name }}</div>
-                <div class="person-details">挂单号: {{ person.orderNo }} | {{ person.gender === 1 ? '男' : '女' }} | 预计入住{{
-                  person.stayDays }}天</div>
+                <div class="person-details">
+                  挂单号: {{ person.orderNo }} |
+                  {{ person.gender === 1 ? '男' : '女' }} |
+                  预计入住{{ person.stayDays }}天
+                </div>
               </div>
               <div class="select-indicator">
                 <el-icon v-if="selectedPerson?.id === person.id">
@@ -261,23 +365,45 @@
 
         <el-form :model="allocationForm" label-width="100px">
           <el-form-item label="挂单人员">
-            <el-select v-model="allocationForm.personId" placeholder="选择挂单人员" style="width: 100%">
-              <el-option v-for="person in pendingPersons" :key="person.id"
-                :label="`${person.name} - 挂单号: ${person.orderNo}`" :value="person.id" />
+            <el-select
+              v-model="allocationForm.personId"
+              placeholder="选择挂单人员"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="person in pendingPersons"
+                :key="person.id"
+                :label="`${person.name} - 挂单号: ${person.orderNo}`"
+                :value="person.id"
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item label="入住日期">
-            <el-date-picker v-model="allocationForm.checkinDate" type="date" placeholder="选择入住日期" style="width: 100%" />
+            <el-date-picker
+              v-model="allocationForm.checkinDate"
+              type="date"
+              placeholder="选择入住日期"
+              style="width: 100%"
+            />
           </el-form-item>
 
           <el-form-item label="预计离店日期">
-            <el-date-picker v-model="allocationForm.checkoutDate" type="date" placeholder="选择离店日期"
-              style="width: 100%" />
+            <el-date-picker
+              v-model="allocationForm.checkoutDate"
+              type="date"
+              placeholder="选择离店日期"
+              style="width: 100%"
+            />
           </el-form-item>
 
           <el-form-item label="备注信息">
-            <el-input v-model="allocationForm.notes" type="textarea" placeholder="请输入备注信息" :rows="3" />
+            <el-input
+              v-model="allocationForm.notes"
+              type="textarea"
+              placeholder="请输入备注信息"
+              :rows="3"
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -317,7 +443,9 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">性别:</span>
-            <span class="detail-value">{{ currentBed.occupant.gender === 1 ? '男' : '女' }}</span>
+            <span class="detail-value">
+              {{ currentBed.occupant.gender === 1 ? '男' : '女' }}
+            </span>
           </div>
           <div class="detail-row">
             <span class="detail-label">入住日期:</span>
@@ -362,9 +490,14 @@ import {
   Brush,
   Calendar,
 } from '@element-plus/icons-vue';
-import type { DashboardOverviewVO, RoomStatusDashboardVO, RoomWithBedsVO, BedStatusVO } from '@/types/room-bed-management';
+import type {
+  DashboardOverviewVO,
+  RoomStatusDashboardVO,
+  RoomWithBedsVO,
+  BedStatusVO,
+} from '@/types/room-bed-management';
 import { getRoomOverview, getRoomStatus } from '@/api/room';
-import PageHeader from '@/components/PageHeader.vue'
+import PageHeader from '@/components/PageHeader.vue';
 
 // 数据响应式变量
 const dashboardData = ref<DashboardOverviewVO>({
@@ -374,17 +507,20 @@ const dashboardData = ref<DashboardOverviewVO>({
   femaleBeds: 0,
   occupiedBeds: 0,
   occupancyRate: 0,
-  pendingAssignments: 0
+  pendingAssignments: 0,
 });
 const roomStatusData = ref<RoomStatusDashboardVO>({
   male: { floors: [] },
-  female: { floors: [] }
+  female: { floors: [] },
 });
 const selectedFloor = ref<string>('');
 const selectedGender = ref<string>('');
 const dateRange = ref<[string, string]>(['', '']);
 const currentPage = ref(1);
 const pageSize = 5;
+
+// 房间展开状态：记录哪些房间展开了床位
+const expandedRooms = ref<Set<number | string>>(new Set());
 
 // 床位分配相关状态
 const bedAllocationVisible = ref(false);
@@ -400,7 +536,7 @@ const allocationForm = ref({
   personId: '',
   checkinDate: '',
   checkoutDate: '',
-  notes: ''
+  notes: '',
 });
 
 // 待分配人员列表（模拟数据）
@@ -409,7 +545,7 @@ const pendingPersons = ref([
   { id: 2, name: '李四', orderNo: 'GD2023042', gender: 1, stayDays: 5 },
   { id: 3, name: '王五', orderNo: 'GD2023043', gender: 2, stayDays: 7 },
   { id: 4, name: '赵六', orderNo: 'GD2023044', gender: 1, stayDays: 4 },
-  { id: 5, name: '孙七', orderNo: 'GD2023045', gender: 2, stayDays: 6 }
+  { id: 5, name: '孙七', orderNo: 'GD2023045', gender: 2, stayDays: 6 },
 ]);
 
 const selectedPerson = ref(pendingPersons.value[0] || null);
@@ -418,10 +554,10 @@ const selectedPerson = ref(pendingPersons.value[0] || null);
 const floorOptions = computed(() => {
   const floors = new Set<number>();
   if (roomStatusData.value?.male?.floors) {
-    roomStatusData.value.male.floors.forEach(f => floors.add(f.floor!));
+    roomStatusData.value.male.floors.forEach((f) => floors.add(f.floor!));
   }
   if (roomStatusData.value?.female?.floors) {
-    roomStatusData.value.female.floors.forEach(f => floors.add(f.floor!));
+    roomStatusData.value.female.floors.forEach((f) => floors.add(f.floor!));
   }
   return Array.from(floors).sort();
 });
@@ -432,7 +568,7 @@ const maleRooms = computed(() => {
   let filteredFloors = roomStatusData.value.male.floors;
 
   if (selectedFloor.value) {
-    filteredFloors = filteredFloors.filter(f => f.floor === Number(selectedFloor.value));
+    filteredFloors = filteredFloors.filter((f) => f.floor === Number(selectedFloor.value));
   }
 
   return filteredFloors;
@@ -444,7 +580,7 @@ const femaleRooms = computed(() => {
   let filteredFloors = roomStatusData.value.female.floors;
 
   if (selectedFloor.value) {
-    filteredFloors = filteredFloors.filter(f => f.floor === Number(selectedFloor.value));
+    filteredFloors = filteredFloors.filter((f) => f.floor === Number(selectedFloor.value));
   }
 
   return filteredFloors;
@@ -456,8 +592,14 @@ const getTotalRooms = (genderRooms: any[]) => {
 };
 
 const getTotalBeds = (genderRooms: any[]) => {
-  return genderRooms.reduce((sum, floor) =>
-    sum + (floor.rooms?.reduce((roomSum: number, room: any) => roomSum + (room.capacity || 0), 0) || 0), 0
+  return genderRooms.reduce(
+    (sum, floor) =>
+      sum +
+      (floor.rooms?.reduce(
+        (roomSum: number, room: any) => roomSum + (room.capacity || 0),
+        0,
+      ) || 0),
+    0,
   );
 };
 
@@ -482,7 +624,21 @@ const getBedStatusType = (bed: any) => {
   return 'info';
 };
 
+// 房间展开控制
+const isRoomExpanded = (room: RoomWithBedsVO) => {
+  return expandedRooms.value.has(room.roomId as any);
+};
 
+const toggleRoomBeds = (room: RoomWithBedsVO) => {
+  const set = new Set(expandedRooms.value);
+  const key = room.roomId as any;
+  if (set.has(key)) {
+    set.delete(key);
+  } else {
+    set.add(key);
+  }
+  expandedRooms.value = set;
+};
 
 // 床位分配相关方法
 const handleBedClick = (bed: BedStatusVO, room: RoomWithBedsVO) => {
@@ -506,8 +662,8 @@ const showBedDetails = (bed: BedStatusVO) => {
       gender: 1,
       checkinDate: '2023-10-01',
       checkoutDate: '2023-10-10',
-      phone: '138****5678'
-    }
+      phone: '138****5678',
+    },
   };
   bedDetailsVisible.value = true;
 };
@@ -527,7 +683,7 @@ const resetAllocationForm = () => {
     personId: '',
     checkinDate: '',
     checkoutDate: '',
-    notes: ''
+    notes: '',
   };
   selectedPerson.value = pendingPersons.value[0] || null;
 };
@@ -542,11 +698,13 @@ const confirmAllocation = async () => {
 
   try {
     // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // 更新床位状态
     if (currentBed.value && currentRoom.value) {
-      const bedIndex = currentRoom.value.beds?.findIndex(b => b.bedId === currentBed.value!.bedId);
+      const bedIndex = currentRoom.value.beds?.findIndex(
+        (b) => b.bedId === currentBed.value!.bedId,
+      );
       if (bedIndex !== undefined && bedIndex !== -1 && currentRoom.value.beds) {
         currentRoom.value.beds[bedIndex].occupied = true;
       }
@@ -602,12 +760,12 @@ const refreshData = async () => {
   }
 };
 
-// 导出报表
+// 导出报表（保留，占位用）
 const exportReport = async () => {
   exporting.value = true;
   try {
     // 模拟导出延迟
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     ElMessage.success('报表导出成功');
   } catch (error) {
     ElMessage.error('导出失败');
@@ -623,10 +781,10 @@ const applyFilters = async () => {
 };
 
 // 查看房间详情
-const viewRoomDetails = (room: RoomWithBedsVO) => {
-  ElMessage.info(`正在查看房间 ${room.roomNo} 的详情`);
-  // 这里可以跳转到详情页或打开弹窗
-};
+// const viewRoomDetails = (room: RoomWithBedsVO) => {
+//   ElMessage.info(`正在查看房间 ${room.roomNo} 的详情`);
+//   // 这里可以跳转到详情页或打开弹窗
+// };
 
 // 加载更多房间（模拟分页）
 const loadMoreRooms = () => {
@@ -703,7 +861,7 @@ onMounted(async () => {
 }
 
 .stat-footer.success {
-  color: #6B8E7F;
+  color: #6b8e7f;
 }
 
 .stat-footer.neutral {
@@ -711,11 +869,11 @@ onMounted(async () => {
 }
 
 .stat-footer.warning {
-  color: #D9A566;
+  color: #d9a566;
 }
 
 .stat-footer.danger {
-  color: #B94E48;
+  color: #b94e48;
 }
 
 .stat-icon {
@@ -730,22 +888,22 @@ onMounted(async () => {
 
 .stat-icon.rooms {
   background-color: rgba(74, 111, 165, 0.1);
-  color: #4A6FA5;
+  color: #4a6fa5;
 }
 
 .stat-icon.beds {
   background-color: rgba(212, 181, 158, 0.1);
-  color: #D4B59E;
+  color: #d4b59e;
 }
 
 .stat-icon.occupied {
   background-color: rgba(217, 165, 102, 0.1);
-  color: #D9A566;
+  color: #d9a566;
 }
 
 .stat-icon.pending {
   background-color: rgba(185, 78, 72, 0.1);
-  color: #B94E48;
+  color: #b94e48;
 }
 
 /* 房间区域 */
@@ -830,11 +988,11 @@ onMounted(async () => {
 }
 
 .gender-indicator.male {
-  background-color: #4A6FA5;
+  background-color: #4a6fa5;
 }
 
 .gender-indicator.female {
-  background-color: #D4B59E;
+  background-color: #d4b59e;
 }
 
 .floor-section {
@@ -865,13 +1023,13 @@ onMounted(async () => {
 .room-card {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px 14px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .room-card:hover {
-  border-color: #4A6FA5;
+  border-color: #4a6fa5;
   box-shadow: 0 4px 20px rgba(74, 111, 165, 0.1);
 }
 
@@ -879,7 +1037,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .room-name {
@@ -894,32 +1052,56 @@ onMounted(async () => {
   padding: 4px 8px;
   border-radius: 12px;
   background-color: rgba(107, 142, 127, 0.1);
-  color: #6B8E7F;
+  color: #6b8e7f;
+}
+
+/* 房间汇总信息 */
+.room-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.room-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toggle-beds-btn,
+.details-link-btn {
+  padding: 0 4px;
+  font-size: 12px;
 }
 
 /* 床位网格 */
 .beds-container {
-  margin-bottom: 12px;
+  margin-top: 6px;
 }
 
 .beds-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
 }
 
 .bed-item {
   border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 8px;
-  text-align: center;
-  font-size: 12px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .bed-item:hover {
@@ -928,9 +1110,8 @@ onMounted(async () => {
 }
 
 .bed-number {
-  font-size: 10px;
-  color: #666;
-  margin-bottom: 2px;
+  font-size: 11px;
+  color: #555;
 }
 
 .bed-status {
@@ -949,26 +1130,26 @@ onMounted(async () => {
 
 .bed-available:hover {
   background-color: #e5e7eb;
-  border-color: #4A6FA5;
+  border-color: #4a6fa5;
   box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
 }
 
 .bed-occupied {
   background-color: rgba(107, 142, 127, 0.1);
   border-color: rgba(107, 142, 127, 0.3);
-  color: #6B8E7F;
+  color: #6b8e7f;
 }
 
 .bed-locked {
   background-color: rgba(217, 165, 102, 0.1);
   border-color: rgba(217, 165, 102, 0.3);
-  color: #D9A566;
+  color: #d9a566;
 }
 
 .bed-cleaning {
   background-color: rgba(185, 78, 72, 0.1);
   border-color: rgba(185, 78, 72, 0.3);
-  color: #B94E48;
+  color: #b94e48;
 }
 
 .room-footer {
@@ -982,19 +1163,6 @@ onMounted(async () => {
 .occupancy-info {
   font-size: 12px;
   color: #666;
-}
-
-.details-btn {
-  background: none;
-  border: none;
-  color: #4A6FA5;
-  font-size: 12px;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.details-btn:hover {
-  color: #3a5a8a;
 }
 
 /* 加载更多 */
@@ -1073,7 +1241,7 @@ onMounted(async () => {
 
 .person-item.selected {
   background-color: rgba(74, 111, 165, 0.05);
-  border-color: #4A6FA5;
+  border-color: #4a6fa5;
 }
 
 .person-avatar {
@@ -1105,7 +1273,7 @@ onMounted(async () => {
 }
 
 .select-indicator {
-  color: #4A6FA5;
+  color: #4a6fa5;
   font-size: 16px;
 }
 
@@ -1155,7 +1323,7 @@ onMounted(async () => {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .rooms-grid {
+  .rooms-grid-3 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -1163,12 +1331,6 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .room-management-container {
     padding: 10px;
-  }
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
   }
 
   .dashboard-cards {
@@ -1191,7 +1353,7 @@ onMounted(async () => {
     align-items: flex-start;
   }
 
-  .rooms-grid {
+  .rooms-grid-3 {
     grid-template-columns: 1fr;
   }
 

@@ -32,10 +32,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="所属部族" prop="departmentCode">
+          <el-form-item label="所属部组" prop="departmentCode">
             <el-select
               v-model="formData.departmentCode"
-              placeholder="请选择所属部族"
+              placeholder="请选择所属部组"
               style="width: 100%"
             >
               <el-option
@@ -246,7 +246,7 @@ const formRules: FormRules = {
   checkoutDate: [{ required: true, message: '请选择短住结束时间', trigger: 'change' }],
   departureDate: [{ required: true, message: '请选择行程到达时间', trigger: 'change' }],
   returnDate: [{ required: true, message: '请选择行程离开时间', trigger: 'change' }],
-  departmentCode: [{ required: true, message: '请选择所属部族', trigger: 'change' }],
+  departmentCode: [{ required: true, message: '请选择所属部组', trigger: 'change' }],
   mealPreference: [{ required: true, message: '请选择用餐类型', trigger: 'change' }],
   shortStayReason: [{ required: true, message: '请输入短住期许', trigger: 'blur' }],
   selfEvaluation: [{ required: true, message: '请输入自我评价', trigger: 'blur' }],

@@ -15,6 +15,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.6.2",
+    "dayjs": "^1.11.19",
     "echarts": "^5.4.3",
     "element-china-area-data": "^6.1.0",
     "element-plus": "^2.4.4",

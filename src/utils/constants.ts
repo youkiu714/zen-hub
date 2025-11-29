@@ -147,3 +147,12 @@ export const preceptsOptions = [
   { label: 3, text: '八戒' },
   { label: 4, text: '菩萨戒' }
 ]
+
+// 在寺表现评价
+export const performanceOptions = [
+  { label: '优秀', value: 1 },
+  { label: '良好', value: 2 },
+  { label: '一般', value: 3 },
+  { label: '需改进', value: 4 }
+]
+

@@ -248,7 +248,7 @@
               </div>
             </div>
             <div class="info-right">
-              <div class="base-info-label">所属部族：</div>
+              <div class="base-info-label">所属部组：</div>
               <div class="base-info-value">
                 {{
                   detail?.lodging?.departmentCode

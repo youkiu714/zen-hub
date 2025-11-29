@@ -89,7 +89,7 @@
       </template>
     </el-table-column>
 
-    <template #empty>
+    <template >
       <el-empty description="暂无申请数据" />
     </template>
   </el-table>

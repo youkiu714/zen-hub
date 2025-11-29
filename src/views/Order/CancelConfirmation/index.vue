@@ -3,14 +3,22 @@
     <!-- 页面标题 -->
     <PageHeader title="退单确认" />
 
-    <TabNavigation :tabs="tabs" :active-tab="activeTab" @change="handleTabChange" />
+    <FilterTab
+      v-model="filterStatus"
+      @update:modelValue="handleTabChange"
+      :statusOptions="statusOptions"
+    />
 
-    <!-- 搜索和筛选区域 -->
-    <el-card class="filter-card" shadow="hover">
-      <el-form :model="queryForm" inline>
+    <el-card class="table-card" shadow="hover">
+      <el-form :model="queryForm" inline class="filter-form">
         <el-form-item label="关键词搜索">
-          <el-input v-model="queryForm.keyword" placeholder="申请编号、申请人姓名或房间号" clearable style="width: 250px"
-            @input="handleSearch">
+          <el-input
+            v-model="queryForm.keyword"
+            placeholder="申请编号、申请人姓名或房间号"
+            clearable
+            style="width: 250px"
+            @input="handleSearch"
+          >
             <template #prefix>
               <el-icon>
                 <Search />
@@ -18,25 +26,33 @@
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="queryForm.status" placeholder="全部状态" clearable style="width: 120px"
-            @change="handleSearch">
-            <el-option label="全部" :value="undefined" />
-            <el-option label="待审核" :value="0" />
-            <el-option label="已批准" :value="1" />
-            <el-option label="已拒绝" :value="2" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="申请类型">
-          <el-select v-model="queryForm.applicationType" placeholder="全部类型" clearable style="width: 120px"
-            @change="handleSearch">
-            <el-option v-for="item in applicationTypeOptions" :key="item.value" :label="item.label"
-              :value="item.value" />
+          <el-select
+            v-model="queryForm.applicationType"
+            placeholder="全部类型"
+            clearable
+            style="width: 120px"
+            @change="handleSearch"
+          >
+            <el-option
+              v-for="item in applicationTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="退单日期">
-          <el-date-picker v-model="queryForm.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
-            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" @change="handleSearch" />
+          <el-date-picker
+            v-model="queryForm.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            @change="handleSearch"
+          />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleFilter">
@@ -47,28 +63,6 @@
           </el-button>
         </el-form-item>
       </el-form>
-    </el-card>
-
-    <el-card class="table-card" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <h3 class="card-title">退单申请列表</h3>
-          <div class="card-actions">
-            <el-button type="danger" :disabled="selectedRows.length === 0" @click="handleBatchReject">
-              <el-icon>
-                <Close />
-              </el-icon>
-              批量拒绝
-            </el-button>
-            <el-button type="success" :disabled="selectedRows.length === 0" @click="handleBatchApprove">
-              <el-icon>
-                <Check />
-              </el-icon>
-              批量批准
-            </el-button>
-          </div>
-        </div>
-      </template>
 
       <el-table
         v-loading="loading"
@@ -76,10 +70,7 @@
         style="width: 100%"
         size="large"
         :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
-        @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="checkoutId" label="退单ID" width="100" />
         <el-table-column label="申请人" min-width="150">
           <template #default="{ row }">
             <div class="applicant-info">
@@ -100,11 +91,7 @@
             <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
           </template>
         </el-table-column>
-        <el-table-column prop="mobile" label="联系电话" width="120">
-          <template #default="{ row }">
-            {{ maskPhone(row.mobile) }}
-          </template>
-        </el-table-column>
+        <el-table-column prop="mobile" label="联系电话" width="130" />
         <el-table-column label="申请类型" width="100">
           <template #default="{ row }">
             {{ getApplicationTypeText(row.applicationType) }}
@@ -114,25 +101,19 @@
         <el-table-column prop="checkoutDate" label="原定退单" width="120" />
         <el-table-column prop="actualCheckoutDate" label="实际退单" width="120" />
         <el-table-column prop="stayDays" label="住宿天数" width="100" />
-        <el-table-column label="状态" width="100">
+        <el-table-column label="操作" width="220" fixed="right" >
           <template #default="{ row }">
-            <el-tag :type="getStatusTagType(row.status)" size="small">
-              {{ getStatusText(row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="performanceLevel" label="表现等级" width="100" />
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="handleViewDetail(row)"> 查看 </el-button>
-            <el-button v-if="row.status === 0" type="success" link @click="handleApprove(row)">
-              批准
+            <el-button @click="() => handleViewDetail(row)" link>
+              查看
             </el-button>
-            <el-button v-if="row.status === 0" type="danger" link @click="handleReject(row)">
-              拒绝
+            <el-button type="primary" link @click="handleConfirmCheckout(row)">
+              确认退单
             </el-button>
           </template>
         </el-table-column>
+        <template #empty>
+          <el-empty description="暂无数据" />
+        </template>
       </el-table>
 
       <!-- 分页 -->
@@ -148,16 +129,98 @@
         />
       </div>
     </el-card>
+
+    <el-dialog
+      v-model="confirmDialogVisible"
+      title="确认退单"
+      width="520px"
+      :close-on-click-modal="false"
+      @close="handleConfirmDialogClose"
+    >
+      <el-form ref="confirmFormRef" :model="confirmForm" :rules="confirmRules" label-width="110px">
+        <el-form-item label="实际退单日期" prop="actualCheckoutDate" required>
+          <el-date-picker
+            v-model="confirmForm.actualCheckoutDate"
+            type="date"
+            placeholder="请选择实际退单日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="在寺表现" prop="performanceLevel" required>
+          <el-select
+            v-model="confirmForm.performanceLevel"
+            placeholder="请选择在寺表现"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in performanceOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="在寺表现描述" prop="performanceRemark">
+          <el-input
+            v-model="confirmForm.performanceRemark"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入在寺表现描述"
+            maxlength="200"
+            show-word-limit
+            resize="none"
+          />
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input
+            v-model="confirmForm.remark"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入备注信息"
+            maxlength="200"
+            show-word-limit
+            resize="none"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="handleConfirmDialogClose">取消</el-button>
+        <el-button type="primary" :loading="confirmSubmitting" @click="submitConfirmCheckout">
+          确认退单
+        </el-button>
+      </template>
+    </el-dialog>
+    <!-- 查看详情 -->
+    <ApplicationDetailDialog
+      v-model="detailVisible"
+      :application-id="currentAppId"
+      @close="onDetailClosed"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Filter, Download, User, House, Close, Check, Clock } from '@element-plus/icons-vue'
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import dayjs from 'dayjs'
+import { Search, Filter, User, View } from '@element-plus/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
-import { getCheckouts, type CheckoutQueryParams, type CheckoutRecord, type CancelConfirmationTabKey } from '@/api/checkout'
-import { applicationTypeOptions } from '@/utils/constants'
+import {
+  getCheckouts,
+  confirmCheckout,
+  type CheckoutQueryParams,
+  type CheckoutRecord,
+  type CancelConfirmationTabKey,
+  type ConfirmCheckoutPayload,
+  PaginationParams
+} from '@/api/checkout'
+import { applicationTypeOptions, performanceOptions } from '@/utils/constants'
+import FilterTab from '@/components/FilterTab.vue'
+import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
+import { CheckinTabKey } from '../CheckInManagement/utils'
 
 // 查询表单数据
 const queryForm = reactive<CheckoutQueryParams>({
@@ -176,28 +239,33 @@ const loading = ref(false)
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
-const selectedRows = ref<CheckoutRecord[]>([])
-
-// 弹窗状态
-const detailVisible = ref(false)
-const processVisible = ref(false)
-const processing = ref(false)
-const currentDetail = ref<CheckoutRecord | null>(null)
-const processAction = ref<'approve' | 'reject'>('approve')
-const currentApplicationId = ref(0)
-
-const activeTab = ref<CancelConfirmationTabKey>('pending')
-
-// 处理表单
-const processFormRef = ref()
-const processForm = reactive({
-  applicationId: 0,
-  confirmationAction: 'approve',
-  rejectionReason: '',
-  refundAmount: 0,
-  refundMethod: '',
-  processNote: ''
+const confirmDialogVisible = ref(false)
+const confirmFormRef = ref<FormInstance>()
+const confirmSubmitting = ref(false)
+const currentCheckoutId = ref<number | null>(null)
+const confirmForm = reactive<ConfirmCheckoutPayload>({
+  actualCheckoutDate: dayjs().format('YYYY-MM-DD'),
+  performanceLevel: 1,
+  performanceRemark: '',
+  remark: ''
 })
+
+const filterStatus = ref(10)
+
+const statusOptions = [
+  {
+    value: 10,
+    label: '待确认',
+    type: 'default',
+    icon: 'Document'
+  },
+  {
+    value: 30,
+    label: '已确认',
+    type: 'default',
+    icon: 'Edit'
+  }
+]
 
 const pagination = reactive<PaginationParams>({
   current: 1,
@@ -205,35 +273,15 @@ const pagination = reactive<PaginationParams>({
   total: 0
 })
 
-// 表单验证规则
-const processRules = computed(() => ({
-  rejectionReason:
-    processAction.value === 'reject'
-      ? [
-        { required: true, message: '请输入拒绝原因', trigger: 'blur' },
-        { min: 5, message: '拒绝原因至少需要5个字符', trigger: 'blur' }
-      ]
-      : [],
-  refundAmount:
-    processAction.value === 'approve'
-      ? [
-        { required: true, message: '请输入退款金额', trigger: 'blur' },
-        { type: 'number', min: 0, message: '退款金额不能小于0', trigger: 'blur' }
-      ]
-      : [],
-  refundMethod:
-    processAction.value === 'approve'
-      ? [{ required: true, message: '请选择退款方式', trigger: 'change' }]
-      : []
-}))
+const confirmRules: FormRules = {
+  actualCheckoutDate: [{ required: true, message: '请选择实际退单日期', trigger: 'change' }],
+  performanceLevel: [{ required: true, message: '请选择在寺表现', trigger: 'change' }],
+  performanceRemark: [{ max: 200, message: '描述不超过200字', trigger: 'blur' }],
+  remark: [{ max: 200, message: '备注不超过200字', trigger: 'blur' }]
+}
 
-// 处理弹窗标题
-const processDialogTitle = computed(() => {
-  return processAction.value === 'approve' ? '批准退单' : '拒绝退单'
-})
-
-const handleTabChange = (key: CheckinTabKey) => {
-  activeTab.value = key
+const handleTabChange = (key: number) => {
+  filterStatus.value = key
   pagination.current = 1
   fetchCheckoutList()
 }
@@ -243,20 +291,24 @@ const fetchCheckoutList = async () => {
   try {
     loading.value = true
 
-    // 处理日期范围
-    if (queryForm.dateRange && queryForm.dateRange.length === 2) {
-      queryForm.startDate = queryForm.dateRange[0]
-      queryForm.endDate = queryForm.dateRange[1]
-    } else {
-      queryForm.startDate = ''
-      queryForm.endDate = ''
+    // 构建请求参数
+    const params: CheckoutQueryParams = {
+      keyword: queryForm.keyword,
+      status: filterStatus.value,
+      applicationType: queryForm.applicationType,
+      current: currentPage.value,
+      size: pageSize.value,
+      startDate: '',
+      endDate: ''
     }
 
-    // 设置分页参数
-    queryForm.current = currentPage.value
-    queryForm.size = pageSize.value
+    // 处理日期范围
+    if (queryForm.dateRange && queryForm.dateRange.length === 2) {
+      params.startDate = queryForm.dateRange[0]
+      params.endDate = queryForm.dateRange[1]
+    }
 
-    const response = await getCheckouts(queryForm)
+    const response = await getCheckouts(params)
 
     tableData.value = response.records
     total.value = response.total
@@ -280,61 +332,6 @@ const handleFilter = () => {
   fetchCheckoutList()
 }
 
-// 导出处理
-const handleExport = async () => {
-  try {
-    // 导出当前查询条件下的所有数据
-    const exportParams = { ...queryForm, current: 1, size: 9999 }
-    const response = await getCheckouts(exportParams)
-
-    if (response.code === 0 && response.data) {
-      const exportData = response.data.records.map((item) => ({
-        退单ID: item.checkoutId,
-        申请编号: item.applicationNumber,
-        申请人: item.applicantName,
-        性别: item.gender === 1 ? '男' : '女',
-        年龄: item.age,
-        联系电话: maskPhone(item.mobile),
-        身份证号: item.idCardMasked,
-        申请类型: getApplicationTypeText(item.applicationType),
-        入住日期: item.checkinDate,
-        原定退单日期: item.checkoutDate,
-        实际退单日期: item.actualCheckoutDate,
-        住宿天数: item.stayDays,
-        状态: getStatusText(item.status),
-        表现等级: item.performanceLevel
-      }))
-
-      // 创建CSV格式的导出数据
-      const csvContent = [
-        Object.keys(exportData[0]).join(','),
-        ...exportData.map((item) => Object.values(item).join(','))
-      ].join('\n')
-
-      // 创建下载链接
-      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `退单记录_${new Date().toISOString().split('T')[0]}.csv`
-      a.click()
-      window.URL.revokeObjectURL(url)
-
-      ElMessage.success('导出成功')
-    } else {
-      ElMessage.error('导出失败')
-    }
-  } catch (error) {
-    console.error('导出失败:', error)
-    ElMessage.error('导出失败')
-  }
-}
-
-// 选择行处理
-const handleSelectionChange = (selection: CheckoutRecord[]) => {
-  selectedRows.value = selection
-}
-
 // 分页处理
 const handleSizeChange = (val: number) => {
   pageSize.value = val
@@ -347,162 +344,66 @@ const handleCurrentChange = (val: number) => {
   fetchCheckoutList()
 }
 
+// 详情对话框状态
+const detailVisible = ref(false)
+const currentAppId = ref<number | null>(null)
+
 // 查看详情
 const handleViewDetail = async (row: CheckoutRecord) => {
+  currentAppId.value = row.applicationId
+  detailVisible.value = true
+}
+
+// 关闭详情对话框
+const onDetailClosed = () => {
+  detailVisible.value = false
+  currentAppId.value = null
+}
+
+// 确认退单
+const handleConfirmCheckout = async (row: CheckoutRecord) => {
+  currentCheckoutId.value = row.checkoutId
+  confirmForm.actualCheckoutDate = row.actualCheckoutDate || dayjs().format('YYYY-MM-DD')
+  confirmForm.performanceLevel = row.performanceLevel || 1
+  confirmForm.performanceRemark = ''
+  confirmForm.remark = ''
+  confirmDialogVisible.value = true
+}
+
+const handleConfirmDialogClose = () => {
+  confirmDialogVisible.value = false
+  confirmFormRef.value?.resetFields()
+  confirmForm.actualCheckoutDate = dayjs().format('YYYY-MM-DD')
+  confirmForm.performanceLevel = 1
+  confirmForm.performanceRemark = ''
+  confirmForm.remark = ''
+  currentCheckoutId.value = null
+}
+
+const submitConfirmCheckout = async () => {
   try {
-    currentDetail.value = row
-    detailVisible.value = true
-  } catch (error) {
-    console.error('获取详情失败:', error)
-    ElMessage.error('获取详情失败')
-  }
-}
-
-// 批准退单
-const handleApprove = (row?: CheckoutRecord) => {
-  const applicationId = row ? row.applicationId : 0
-
-  processAction.value = 'approve'
-  currentApplicationId.value = applicationId
-
-  // 重置表单
-  processForm.applicationId = applicationId
-  processForm.confirmationAction = 'approve'
-  processForm.rejectionReason = ''
-  processForm.refundAmount = 300 // 默认退款金额
-  processForm.refundMethod = 'original'
-  processForm.processNote = ''
-
-  processVisible.value = true
-}
-
-// 拒绝退单
-const handleReject = (row?: CheckoutRecord) => {
-  const applicationId = row ? row.applicationId : 0
-
-  processAction.value = 'reject'
-  currentApplicationId.value = applicationId
-
-  // 重置表单
-  processForm.applicationId = applicationId
-  processForm.confirmationAction = 'reject'
-  processForm.rejectionReason = ''
-  processForm.refundAmount = 0
-  processForm.refundMethod = ''
-  processForm.processNote = ''
-
-  processVisible.value = true
-}
-
-// 批量批准
-const handleBatchApprove = async () => {
-  try {
-    await ElMessageBox.confirm(
-      `确定要批准选中的 ${selectedRows.value.length} 条退单申请吗？`,
-      '批量批准确认',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-
-    // 模拟批量处理延迟
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    ElMessage.success('批量批准成功')
-    selectedRows.value = []
-    fetchCheckoutList()
-  } catch (error) {
-    if (error === 'cancel') {
+    if (!confirmFormRef.value) return
+    if (!currentCheckoutId.value) {
+      ElMessage.error('未找到退单记录')
       return
     }
-    console.error('批量批准失败:', error)
-    ElMessage.error('批量批准失败')
-  }
-}
 
-// 批量拒绝
-const handleBatchReject = async () => {
-  try {
-    const { value: reason } = await ElMessageBox.prompt(
-      `请输入拒绝退单的原因（共 ${selectedRows.value.length} 条申请）`,
-      '批量拒绝确认',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputType: 'textarea',
-        inputValidator: (value) => {
-          if (!value || value.trim().length < 5) {
-            return '拒绝原因至少需要5个字符'
-          }
-          return true
-        }
-      }
-    )
+    await confirmFormRef.value.validate()
+    confirmSubmitting.value = true
 
-    // 模拟批量处理延迟
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    await confirmCheckout(currentCheckoutId.value, { ...confirmForm })
+    ElMessage.success('退单确认成功')
+    handleConfirmDialogClose()
 
-    ElMessage.success('批量拒绝成功')
-    selectedRows.value = []
     fetchCheckoutList()
   } catch (error) {
-    if (error === 'cancel') {
-      return
+    if (error !== false) {
+      console.error('确认退单失败:', error)
+      ElMessage.error('确认退单失败')
     }
-    console.error('批量拒绝失败:', error)
-    ElMessage.error('批量拒绝失败')
-  }
-}
-
-// 提交处理
-const handleSubmitProcess = async () => {
-  try {
-    await processFormRef.value.validate()
-
-    processing.value = true
-
-    // 模拟提交延迟
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    // 这里会调用真实的API
-    // await processCancelConfirmation(processForm)
-
-    const actionText = processAction.value === 'approve' ? '批准' : '拒绝'
-    ElMessage.success(`退单申请${actionText}成功`)
-    processVisible.value = false
-    detailVisible.value = false
-
-    // 刷新列表
-    fetchCheckoutList()
-  } catch (error) {
-    if (error === false) {
-      // 表单验证失败
-      return
-    }
-    console.error('提交处理失败:', error)
-    ElMessage.error('提交处理失败')
   } finally {
-    processing.value = false
+    confirmSubmitting.value = false
   }
-}
-
-// 关闭处理弹窗
-const handleProcessClose = () => {
-  processVisible.value = false
-  processFormRef.value?.resetFields()
-}
-
-// 工具函数
-const maskIdCard = (idCard: string) => {
-  if (!idCard || idCard.length < 8) return idCard
-  return idCard.slice(0, 3) + '********' + idCard.slice(-4)
-}
-
-const maskPhone = (phone: string) => {
-  if (!phone || phone.length < 7) return phone
-  return phone.slice(0, 3) + '****' + phone.slice(-4)
 }
 
 const getStatusTagType = (status: number) => {
@@ -548,11 +449,6 @@ const getApplicationTypeText = (type: number) => {
   }
 }
 
-const calculateRefundAmount = (detail: CheckoutRecord) => {
-  // 简单的退款金额计算逻辑，实际项目中可能更复杂
-  return 0 // 根据实际业务逻辑计算
-}
-
 // 页面加载时获取数据
 onMounted(() => {
   fetchCheckoutList()
@@ -560,15 +456,15 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-:deep(.el-form-item) {
-  margin-bottom: 0;
-}
 :deep(.el-card__body) {
   padding: 19px;
 }
 :deep(.el-card__header) {
   border-bottom: 0;
   padding-bottom: 0;
+}
+.filter-form {
+    margin-bottom: 12px;
 }
 .table-card {
   border-radius: 12px;

@@ -261,16 +261,18 @@ const remark = ref('')
 
 // 监听弹窗显示状态
 watch(() => props.modelValue, (newVal) => {
-  dialogVisible.value = newVal
-  if (newVal && props.selectedPerson) {
-    initializeData()
-  }
+//   dialogVisible.value = newVal
+// console.log("props.selectedPerson:", props.selectedPerson)
+//   if (newVal && props.selectedPerson) {
+//     initializeData()
+//   }
 })
 
 // 监听弹窗关闭
-watch(dialogVisible, (newVal) => {
-  emit('update:modelValue', newVal)
-})
+// watch(dialogVisible, (newVal) => {
+//     console.log("aa")
+//   emit('update:modelValue', newVal)
+// })
 
 // 初始化数据
 const initializeData = async () => {
@@ -291,6 +293,7 @@ const initializeData = async () => {
 // 加载楼层列表
 const loadFloors = async () => {
   if (!props.selectedPerson) return
+
 
   loadingFloors.value = true
   try {
