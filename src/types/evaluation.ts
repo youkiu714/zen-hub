@@ -33,7 +33,7 @@ export interface EvaluationForm {
 export interface RatingOption {
   value: number
   label: string
-  icon: any
+  icon: string // 使用emoji字符串而不是组件
   color: string
 }
 
