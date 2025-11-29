@@ -8,7 +8,7 @@ export interface CheckinTab {
 export const CHECKIN_TABS: CheckinTab[] = [
   { key: 'pending', label: '待入住' },
   { key: 'checked-in', label: '已入住' },
-  { key: 'checked-out', label: '已退住' }
+  // { key: 'checked-out', label: '已退住' }
 ]
 
 export const SEARCH_PLACEHOLDER_MAP: Record<CheckinTabKey, string> = {

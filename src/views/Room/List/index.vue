@@ -32,6 +32,7 @@
         stripe
         style="width: 100%"
         :row-class-name="tableRowClassName"
+        max-height="calc(100vh - 360px)"
         fit 
       >
         <!-- 未分配床位状态的列 -->
@@ -777,8 +778,8 @@ onMounted(() => {
 <style scoped>
 .room-management-container {
   background-color: #FFF8E7;
-  min-height: 100vh;
-  padding: 20px 40px;
+  /* min-height: 100vh; */
+  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -865,7 +866,7 @@ onMounted(() => {
 
 .table-container {
   background: white;
-  padding: 20px;
+  padding: 10px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -920,9 +921,22 @@ onMounted(() => {
   color: #5D4037;
 }
 
+.room-table-row {
+  max-height: calc(100vh - 480px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 和 Edge */
+}
+/* 隐藏表格的 Webkit 滚动条 */
+.room-table-row::-webkit-scrollbar {
+  display: none;
+}
+
 :deep(.el-table .room-table-row:hover) {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
+
 }
 
 .pagination {
@@ -951,5 +965,28 @@ onMounted(() => {
   /* IE 和 Edge */
 }
 
+/* 表格内容区样式控制 */
+:deep(.el-table__inner-wrapper) {
+  /* 使表格内部的包裹器占据所有可用高度 */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
+/* 隐藏表格内容区的滚动条 */
+:deep(.el-table__body-wrapper) {
+  overflow-y: scroll !important; /* 确保内容区可以滚动 */
+  overflow-x: hidden; /* 隐藏水平滚动条 */
+  flex-grow: 1; /* 占据剩余高度 */
+  /* 隐藏 Webkit 滚动条 (Chrome, Safari, Edge) */
+  &::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none;
+  }
+  /* 隐藏 IE 和 Edge */
+  -ms-overflow-style: none;
+  /* 隐藏 Firefox 滚动条 */
+  scrollbar-width: none;
+}
 </style>

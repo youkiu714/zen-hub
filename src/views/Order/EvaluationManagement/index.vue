@@ -38,7 +38,7 @@
           <div class="search-box">
             <el-input
               v-model="searchForm.keyword"
-              placeholder="搜索挂单人姓名或身份证号"
+              placeholder="搜索姓名、证件号或申请编号"
               clearable
               @input="handleSearch"
             >
@@ -47,33 +47,6 @@
               </template>
             </el-input>
           </div>
-
-          <el-select
-            v-model="searchForm.type"
-            placeholder="全部挂单类型"
-            clearable
-            @change="handleSearch"
-            style="width: 150px"
-          >
-            <el-option label="短住" value="short" />
-            <el-option label="直通车" value="express" />
-            <el-option label="僧亲" value="monk" />
-            <el-option label="团队挂单" value="group" />
-            <el-option label="特殊客人" value="special" />
-          </el-select>
-
-          <el-select
-            v-model="searchForm.dateRange"
-            placeholder="全部退单日期"
-            clearable
-            @change="handleSearch"
-            style="width: 150px"
-          >
-            <el-option label="今天" value="today" />
-            <el-option label="本周" value="week" />
-            <el-option label="本月" value="month" />
-            <el-option label="本季度" value="quarter" />
-          </el-select>
 
           <el-button type="primary" @click="handleExport">
             <el-icon><Download /></el-icon>
@@ -92,34 +65,44 @@
         <el-table-column label="挂单人" min-width="120">
           <template #default="{ row }">
             <div class="person-info">
-              <el-avatar :size="32" :src="row.avatar" />
-              <span class="person-name">{{ row.name }}</span>
+              <el-avatar :size="32">
+                {{ row.applicantName?.charAt(0) || '用' }}
+              </el-avatar>
+              <span class="person-name">{{ row.applicantName }}</span>
             </div>
           </template>
         </el-table-column>
 
         <el-table-column prop="idCardMasked" label="身份证号" width="150">
           <template #default="{ row }">
-            {{ maskIdCard(row.idCardMasked || row.idCard) }}
+            {{ row.idCardMasked || '-' }}
           </template>
         </el-table-column>
 
-        <el-table-column prop="departmentName" label="部组" width="100">
+        <el-table-column prop="applicationTypeName" label="挂单类型" width="100">
           <template #default="{ row }">
-            {{ row.departmentName || getDepartmentName(row.departmentCode) }}
+            {{ row.applicationTypeName || getApplicationTypeLabel(row.applicationType) }}
           </template>
         </el-table-column>
 
         <el-table-column prop="checkinDate" label="入住日期" width="120" />
 
-        <el-table-column prop="checkoutDate" label="退单日期" width="120" />
+        <el-table-column prop="actualCheckoutDate" label="退单日期" width="120">
+          <template #default="{ row }">
+            {{ row.actualCheckoutDate || row.plannedCheckoutDate || '-' }}
+          </template>
+        </el-table-column>
 
-        <el-table-column prop="stayDays" label="入住天数" width="100" />
+        <el-table-column prop="mobileMasked" label="手机号" width="120">
+          <template #default="{ row }">
+            {{ row.mobileMasked || '-' }}
+          </template>
+        </el-table-column>
 
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)" size="small">
-              {{ getStatusLabel(row.status) }}
+            <el-tag :type="getEvaluationStatusType(row.status)" size="small">
+              {{ getEvaluationStatusLabel(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -135,7 +118,7 @@
               查看
             </el-button>
             <el-button
-              v-if="row.status === 30"
+              v-if="row.status === 10"
               link
               type="info"
               size="small"
@@ -144,7 +127,7 @@
               评价
             </el-button>
             <el-button
-              v-else-if="row.status === 40"
+              v-else-if="row.status === 20"
               link
               type="warning"
               size="small"
@@ -203,13 +186,12 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Download, User, Star, StarFilled, Menu, Message } from '@element-plus/icons-vue'
+import { Search, Download } from '@element-plus/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import EvaluationStatusFilter from './components/EvaluationStatusFilter.vue'
 import EvaluationDialog from './components/EvaluationDialog.vue'
 import ExportDialog from './components/ExportDialog.vue'
 import { EvaluationStatus } from '@/types/review'
-import { departmentOptions } from '@/utils/constants'
 import {
   EvaluationRecord,
   EvaluationForm,
@@ -222,13 +204,11 @@ import {
 } from '@/types/evaluation'
 
 import {
-  getPendingRecords,
-  exportPendingRecords,
-  type PendingRecordsQuery,
-  type LodgingRecordVO,
-} from '@/api/pending-records'
-import {
   submitEvaluation,
+  getEvaluations,
+  type EvaluationsQuery,
+  type EvaluationListItemVO,
+  type EvaluationsResponse,
   type EvaluationSubmitRequest,
   type ResultBoolean,
 } from '@/api/review'
@@ -244,9 +224,7 @@ const filterStatus = ref(EvaluationStatus.PENDING)
 
 // 搜索表单
 const searchForm = reactive({
-  keyword: '',
-  type: '',
-  dateRange: ''
+  keyword: ''
 })
 
 // 分页
@@ -255,8 +233,8 @@ const pagination = reactive({
   pageSize: 10
 })
 
-// 表格数据 - 使用挂单记录的真实数据
-const tableData = ref<LodgingRecordVO[]>([])
+// 表格数据 - 使用评价列表的真实数据
+const tableData = ref<EvaluationListItemVO[]>([])
 const total = ref(0)
 
 // 评价弹窗
@@ -268,7 +246,7 @@ const evaluationDialog = reactive({
 })
 
 // 当前查看的档案 - 兼容新旧数据结构
-const currentProfile = ref<EvaluationRecord & Partial<LodgingRecordVO>>({} as EvaluationRecord & Partial<LodgingRecordVO>)
+const currentProfile = ref<EvaluationRecord & Partial<EvaluationListItemVO>>({} as EvaluationRecord & Partial<EvaluationListItemVO>)
 
 // 评价表单
 const evaluationForm = reactive<EvaluationForm>({
@@ -277,56 +255,56 @@ const evaluationForm = reactive<EvaluationForm>({
   overall: ''
 })
 
-// 评分项配置
+// 评分项配置 - 使用表情图标
 const ratingItems = ref([
   {
     label: '纪律遵守情况',
     options: [
-      { value: 1, label: '差', icon: Message, color: '#f56565' },
-      { value: 2, label: '较差', icon: Menu, color: '#ed8936' },
-      { value: 3, label: '一般', icon: Menu, color: '#ecc94b' },
-      { value: 4, label: '良好', icon: StarFilled, color: '#48bb78' },
-      { value: 5, label: '优秀', icon: StarFilled, color: '#38a169' }
+      { value: 1, label: '差', icon: '👎', color: '#f56565' },
+      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
+      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
+      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
+      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
     ]
   },
   {
     label: '礼仪规范情况',
     options: [
-      { value: 1, label: '差', icon: Message, color: '#f56565' },
-      { value: 2, label: '较差', icon: Menu, color: '#ed8936' },
-      { value: 3, label: '一般', icon: Menu, color: '#ecc94b' },
-      { value: 4, label: '良好', icon: StarFilled, color: '#48bb78' },
-      { value: 5, label: '优秀', icon: StarFilled, color: '#38a169' }
+      { value: 1, label: '差', icon: '👎', color: '#f56565' },
+      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
+      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
+      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
+      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
     ]
   },
   {
     label: '集体活动参与',
     options: [
-      { value: 1, label: '差', icon: Message, color: '#f56565' },
-      { value: 2, label: '较差', icon: Menu, color: '#ed8936' },
-      { value: 3, label: '一般', icon: Menu, color: '#ecc94b' },
-      { value: 4, label: '良好', icon: StarFilled, color: '#48bb78' },
-      { value: 5, label: '优秀', icon: StarFilled, color: '#38a169' }
+      { value: 1, label: '差', icon: '👎', color: '#f56565' },
+      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
+      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
+      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
+      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
     ]
   },
   {
     label: '环境维护与卫生',
     options: [
-      { value: 1, label: '差', icon: Message, color: '#f56565' },
-      { value: 2, label: '较差', icon: Menu, color: '#ed8936' },
-      { value: 3, label: '一般', icon: Menu, color: '#ecc94b' },
-      { value: 4, label: '良好', icon: StarFilled, color: '#48bb78' },
-      { value: 5, label: '优秀', icon: StarFilled, color: '#38a169' }
+      { value: 1, label: '差', icon: '👎', color: '#f56565' },
+      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
+      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
+      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
+      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
     ]
   },
   {
     label: '与人相处情况',
     options: [
-      { value: 1, label: '差', icon: Message, color: '#f56565' },
-      { value: 2, label: '较差', icon: Menu, color: '#ed8936' },
-      { value: 3, label: '一般', icon: Menu, color: '#ecc94b' },
-      { value: 4, label: '良好', icon: StarFilled, color: '#48bb78' },
-      { value: 5, label: '优秀', icon: StarFilled, color: '#38a169' }
+      { value: 1, label: '差', icon: '👎', color: '#f56565' },
+      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
+      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
+      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
+      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
     ]
   }
 ])
@@ -356,88 +334,76 @@ const exportForm = reactive({
 const filteredTableData = computed(() => {
   let data = tableData.value
 
-  // // 根据当前选择的tab状态筛选
-  // if (activeTab.value === 'pending') {
-  //   // 待评价：入住中的记录 (status = 30)
-  //   data = data.filter(item => item.status === 30)
-  // } else if (activeTab.value === 'completed') {
-  //   // 已评价：已退住的记录 (status = 40)
-  //   data = data.filter(item => item.status === 40)
-  // }
-
-  // 关键词搜索
+  // 关键词搜索 - 现在由后端处理，前端只做显示
   if (searchForm.keyword) {
     data = data.filter(item =>
-      item.name?.includes(searchForm.keyword) ||
-      item.idCard?.includes(searchForm.keyword) ||
-      item.mobile?.includes(searchForm.keyword)
+      item.applicantName?.includes(searchForm.keyword) ||
+      item.idCardMasked?.includes(searchForm.keyword) ||
+      item.mobileMasked?.includes(searchForm.keyword) ||
+      item.applicationId?.toString().includes(searchForm.keyword)
     )
   }
 
   return data
 })
 
-const totalItems = computed(() => filteredTableData.value.length)
-const startIndex = computed(() => (pagination.currentPage - 1) * pagination.pageSize + 1)
-const endIndex = computed(() => Math.min(pagination.currentPage * pagination.pageSize, totalItems.value))
 
 const pendingCount = computed(() => {
-  // 基于当前筛选状态计算待评价数量
+  // 计算待评价数量
   const filteredData = tableData.value.filter(item => {
-    if (filterStatus.value === EvaluationStatus.PENDING) {
-      return item.status === 30 // 入住中
-    } else if (filterStatus.value === EvaluationStatus.COMPLETED) {
-      return item.status === 40 // 已退住
-    }
-    return false
+    return item.status === 10 // 待评价
   })
   return filteredData.length
 })
 
 const completedCount = computed(() => {
-  // 基于当前筛选状态计算已评价数量
+  // 计算已评价数量
   const filteredData = tableData.value.filter(item => {
-    if (filterStatus.value === EvaluationStatus.COMPLETED) {
-      return item.status === 40 // 已退住
-    }
-    return false
+    return item.status === 20 // 已评价
   })
   return filteredData.length
 })
 
-// 获取挂单记录列表 - 使用真实数据
-const fetchPendingRecords = async () => {
+// 获取评价列表 - 使用新的评价接口
+const fetchEvaluationRecords = async () => {
   try {
     loading.value = true
-    const params: PendingRecordsQuery = {
+    const params: EvaluationsQuery = {
       pageNo: pagination.currentPage,
       pageSize: pagination.pageSize
     }
 
-    // 根据评价状态筛选对应的入住状态
+    // 根据评价状态筛选
     if (filterStatus.value === EvaluationStatus.PENDING) {
-      // 待评价：入住中 (status = 30)
-      params.status = 30
+      // 待评价
+      params.status = 10
     } else if (filterStatus.value === EvaluationStatus.COMPLETED) {
-      // 已评价：已退住 (status = 40)
-      params.status = 40
+      // 已评价
+      params.status = 20
     }
 
-    const response = await getPendingRecords(params)
-    console.log('评价管理页面-挂单记录查询响应:', response)
-
-    if (response && response.records) {
-      tableData.value = response.records || []
-      total.value = response.total || 0
-    } else {
-      tableData.value = []
-      total.value = 0
+    // 添加关键词搜索
+    if (searchForm.keyword) {
+      params.keyword = searchForm.keyword
     }
+
+    const response: EvaluationsResponse = await getEvaluations(params)
+    console.log('评价管理页面-评价列表查询响应:', response)
+    tableData.value = response.records || []
+
+    // if (response && response.code === 0 && response.data) {
+    //   tableData.value = response.data.records || []
+    //   total.value = response.data.total || 0
+    // } else {
+    //   tableData.value = []
+    //   total.value = 0
+    //   ElMessage.error(response.message || '获取评价列表失败')
+    // }
     console.log(tableData.value);
-    
+
   } catch (error) {
-    console.error('获取挂单记录失败:', error)
-    ElMessage.error('获取挂单记录失败')
+    console.error('获取评价列表失败:', error)
+    ElMessage.error('获取评价列表失败')
     tableData.value = []
     total.value = 0
   } finally {
@@ -448,7 +414,7 @@ const fetchPendingRecords = async () => {
 // ====== 筛选状态 切换 ======
 const statusChange = () => {
   pagination.currentPage = 1; // 切换 Tab 时重置页码
-  fetchPendingRecords(); // 重新加载数据
+  fetchEvaluationRecords(); // 重新加载数据
 };
 
 
@@ -460,64 +426,64 @@ const handleTabChange = (tabName: string) => {
 
 const handleSearch = () => {
   pagination.currentPage = 1
+  fetchEvaluationRecords()
 }
 
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size
   pagination.currentPage = 1
-  fetchPendingRecords()
+  fetchEvaluationRecords()
 }
 
 const handleCurrentChange = (page: number) => {
   pagination.currentPage = page
-  fetchPendingRecords()
+  fetchEvaluationRecords()
 }
 
 // 查看
-const handleViewProfile = (row: LodgingRecordVO) => {
+const handleViewProfile = (row: EvaluationListItemVO) => {
   currentProfile.value = {
-    // id: row.personId?.toString() || row.applicationId?.toString() || '',
-    id: row.applicationId?.toString(),
-    name: row.name || '',
-    avatar: row.avatar || '',
-    idCard: row.idCardMasked || row.idCard || '',
-    type: row.applicationType || 'short',
+    // id: row.applicationId?.toString() || row.evaluationId?.toString() || '',
+    id: row.evaluationId?.toString() || '',
+    name: row.applicantName || '',
+    avatar: '', // 新接口没有头像字段
+    idCard: row.idCardMasked || '',
+    type: getApplicationTypeLabel(row.applicationType),
     checkInDate: row.checkinDate || '',
-    checkOutDate: row.checkoutDate || '',
-    status: row.status === 30 ? 'pending' : 'completed',
-    gender: row.gender || '',
-    age: row.age || '',
-    nation: row.nation || '',
-    phone: row.mobileMasked || row.mobile || '',
-    duration: row.stayDays ? `${row.stayDays}天` : '',
-    purpose: row.purpose || '禅修'
+    checkOutDate: row.actualCheckoutDate || row.plannedCheckoutDate || '',
+    status: row.status === 10 ? 'pending' : 'completed',
+    gender: row.gender ? (row.gender === 1 ? '男' : '女') : '',
+    age: '', // 新接口没有年龄字段
+    nation: '', // 新接口没有民族字段
+    phone: row.mobileMasked || '',
+    duration: '', // 新接口没有住宿天数字段
+    purpose: '禅修' // 默认值
   }
-  evaluationDialog.title = `挂单人详情 - ${row.name}`
+  evaluationDialog.title = `挂单人详情 - ${row.applicantName}`
   evaluationDialog.visible = true
   evaluationDialog.showForm = false
   evaluationDialog.showEvaluation = false
 }
 
 // 评价
-const handleStartEvaluation = (row: LodgingRecordVO) => {
+const handleStartEvaluation = (row: EvaluationListItemVO) => {
   currentProfile.value = {
-    // id: row.personId?.toString() || row.applicationId?.toString() || '',
-    id: row.applicationId?.toString(),
-    name: row.name || '',
-    avatar: row.avatar || '',
-    idCard: row.idCardMasked || row.idCard || '',
-    type: row.applicationType || 'short',
+    id: row.applicationId?.toString() || row.evaluationId?.toString() || '',
+    name: row.applicantName || '',
+    avatar: '', // 新接口没有头像字段
+    idCard: row.idCardMasked || '',
+    type: getApplicationTypeLabel(row.applicationType),
     checkInDate: row.checkinDate || '',
-    checkOutDate: row.checkoutDate || '',
-    status: row.status === 30 ? 'pending' : 'completed',
-    gender: row.gender || '',
-    age: row.age || '',
-    nation: row.nation || '',
-    phone: row.mobileMasked || row.mobile || '',
-    duration: row.stayDays ? `${row.stayDays}天` : '',
-    purpose: row.purpose || '禅修'
+    checkOutDate: row.actualCheckoutDate || row.plannedCheckoutDate || '',
+    status: row.status === 10 ? 'pending' : 'completed',
+    gender: row.gender ? (row.gender === 1 ? '男' : '女') : '',
+    age: '', // 新接口没有年龄字段
+    nation: '', // 新接口没有民族字段
+    phone: row.mobileMasked || '',
+    duration: '', // 新接口没有住宿天数字段
+    purpose: '禅修' // 默认值
   }
-  evaluationDialog.title = `挂单人详情 - ${row.name}`
+  evaluationDialog.title = `挂单人详情 - ${row.applicantName}`
   evaluationDialog.visible = true
   evaluationDialog.showForm = true
   evaluationDialog.showEvaluation = false
@@ -525,25 +491,24 @@ const handleStartEvaluation = (row: LodgingRecordVO) => {
 }
 
 // 查看评价
-const handleViewEvaluation = (row: LodgingRecordVO) => {
+const handleViewEvaluation = (row: EvaluationListItemVO) => {
   currentProfile.value = {
-    // id: row.personId?.toString() || row.applicationId?.toString() || '',
-    id: row.applicationId?.toString(),
-    name: row.name || '',
-    avatar: row.avatar || '',
-    idCard: row.idCardMasked || row.idCard || '',
-    type: row.applicationType || 'short',
+    id: row.applicationId?.toString() || row.evaluationId?.toString() || '',
+    name: row.applicantName || '',
+    avatar: '', // 新接口没有头像字段
+    idCard: row.idCardMasked || '',
+    type: getApplicationTypeLabel(row.applicationType),
     checkInDate: row.checkinDate || '',
-    checkOutDate: row.checkoutDate || '',
-    status: row.status === 30 ? 'pending' : 'completed',
-    gender: row.gender || '',
-    age: row.age || '',
-    nation: row.nation || '',
-    phone: row.mobileMasked || row.mobile || '',
-    duration: row.stayDays ? `${row.stayDays}天` : '',
-    purpose: row.purpose || '禅修'
+    checkOutDate: row.actualCheckoutDate || row.plannedCheckoutDate || '',
+    status: row.status === 10 ? 'pending' : 'completed',
+    gender: row.gender ? (row.gender === 1 ? '男' : '女') : '',
+    age: '', // 新接口没有年龄字段
+    nation: '', // 新接口没有民族字段
+    phone: row.mobileMasked || '',
+    duration: '', // 新接口没有住宿天数字段
+    purpose: '禅修' // 默认值
   }
-  evaluationDialog.title = `挂单人评价详情 - ${row.name}`
+  evaluationDialog.title = `挂单人评价详情 - ${row.applicantName}`
   evaluationDialog.visible = true
   evaluationDialog.showForm = false
   evaluationDialog.showEvaluation = true
@@ -681,22 +646,10 @@ const getOverallLabel = (overall: string) => {
 }
 
 
-// 工具函数 - 从 PendingRecords 页面复制
+// 工具函数
 const maskIdCard = (idCard: string) => {
   if (!idCard || idCard.length < 8) return idCard
   return idCard.slice(0, 3) + '********' + idCard.slice(-4)
-}
-
-const maskPhone = (phone: string) => {
-  if (!phone || phone.length < 7) return phone
-  return phone.slice(0, 3) + '****' + phone.slice(-4)
-}
-
-// 根据部组编码获取部组名称
-const getDepartmentName = (departmentCode?: string) => {
-  if (!departmentCode) return '-'
-  const dept = departmentOptions.find(item => item.value === departmentCode)
-  return dept ? dept.label : departmentCode
 }
 
 // 获取状态标签类型
@@ -739,6 +692,48 @@ const getStatusLabel = (status?: number): string => {
   }
 }
 
+// 获取评价状态标签类型
+const getEvaluationStatusType = (status?: number): string => {
+  switch (status) {
+    case 10: // 待评价
+      return 'warning'
+    case 20: // 已评价
+      return 'success'
+    default:
+      return 'info'
+  }
+}
+
+// 获取评价状态标签文本
+const getEvaluationStatusLabel = (status?: number): string => {
+  switch (status) {
+    case 10:
+      return '待评价'
+    case 20:
+      return '已评价'
+    default:
+      return '未知'
+  }
+}
+
+// 根据挂单类型编码获取标签
+const getApplicationTypeLabel = (type?: number): string => {
+  switch (type) {
+    case 1:
+      return '短住'
+    case 2:
+      return '直通车'
+    case 3:
+      return '僧亲'
+    case 4:
+      return '团队挂单'
+    case 5:
+      return '特殊客人'
+    default:
+      return '未知类型'
+  }
+}
+
 // 将综合评价字符串转换为数值（根据API文档：1优秀 2良好 3一般 4较差 5差）
 const getOverallGradeValue = (overall: string): number => {
   switch (overall) {
@@ -760,7 +755,7 @@ const getOverallGradeValue = (overall: string): number => {
 // 生命周期
 onMounted(() => {
   // 初始化数据
-  fetchPendingRecords()
+  fetchEvaluationRecords()
 })
 </script>
 
