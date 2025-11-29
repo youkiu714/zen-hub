@@ -54,12 +54,6 @@
           </el-icon>
           筛选
         </el-button>
-        <el-button @click="handleExport">
-          <el-icon>
-            <Download />
-          </el-icon>
-          导出
-        </el-button>
       </div>
 
       <el-table v-loading="loading" :data="tableData" stripe style="width: 100%" @sort-change="handleSortChange">
@@ -89,9 +83,6 @@
             <el-button type="primary" link @click="handleView(row)">
               查看
             </el-button>
-            <el-button type="success" link @click="handleViewHistory(row)">
-              历史记录
-            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -106,17 +97,6 @@
 
     <!-- 查看详情弹窗 -->
     <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
-
-    <!-- 历史记录弹窗 -->
-    <el-dialog v-model="historyVisible" title="挂单历史记录" width="800px" :before-close="handleCloseHistory">
-      <div v-if="currentRow" class="history-content">
-        <p>{{ currentRow.name }} 的历史记录功能正在开发中...</p>
-        <p>挂单总次数: {{ currentRow.totalCount }}</p>
-      </div>
-      <template #footer>
-        <el-button @click="historyVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -212,47 +192,6 @@ const handleFilter = () => {
   fetchPendingRecords()
 }
 
-// 导出处理
-const handleExport = async () => {
-  try {
-    const params: PendingRecordsQuery = {}
-
-    if (queryForm.keyword) {
-      params.keyword = queryForm.keyword
-    }
-
-    if (queryForm.departmentCode) {
-      params.departmentCode = queryForm.departmentCode
-    }
-
-    if (queryForm.startDate) {
-      params.startDate = queryForm.startDate
-    }
-
-    if (queryForm.endDate) {
-      params.endDate = queryForm.endDate
-    }
-
-    const response = await exportPendingRecords(params)
-
-    // 创建下载链接
-    const blob = new Blob([response], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `挂单记录_${new Date().toISOString().split('T')[0]}.xlsx`
-    a.click()
-    window.URL.revokeObjectURL(url)
-
-    ElMessage.success('导出成功')
-  } catch (error) {
-    console.error('导出失败:', error)
-    ElMessage.error('导出失败')
-  }
-}
-
 // 查看详情
 const handleView = (row: LodgingRecordVO) => {
   currentAppId.value = row.applicationId || row.personId || 0;
@@ -261,20 +200,6 @@ const handleView = (row: LodgingRecordVO) => {
 
 const onDetailClosed = () => {
   console.log('详情窗口已关闭')
-}
-
-// 查看历史记录
-const handleViewHistory = async (row: LodgingRecordVO) => {
-  try {
-    currentRow.value = row
-    ElMessage.info('历史记录功能开发中')
-    // TODO: 实现历史记录查询接口
-    // currentHistory.value = await getPendingHistory(row.personId)
-    // historyVisible.value = true
-  } catch (error) {
-    console.error('获取历史记录失败:', error)
-    ElMessage.error('获取历史记录失败')
-  }
 }
 
 // 分页处理
@@ -367,8 +292,6 @@ onMounted(() => {
 .pending-records {
   padding: 20px;
 
-  
-
   .filter-card {
     margin-bottom: 20px;
   }
@@ -393,21 +316,6 @@ onMounted(() => {
       }
     }
   }
-
-  .detail-content {
-    :deep(.el-descriptions) {
-      .el-descriptions__body {
-        .el-descriptions__table {
-          .el-descriptions__cell {
-            &.is-bordered-label {
-              background-color: #f8f9fa;
-            }
-          }
-        }
-      }
-    }
-  }
-
   .history-content {
     text-align: center;
     padding: 40px 20px;
