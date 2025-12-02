@@ -10,6 +10,7 @@ declare module 'vue' {
     ApplicationDetailDialog: typeof import('./src/components/ApplicationDetailDialog.vue')['default']
     AssignBedModal: typeof import('./src/components/AssignBed/AssignBedModal.vue')['default']
     Breadcrumb: typeof import('./src/components/Layout/Breadcrumb.vue')['default']
+    CheckInModal: typeof import('./src/components/CheckInModal.vue')['default']
     CloudCover: typeof import('./src/components/CloudCover.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
