@@ -166,6 +166,14 @@ const menuList = ref([
           icon: 'List'
         }
       },
+    {
+        path: '/accommodation-management/room-bed-management-two',
+        name: 'RoomBedManagement2',
+        meta: {
+          title: '房间及床位管理2',
+          icon: 'List'
+        }
+      },
       {
         path: '/accommodation-management/room-bed-edit',
         name: 'RoomBedEdit',

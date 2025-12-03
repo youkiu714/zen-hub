@@ -102,3 +102,14 @@ export const batchCreateBeds = (
     data,
   });
 };
+
+export const batchBeds = (
+  params: any
+): Promise<ApiResponse<number>> => {
+  
+  return request({
+    url: '/assignments/allocate/batch',
+    method: 'POST',
+    data: params,
+  });
+};

@@ -3,11 +3,36 @@
   font-weight: 600;
 }
 .el-table td.el-table__cell {
-    color: #1a1c1f;
+  color: #1a1c1f;
 }
 
 .flex-space-between {
-    display: flex;
-    justify-content:space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 颜色类 */
+.g-purple {
+  background: #f9f0ff;
+  color: #531dab;
+  font-weight: 500;
+}
+
+.g-green {
+  background: #f6ffed;
+  color: #389e0d;
+  font-weight: 500;
+}
+
+.g-blue {
+  background: #e6f7ff;
+  color: #096dd9;
+  font-weight: 500;
+}
+
+.g-gray {
+  background: #f5f5f5;
+  color: #8c8c8c;
+  font-weight: 500;
 }

@@ -157,12 +157,6 @@
           <el-button @click="handleClose">关闭</el-button>
         </div>
       </div>
-      <div class="dialog-footer-bottom">
-        <el-button type="primary" @click="$emit('download-profile')">
-          <el-icon><Download /></el-icon>
-          下载挂单记录
-        </el-button>
-      </div>
     </template>
   </el-dialog>
 </template>
@@ -170,12 +164,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { User, Star, StarFilled, Menu, Message, Download } from '@element-plus/icons-vue'
-// 使用 Element Plus 的表情图标替代 FontAwesome
-const Frown = '👎' // 差
-const Meh = '👎🏻' // 较差
-const MehRollingEyes = '😑' // 一般
-const Smile = '😊' // 良好
-const GrinStars = '🤩' // 优秀
 import type {
   EvaluationRecord as Profile,
   EvaluationForm,

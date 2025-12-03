@@ -70,6 +70,13 @@ export const DepartmentMap: Record<string, string> = {
   [DEPARTMENT.OTHER]: '其他'
 }
 
+export const DepartmentMapColor: Record<string, { name: string, className: string }> = {
+  [DEPARTMENT.PROJECT]: { name: '项目部', className: 'g-green' },
+  [DEPARTMENT.READING]: { name: '读书会', className: 'g-blue' },
+  [DEPARTMENT.COMPILATION]: { name: '汇编', className: 'g-purple' },
+  [DEPARTMENT.OTHER]: { name: '其他', className: 'g-gray' },
+}
+
 export const departmentOptions = [
   {
     label: '项目部',

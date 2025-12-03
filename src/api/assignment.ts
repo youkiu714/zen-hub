@@ -22,12 +22,6 @@ import type {
 /**
  * 获取待分配人员列表
  */
-// export function getPendingAssignments(params: AssignmentRequest) {
-//   return request.get<AssignmentResponse>('/assignments/pending', {
-//     params,
-//   });
-// }
-
 export const getPendingAssignments = (params: AssignmentRequest): Promise<AssignmentResponse> => {
   return request({
     url: '/assignments/pending',

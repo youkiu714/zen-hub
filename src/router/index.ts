@@ -163,6 +163,15 @@ export const asyncRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: '/accommodation-management/room-bed-management2',
+        name: 'RoomBedManagement2',
+        component: () => import('@/views/RoomManagement/index.vue'),
+        meta: {
+          title: '房间及床位管理2',
+          icon: 'List'
+        }
+      },
+      {
         path: '/accommodation-management/room-bed-edit',
         name: 'RoomBedEdit',
         component: () => import('@/views/Room/List/index.vue'),
@@ -188,7 +197,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
           title: '人员管理',
           icon: 'List'
         }
-      },
+      }
     ]
   },
   {

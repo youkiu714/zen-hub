@@ -89,7 +89,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="days" label="挂单时长（天）" min-width="130" />
-        <el-table-column label="操作" min-width="480" fixed="right">
+        <!-- <el-table-column label="操作" min-width="480" fixed="right">
           <template #default="{ row }">
             <el-button @click="() => handleViewDetail(row.id)" link>
               <el-icon class="btn-icon"><View /></el-icon>
@@ -144,6 +144,83 @@
               @click="() => handleCheckoutApplication(row)"
               ><el-icon class="btn-icon"><EditPen /></el-icon>退单</el-button
             >
+          </template>
+        </el-table-column> -->
+
+        <el-table-column label="操作" width="180" fixed="right" align="left">
+          <template #default="{ row }">
+            <div class="operation-wrapper">
+              <el-button
+                v-if="
+                  row.status === ApplicationStatus.PENDING_REVIEW ||
+                  row.status === ApplicationStatus.WAITING_CHECKIN
+                "
+                link
+                class="action-link main-action"
+                @click="() => handleReview(row.id)"
+              >
+                审核
+              </el-button>
+
+              <el-button v-else link class="action-link" @click="() => handleViewDetail(row.id)">
+                查看
+              </el-button>
+
+              <el-divider direction="vertical" class="action-divider" />
+
+              <el-dropdown trigger="click" @command="(cmd) => handleMoreCommand(cmd, row)">
+                <span class="el-dropdown-link">
+                  更多 <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      v-if="
+                        row.status === ApplicationStatus.PENDING_REVIEW ||
+                        row.status === ApplicationStatus.WAITING_CHECKIN
+                      "
+                      command="view"
+                    >
+                      查看详情
+                    </el-dropdown-item>
+
+                    <el-dropdown-item
+                      v-if="row.status !== ApplicationStatus.CANCELED"
+                      command="edit"
+                      :icon="EditPen"
+                    >
+                      修改信息
+                    </el-dropdown-item>
+
+                    <el-dropdown-item
+                      v-if="row.status === ApplicationStatus.CHECKED_IN"
+                      command="renew"
+                    >
+                      续单申请
+                    </el-dropdown-item>
+
+                    <el-dropdown-item
+                      v-if="row.status === ApplicationStatus.CHECKED_IN"
+                      command="checkout"
+                    >
+                      退单办理
+                    </el-dropdown-item>
+
+                    <el-dropdown-item
+                      v-if="
+                        row.status === ApplicationStatus.PENDING_REVIEW ||
+                        row.status === ApplicationStatus.WAITING_CHECKIN
+                      "
+                      command="cancel"
+                      divided
+                      class="danger-item"
+                    >
+                      取消申请
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </template>
         </el-table-column>
 
@@ -308,6 +385,41 @@ const handleKeywordSearch = () => {
 onMounted(() => {
   loadApplications()
 })
+
+const handleCancelConfirm = (id: number) => {
+  ElMessageBox.confirm('确定要取消该挂单申请吗？取消后不可恢复。', '取消确认', {
+    confirmButtonText: '确认取消',
+    cancelButtonText: '暂不取消',
+    type: 'warning',
+    confirmButtonClass: 'el-button--danger'
+  })
+    .then(async () => {
+      await handleCancelApplication(id)
+    })
+    .catch(() => {
+      // 取消操作
+    })
+}
+
+const handleMoreCommand = (command: string, row: any) => {
+  switch (command) {
+    case 'view':
+      handleViewDetail(row.id)
+      break
+    case 'edit':
+      handleEditApplication(row)
+      break
+    case 'renew':
+      handleRenewalApplication(row)
+      break
+    case 'checkout':
+      handleCheckoutApplication(row)
+      break
+    case 'cancel':
+      handleCancelConfirm(row.id) // 调用新的确认方法
+      break
+  }
+}
 
 // 事件处理 - 添加节流控制
 const handleNewApplication = throttle(() => {
@@ -635,5 +747,63 @@ const handleEditSubmit = async (data: any, id: number) => {
 
 .status-tag {
   font-weight: 600;
+}
+.operation-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.action-link {
+  font-size: 14px;
+  padding: 0 4px;
+
+  // 默认查看颜色（灰色/中性色）
+  color: #606266;
+
+  &:hover {
+    color: #8b4513; // 悬停变为寺院主题色
+  }
+
+  // 主操作按钮（审核）高亮显示
+  &.main-action {
+    color: #8b4513; // 寺院风格的主题色（替换原来的亮蓝色）
+    font-weight: 600;
+
+    &:hover {
+      color: #6b370f;
+    }
+  }
+}
+
+.action-divider {
+  margin: 0 12px;
+  border-color: #dcdfe6;
+}
+
+.el-dropdown-link {
+  cursor: pointer;
+  color: #909399; // 弱化“更多”按钮的视觉干扰
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+
+  &:hover {
+    color: #8b4513;
+  }
+}
+
+// 下拉菜单中的危险选项样式
+:global(.danger-item) {
+  color: #f56c6c !important;
+  &:hover {
+    background-color: #fef0f0 !important;
+  }
+}
+
+// 优化表格标签样式，使其不那么刺眼
+.status-tag {
+  border: none;
+  font-weight: normal;
+  // 这里可以根据 tag 类型微调背景色透明度，保持清爽
 }
 </style>

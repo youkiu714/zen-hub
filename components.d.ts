@@ -63,6 +63,7 @@ declare module 'vue' {
     FilterTab: typeof import('./src/components/FilterTab.vue')['default']
     Header: typeof import('./src/components/Layout/Header.vue')['default']
     Layout: typeof import('./src/components/Layout/index.vue')['default']
+    MemberCard: typeof import('./src/components/MemberCard.vue')['default']
     PageHeader: typeof import('./src/components/PageHeader.vue')['default']
     ReviewPage: typeof import('./src/components/ReviewPage.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
@@ -71,6 +72,7 @@ declare module 'vue' {
     SidebarItem: typeof import('./src/components/Layout/SidebarItem.vue')['default']
     Starfield: typeof import('./src/components/Starfield.vue')['default']
     Tabs: typeof import('./src/components/Layout/Tabs.vue')['default']
+    VirtualList: typeof import('./src/components/VirtualList.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']
