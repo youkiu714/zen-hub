@@ -4,16 +4,15 @@
     :title="title"
     width="800"
     :before-close="handleClose"
-    class="evaluation-dialog"
+    class="evaluation-dialog jobs-style"
   >
     <div class="dialog-content">
-      <!-- 挂单人基本信息 -->
       <div class="profile-section">
         <h4 class="section-title">
           <el-icon><User /></el-icon>
           挂单人基本信息
         </h4>
-        <el-descriptions :column="2" border>
+        <el-descriptions :column="2" border class="jobs-descriptions">
           <el-descriptions-item label="姓名">{{ profile.name }}</el-descriptions-item>
           <el-descriptions-item label="性别">{{ profile.gender || '-' }}</el-descriptions-item>
           <el-descriptions-item label="年龄">{{ profile.age || '-' }}</el-descriptions-item>
@@ -31,7 +30,6 @@
         </el-descriptions>
       </div>
 
-      <!-- 评价表单 -->
       <div v-if="showForm" class="evaluation-form">
         <h4 class="section-title">
           <el-icon><Star /></el-icon>
@@ -39,7 +37,6 @@
         </h4>
 
         <el-form :model="form" label-width="140px" label-position="top">
-          <!-- 评分项 -->
           <div class="rating-sections">
             <div
               v-for="(item, index) in ratingItems"
@@ -48,34 +45,28 @@
             >
               <label class="rating-label">{{ index + 1 }}. {{ item.label }}</label>
               <div class="rating-options">
-                <div
-                  v-for="option in item.options"
-                  :key="option.value"
-                  class="rating-option"
-                  :class="{ active: form.ratings[index] === option.value }"
-                  @click="setRating(index, option.value)"
-                >
-                  <span class="rating-emoji" :style="{ color: option.color, fontSize: '24px' }">
-                    {{ option.icon }}
-                  </span>
-                  <span>{{ option.label }}</span>
-                </div>
+                <el-rate
+                  v-model="form.ratings[index]"
+                  :colors="['#ff6e6e', '#ffb948', '#fecb65', '#98e34c', '#52c41a']"
+                  show-score
+                  score-template="{value}分"
+                  :texts="['差', '较差', '一般', '良好', '优秀']"
+                  @change="(value) => setRating(index, value)"
+                />
               </div>
             </div>
           </div>
 
-          <!-- 评价意见 -->
           <el-form-item label="评价意见与建议" required>
             <el-input
               v-model="form.comments"
               type="textarea"
               :rows="4"
-              style="width: 80%" 
+              style="width: 100%"
               placeholder="请输入对挂单人在寺表现的具体评价和建议"
             />
           </el-form-item>
 
-          <!-- 综合评价 -->
           <el-form-item label="综合评价等级" required>
             <el-select
               v-model="form.overall"
@@ -92,42 +83,56 @@
         </el-form>
       </div>
 
-      <!-- 已评价内容展示 -->
       <div v-else-if="showEvaluation" class="evaluation-content">
         <h4 class="section-title">
           <el-icon><Star /></el-icon>
           评价内容
         </h4>
-        <el-descriptions :column="1" border>
+        <el-descriptions :column="1" border class="jobs-descriptions">
           <el-descriptions-item label="纪律遵守情况">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.discipline) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.discipline) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.discipline"
+              disabled
+              :colors="['#ff6e6e', '#ffb948', '#fecb65', '#98e34c', '#52c41a']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="礼仪规范情况">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.etiquette) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.etiquette) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.etiquette"
+              disabled
+              :colors="['#ff6e6e', '#ffb948', '#fecb65', '#98e34c', '#52c41a']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="集体活动参与">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.activity) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.activity) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.activity"
+              disabled
+              :colors="['#ff6e6e', '#ffb948', '#fecb65', '#98e34c', '#52c41a']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="环境维护与卫生">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.environment) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.environment) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.environment"
+              disabled
+              :colors="['#ff6e6e', '#ffb948', '#fecb65', '#98e34c', '#52c41a']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="与人相处情况">
-            <div class="rating-display">
-              <span class="rating-emoji">{{ getRatingEmoji(viewEvaluationData.interaction) }}</span>
-              <span class="rating-label">{{ getRatingLabel(viewEvaluationData.interaction) }}</span>
-            </div>
+            <el-rate
+              v-model="viewEvaluationData.interaction"
+              disabled
+              :colors="['#ff6e6e', '#ffb948', '#fecb65', '#98e34c', '#52c41a']"
+              show-score
+              score-template="{value}分"
+            />
           </el-descriptions-item>
           <el-descriptions-item label="评价意见">
             {{ viewEvaluationData.comments }}
@@ -144,17 +149,17 @@
     <template #footer>
       <div class="dialog-footer">
         <div v-if="!showForm && !showEvaluation" class="view-actions">
-          <el-button @click="handleClose">关闭</el-button>
-          <el-button type="primary" @click="$emit('start-evaluation')">开始评价</el-button>
+          <el-button @click="handleClose" class="btn-secondary">关闭</el-button>
+          <el-button type="primary" @click="$emit('start-evaluation')" class="btn-primary">开始评价</el-button>
         </div>
         <div v-else-if="showForm" class="form-actions">
-          <el-button @click="$emit('cancel-evaluation')">取消</el-button>
-          <el-button type="primary" @click="$emit('submit-evaluation')" :loading="submitting">
+          <el-button @click="$emit('cancel-evaluation')" class="btn-secondary">取消</el-button>
+          <el-button type="primary" @click="$emit('submit-evaluation')" :loading="submitting" class="btn-primary">
             提交评价
           </el-button>
         </div>
         <div v-else class="evaluation-actions">
-          <el-button @click="handleClose">关闭</el-button>
+          <el-button @click="handleClose" class="btn-secondary">关闭</el-button>
         </div>
       </div>
     </template>
@@ -172,7 +177,7 @@ import type {
   ViewEvaluationData,
 } from '@/types/evaluation'
 
-// Props
+// Props (保持不变)
 interface Props {
   visible: boolean
   title: string
@@ -209,7 +214,7 @@ const props = withDefaults(defineProps<Props>(), {
   ratingItems: () => []
 })
 
-// Emits
+// Emits (保持不变)
 const emit = defineEmits<{
   'update:visible': [value: boolean]
   'close': []
@@ -220,13 +225,13 @@ const emit = defineEmits<{
   'set-rating': [index: number, value: number]
 }>()
 
-// 计算属性
+// 计算属性 (保持不变)
 const visible = computed({
   get: () => props.visible,
   set: (value) => emit('update:visible', value)
 })
 
-// 方法
+// 方法 (保持不变)
 const handleClose = () => {
   emit('close')
 }
@@ -235,7 +240,7 @@ const setRating = (index: number, value: number) => {
   emit('set-rating', index, value)
 }
 
-// 工具函数
+// 工具函数 (保持不变)
 const maskPhone = (phone: string) => {
   if (!phone || phone.length < 7) return phone
   return phone.slice(0, 3) + '****' + phone.slice(-4)
@@ -285,180 +290,174 @@ const getOverallTagType = (overall: string) => {
   return types[overall] || 'info'
 }
 
-// 根据评分值获取对应的表情图标
-const getRatingEmoji = (score: number): string => {
-  switch (score) {
-    case 1:
-      return '👎' // 差
-    case 2:
-      return '😐' // 较差
-    case 3:
-      return '😑' // 一般
-    case 4:
-      return '😊' // 良好
-    case 5:
-      return '🤩' // 优秀
-    default:
-      return '😐' // 默认为较差
-  }
-}
-
-// 根据评分值获取对应的标签文本
-const getRatingLabel = (score: number): string => {
-  switch (score) {
-    case 1:
-      return '差'
-    case 2:
-      return '较差'
-    case 3:
-      return '一般'
-    case 4:
-      return '良好'
-    case 5:
-      return '优秀'
-    default:
-      return '未评分'
-  }
-}
 </script>
 
 <style scoped lang="scss">
-.evaluation-dialog {
-  .dialog-content {
-    max-height: 70vh;
-    overflow-y: auto;
+/* =========================================
+   1. Jobs Style 通用变量/重置
+   ========================================= */
+$jobs-primary-color: #007aff; /* Apple Blue for action */
+$jobs-text-color: #333333;
+$jobs-light-text-color: #6a6a6a;
+$jobs-border-color: #e0e0e0;
+$jobs-background-color: #f7f7f7;
+
+/* 定义 Header 和 Footer 的大致高度，用于 Flex 计算 */
+$header-height: 52px; 
+$footer-height: 60px; // 稍微增加，确保底部按钮有足够的 padding
+
+/* =========================================
+   2. 弹窗样式 (Dialog & Form)
+   ========================================= */
+.evaluation-dialog.jobs-style {
+  /* 覆盖 Header */
+  :deep(.el-dialog__header) {
+    margin: 0;
+    padding: 16px 24px;
+    border-bottom: 1px solid $jobs-border-color;
+    // background-color: white;
+    flex-shrink: 0;
+    height: $header-height;
+
+    .el-dialog__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: $jobs-text-color;
+    }
+
+    .el-dialog__headerbtn .el-dialog__close {
+      color: #999999;
+      &:hover {
+        color: $jobs-primary-color;
+      }
+    }
   }
 
-  .profile-section {
+  /* 覆盖 Body - 容器弹性伸展，不负责滚动 */
+  :deep(.el-dialog__body) {
+    padding: 0; 
+    flex-grow: 1;      
+    overflow: hidden;  
+    min-height: 0; 
+
+    // 使 dialog body 采用 flex 布局，以容纳内部 content wrapper
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* 覆盖 Footer - 固定高度 */
+  :deep(.el-dialog__footer) {
+    padding: 16px 24px; // 增加垂直 padding
+    border-top: 1px solid $jobs-border-color;
+    background-color: #ffffff;
+    flex-shrink: 0; 
+    height: $footer-height;
+  }
+
+  /* 核心滚动区域 */
+  .dialog-content {
+    // 之前是 max-height: 70vh; overflow-y: auto;
+    // 现在让它占据 Body 的全部空间，并作为滚动容器
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 24px 32px; // 恢复内容所需的 padding
+    max-height: calc(80vh - #{$header-height} - #{$footer-height} - 4vh);
+    // 80vh (Dialog max-height) - Header - Footer - Dialog 上下 margin 约 4vh
+  }
+}
+
+/* 描述列表样式覆盖 - 乔布斯风格：更细、更少的线条 */
+.jobs-descriptions {
+  :deep(.el-descriptions__header) {
+    margin-bottom: 16px;
+  }
+  :deep(.el-descriptions__body) {
+    background-color: #ffffff;
+  }
+  :deep(.el-descriptions__table) {
+    border-color: $jobs-border-color;
+  }
+  :deep(.el-descriptions-item__label) {
+    background-color: $jobs-background-color; // 浅灰色背景
+    color: $jobs-light-text-color;
+    font-weight: 500;
+    border-color: $jobs-border-color;
+    padding: 12px 16px;
+  }
+  :deep(.el-descriptions-item__content) {
+    color: $jobs-text-color;
+    border-color: $jobs-border-color;
+    padding: 12px 16px;
+  }
+}
+
+/* =========================================
+   3. 内容区块样式
+   ========================================= */
+
+.profile-section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: $jobs-text-color; // 强调标题使用深色文本
+  margin-bottom: 16px;
+  padding-bottom: 8px; // 增加标题底部留白
+
+  :deep(.el-icon) {
+    color: $jobs-primary-color; // 图标使用主色调
+    font-size: 20px;
+  }
+}
+
+.evaluation-form {
+  .rating-sections {
     margin-bottom: 32px;
 
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 18px;
-      font-weight: 600;
-      color: #8b5a2b;
-      margin-bottom: 16px;
-    }
-  }
-
-  .evaluation-form {
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 18px;
-      font-weight: 600;
-      color: #8b5a2b;
+    .rating-item {
       margin-bottom: 24px;
-    }
-
-    .rating-sections {
-      margin-bottom: 32px;
-
-      .rating-item {
-        margin-bottom: 24px;
-
-        .rating-label {
-          display: block;
-          font-weight: 500;
-          color: #333;
-          margin-bottom: 12px;
-        }
-
-        .rating-options {
-          display: flex;
-          gap: 24px;
-
-          .rating-option {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-
-            &:hover {
-              background: #f5f7fa;
-              transform: translateY(-2px);
-            }
-
-            &.active {
-              background: #e8f5e8;
-              border: 2px solid #67c23a;
-              transform: scale(1.05);
-            }
-
-            .rating-emoji {
-              font-size: 24px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              transition: all 0.3s;
-            }
-
-            span:not(.rating-emoji) {
-              font-size: 12px;
-              color: #666;
-              font-weight: 500;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  .evaluation-content {
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 18px;
-      font-weight: 600;
-      color: #8b5a2b;
-      margin-bottom: 16px;
-    }
-
-    .rating-display {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      .rating-emoji {
-        font-size: 20px;
-        display: inline-block;
-      }
 
       .rating-label {
+        display: block;
         font-weight: 500;
-        color: #333;
+        color: $jobs-text-color;
+        margin-bottom: 12px;
+        font-size: 15px;
       }
     }
   }
 }
 
+// 评分组件颜色覆盖 (已在 template 中完成)
+// :colors="['#ff6e6e', '#ffb948', '#fecb65', '#98e34c', '#52c41a']"
+
+/* 按钮样式覆盖 */
 .dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  .btn-primary.el-button--primary {
+    // 保持 Element Plus 默认蓝色或微调为 $jobs-primary-color
+    background-color: $jobs-primary-color;
+    border-color: $jobs-primary-color;
+    font-weight: 500;
 
-  .view-actions,
-  .form-actions,
-  .evaluation-actions {
-    display: flex;
-    gap: 12px;
+    &:hover {
+      opacity: 0.9;
+    }
   }
-}
 
-.dialog-footer-bottom {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #ebeef5;
+  .btn-secondary {
+    background-color: #f5f5f5;
+    border-color: $jobs-border-color;
+    color: $jobs-text-color;
+
+    &:hover {
+      background-color: $jobs-border-color;
+      border-color: $jobs-border-color;
+    }
+  }
 }
 </style>

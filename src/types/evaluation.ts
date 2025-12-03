@@ -42,7 +42,7 @@ export interface RatingOption {
  */
 export interface RatingItem {
   label: string
-  options: RatingOption[]
+  options?: RatingOption[] // 可选，用于向后兼容
 }
 
 /**

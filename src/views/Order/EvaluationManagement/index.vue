@@ -9,29 +9,20 @@
     <div class="table-container">
       <!-- 搜索和筛选区域 -->
       <div class="filter-bar">
-          <div class="search-box">
-            <el-input
-              v-model="searchForm.keyword"
-              placeholder="搜索姓名、证件号或申请编号"
-              clearable
-              @input="handleSearch"
-            >
-              <template #prefix>
-                <el-icon><Search /></el-icon>
-              </template>
-            </el-input>
-          </div>
+        <div class="search-box">
+          <el-input v-model="searchForm.keyword" placeholder="搜索姓名、证件号或申请编号" clearable @input="handleSearch">
+            <template #prefix>
+              <el-icon>
+                <Search />
+              </el-icon>
+            </template>
+          </el-input>
+        </div>
       </div>
 
       <!-- 表格 -->
-      <el-table
-        :data="filteredTableData"
-        stripe
-        style="width: 100%"
-        class="application-table"
-        v-loading="loading"
-      >
-        <el-table-column label="挂单人" min-width="120">
+      <el-table :data="filteredTableData" stripe style="width: 100%" class="application-table" v-loading="loading">
+        <!-- <el-table-column label="挂单人" min-width="120">
           <template #default="{ row }">
             <div class="person-info">
               <el-avatar :size="32">
@@ -40,35 +31,51 @@
               <span class="person-name">{{ row.applicantName }}</span>
             </div>
           </template>
-        </el-table-column>
+        </el-table-column> -->
 
-        <el-table-column prop="idCardMasked" label="身份证号" width="150">
+        <el-table-column label="挂单人" min-width="150">
           <template #default="{ row }">
-            {{ row.idCardMasked || '-' }}
+            <div class="applicant-info">
+              <el-avatar :size="40" class="applicant-avatar">
+                <el-icon>
+                  <User />
+                </el-icon>
+              </el-avatar>
+              <div class="applicant-details">
+                <div class="applicant-name">{{ row.applicantName }}</div>
+                <div class="applicant-id">{{ row.idCardMasked }}</div>
+              </div>
+            </div>
           </template>
         </el-table-column>
 
-        <el-table-column prop="applicationTypeName" label="挂单类型" width="100">
+        <el-table-column label="性别/年龄" min-width="100">
+          <template #default="{ row }">
+            <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="applicationTypeName" label="挂单类型" min-width="100">
           <template #default="{ row }">
             {{ row.applicationTypeName || getApplicationTypeLabel(row.applicationType) }}
           </template>
         </el-table-column>
 
-        <el-table-column prop="checkinDate" label="入住日期" width="120" />
+        <el-table-column prop="checkinDate" label="入住日期" min-width="120" />
 
-        <el-table-column prop="actualCheckoutDate" label="退单日期" width="120">
+        <el-table-column prop="actualCheckoutDate" label="退单日期" min-width="120">
           <template #default="{ row }">
             {{ row.actualCheckoutDate || row.plannedCheckoutDate || '-' }}
           </template>
         </el-table-column>
 
-        <el-table-column prop="mobileMasked" label="手机号" width="120">
+        <el-table-column prop="mobileMasked" label="手机号" min-width="120">
           <template #default="{ row }">
             {{ row.mobileMasked || '-' }}
           </template>
         </el-table-column>
 
-        <el-table-column label="状态" width="100">
+        <el-table-column label="状态" min-width="100">
           <template #default="{ row }">
             <el-tag :type="getEvaluationStatusType(row.status)" size="small">
               {{ getEvaluationStatusLabel(row.status) }}
@@ -78,30 +85,14 @@
 
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
-            <el-button
-              link
-              type="primary"
-              size="small"
-              @click="handleViewProfile(row)"
-            >
+            <el-button link type="primary" size="small" @click="handleViewProfile(row)">
               查看
             </el-button>
-            <el-button
-              v-if="row.status === 10"
-              link
-              type="info"
-              size="small"
-              @click="handleStartEvaluation(row)"
-            >
+            <el-button v-if="row.status === 10" link type="info" size="small" @click="handleStartEvaluation(row)">
               评价
             </el-button>
-            <el-button
-              v-else-if="row.status === 20"
-              link
-              type="warning"
-              size="small"
-              @click="handleViewEvaluation(row)"
-            >
+            <el-button v-else-if="row.status === 20" link type="warning" size="small"
+              @click="handleViewEvaluation(row)">
               查看评价
             </el-button>
           </template>
@@ -110,52 +101,30 @@
 
       <!-- 分页 -->
       <div v-if="total > 10" class="pagination-container">
-        <el-pagination
-          v-model:current-page="pagination.currentPage"
-          v-model:page-size="pagination.pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="pagination.currentPage" v-model:page-size="pagination.pageSize"
+          :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" :total="total"
+          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
     </div>
 
     <!-- 评价详情弹窗 -->
-    <EvaluationDialog
-      v-model:visible="evaluationDialog.visible"
-      :title="evaluationDialog.title"
-      :profile="currentProfile"
-      :show-form="evaluationDialog.showForm"
-      :show-evaluation="evaluationDialog.showEvaluation"
-      :form="evaluationForm"
-      :submitting="submitting"
-      :view-evaluation-data="viewEvaluationData"
-      :rating-items="ratingItems"
-      @close="handleCloseDialog"
-      @start-evaluation="handleStartEvaluationFromProfile"
-      @cancel-evaluation="handleCancelEvaluation"
-      @submit-evaluation="handleSubmitEvaluation"
-      @download-profile="handleDownloadProfile"
-      @set-rating="setRating"
-    />
+    <EvaluationDialog v-model:visible="evaluationDialog.visible" :title="evaluationDialog.title"
+      :profile="currentProfile" :show-form="evaluationDialog.showForm"
+      :show-evaluation="evaluationDialog.showEvaluation" :form="evaluationForm" :submitting="submitting"
+      :view-evaluation-data="viewEvaluationData" :rating-items="ratingItems" @close="handleCloseDialog"
+      @start-evaluation="handleStartEvaluationFromProfile" @cancel-evaluation="handleCancelEvaluation"
+      @submit-evaluation="handleSubmitEvaluation" @download-profile="handleDownloadProfile" @set-rating="setRating" />
 
     <!-- 导出选项弹窗 -->
-    <ExportDialog
-      v-model:visible="exportDialog.visible"
-      :form="exportForm"
-      :exporting="exporting"
-      @close="exportDialog.visible = false"
-      @confirm-export="handleConfirmExport"
-    />
+    <ExportDialog v-model:visible="exportDialog.visible" :form="exportForm" :exporting="exporting"
+      @close="exportDialog.visible = false" @confirm-export="handleConfirmExport" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Download } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import EvaluationStatusFilter from './components/EvaluationStatusFilter.vue'
 import EvaluationDialog from './components/EvaluationDialog.vue'
@@ -164,22 +133,22 @@ import { EvaluationStatus } from '@/types/review'
 import {
   EvaluationRecord,
   EvaluationForm,
-  RatingOption,
-  RatingItem,
-  ViewEvaluationData,
-  ExportForm,
-  EvaluationDialogConfig,
-  ExportDialogConfig,
 } from '@/types/evaluation'
 
 import {
   submitEvaluation,
   getEvaluations,
+  getEvaluationDetail,
   type EvaluationsQuery,
   type EvaluationListItemVO,
   type EvaluationsResponse,
   type EvaluationSubmitRequest,
   type ResultBoolean,
+  type EvaluationDetailResponse,
+  type EvaluationDetailVO,
+  type EvaluationInfo,
+  type LodgingInfo,
+  type PersonInfo,
 } from '@/api/review'
 
 
@@ -224,57 +193,22 @@ const evaluationForm = reactive<EvaluationForm>({
   overall: ''
 })
 
-// 评分项配置 - 使用表情图标
+// 评分项配置 - 简化配置，使用el-rate组件
 const ratingItems = ref([
   {
-    label: '纪律遵守情况',
-    options: [
-      { value: 1, label: '差', icon: '👎', color: '#f56565' },
-      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
-      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
-      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
-      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
-    ]
+    label: '纪律遵守情况'
   },
   {
-    label: '礼仪规范情况',
-    options: [
-      { value: 1, label: '差', icon: '👎', color: '#f56565' },
-      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
-      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
-      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
-      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
-    ]
+    label: '礼仪规范情况'
   },
   {
-    label: '集体活动参与',
-    options: [
-      { value: 1, label: '差', icon: '👎', color: '#f56565' },
-      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
-      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
-      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
-      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
-    ]
+    label: '集体活动参与'
   },
   {
-    label: '环境维护与卫生',
-    options: [
-      { value: 1, label: '差', icon: '👎', color: '#f56565' },
-      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
-      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
-      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
-      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
-    ]
+    label: '环境维护与卫生'
   },
   {
-    label: '与人相处情况',
-    options: [
-      { value: 1, label: '差', icon: '👎', color: '#f56565' },
-      { value: 2, label: '较差', icon: '😐', color: '#ed8936' },
-      { value: 3, label: '一般', icon: '😑', color: '#ecc94b' },
-      { value: 4, label: '良好', icon: '😊', color: '#48bb78' },
-      { value: 5, label: '优秀', icon: '🤩', color: '#38a169' }
-    ]
+    label: '与人相处情况'
   }
 ])
 
@@ -437,7 +371,7 @@ const handleViewProfile = (row: EvaluationListItemVO) => {
 // 评价
 const handleStartEvaluation = (row: EvaluationListItemVO) => {
   currentProfile.value = {
-    id: row.applicationId?.toString() || row.evaluationId?.toString() || '',
+    id: row.evaluationId?.toString() || row.applicationId?.toString() || '',
     name: row.applicantName || '',
     avatar: '', // 新接口没有头像字段
     idCard: row.idCardMasked || '',
@@ -460,27 +394,56 @@ const handleStartEvaluation = (row: EvaluationListItemVO) => {
 }
 
 // 查看评价
-const handleViewEvaluation = (row: EvaluationListItemVO) => {
-  currentProfile.value = {
-    id: row.applicationId?.toString() || row.evaluationId?.toString() || '',
-    name: row.applicantName || '',
-    avatar: '', // 新接口没有头像字段
-    idCard: row.idCardMasked || '',
-    type: getApplicationTypeLabel(row.applicationType),
-    checkInDate: row.checkinDate || '',
-    checkOutDate: row.actualCheckoutDate || row.plannedCheckoutDate || '',
-    status: row.status === 10 ? 'pending' : 'completed',
-    gender: row.gender ? (row.gender === 1 ? '男' : '女') : '',
-    age: '', // 新接口没有年龄字段
-    nation: '', // 新接口没有民族字段
-    phone: row.mobileMasked || '',
-    duration: '', // 新接口没有住宿天数字段
-    purpose: '禅修' // 默认值
+const handleViewEvaluation = async (row: EvaluationListItemVO) => {
+  try {
+    // 调用评价详情接口
+    const evaluationId = row.evaluationId || row.applicationId
+    if (!evaluationId) {
+      ElMessage.error('评价ID不存在')
+      return
+    }
+
+    const response: EvaluationDetailResponse = await getEvaluationDetail(evaluationId)
+
+    const detailData = response
+
+    // 更新当前评价数据
+    viewEvaluationData.discipline = detailData.evaluation?.disciplineScore || 0
+    viewEvaluationData.etiquette = detailData.evaluation?.etiquetteScore || 0
+    viewEvaluationData.activity = detailData.evaluation?.activityScore || 0
+    viewEvaluationData.environment = detailData.evaluation?.hygieneScore || 0
+    viewEvaluationData.interaction = detailData.evaluation?.relationshipScore || 0
+    viewEvaluationData.comments = detailData.evaluation?.comment || ''
+    viewEvaluationData.overall = getOverallGradeByNumber(detailData.evaluation?.overallGrade) || 'average'
+
+    // 设置档案信息
+    currentProfile.value = {
+      id: detailData.person?.personId?.toString() || detailData.lodging?.applicationId?.toString() || evaluationId.toString(),
+      name: detailData.person?.name?.toString() || detailData.lodging?.applicationTypeName || '',
+      avatar: '', // 接口没有头像字段
+      idCard: detailData.person?.idCard || detailData.lodging?.bedNo || '',
+      type: getApplicationTypeLabel(detailData.lodging?.applicationType),
+      checkInDate: detailData.lodging?.checkinDate || '',
+      checkOutDate: detailData.lodging?.actualCheckoutDate || '',
+      status: row.status === 10 ? 'pending' : 'completed',
+      gender: detailData.person?.genderName || '',
+      age: detailData.person?.age?.toString() || '',
+      nation: detailData.person?.nation || '',
+      phone: detailData.person?.mobile || '',
+      duration: '', // 接口没有住宿天数字段
+      purpose: detailData.lodging?.purpose || '禅修'
+    }
+
+    evaluationDialog.title = `挂单人评价详情 - ${detailData.person?.name || detailData.lodging?.applicationTypeName || ''}`
+    evaluationDialog.visible = true
+    evaluationDialog.showForm = false
+    evaluationDialog.showEvaluation = true
+
+
+  } catch (error) {
+    console.error('获取评价详情失败:', error)
+    ElMessage.error('获取评价详情失败')
   }
-  evaluationDialog.title = `挂单人评价详情 - ${row.applicantName}`
-  evaluationDialog.visible = true
-  evaluationDialog.showForm = false
-  evaluationDialog.showEvaluation = true
 }
 
 // 开始评价
@@ -512,6 +475,7 @@ const setRating = (index: number, value: number) => {
 
 // 提交评价
 const handleSubmitEvaluation = async () => {
+
   if (!evaluationForm.comments.trim()) {
     ElMessage.error('请输入评价意见与建议')
     return
@@ -542,28 +506,41 @@ const handleSubmitEvaluation = async () => {
       comment: evaluationForm.comments,
       overallGrade: getOverallGradeValue(evaluationForm.overall)
     }
-    
+
     // 使用 applicationId 或 personId 作为评价ID
     // const evaluationId = currentProfile.value.applicationId || currentProfile.value.personId || 0
     const evaluationId = currentProfile.value.id
 
     const response: ResultBoolean = await submitEvaluation(evaluationId, params)
 
-    if (response.code === 0) {
-      ElMessage.success('评价提交成功')
-
-      // 更新数据状态 - 将入住中状态改为已退住状态
-      const index = tableData.value.findIndex(item =>
-        item.applicationId === evaluationId || item.personId === evaluationId
-      )
-      if (index !== -1) {
-        tableData.value[index].status = 40 // 已退住
-      }
-
-      handleCloseDialog()
-    } else {
-      ElMessage.error(response.message || '评价提交失败')
+    ElMessage.success('评价提交成功')
+    // 更新数据状态 - 将入住中状态改为已退住状态
+    const index = tableData.value.findIndex(item =>
+      item.applicationId === evaluationId || item.personId === evaluationId
+    )
+    if (index !== -1) {
+      tableData.value[index].status = 40 // 已退住
     }
+
+    handleCloseDialog()
+
+    fetchEvaluationRecords()
+
+    // if (response.code === 0) {
+    //   ElMessage.success('评价提交成功')
+
+    //   // 更新数据状态 - 将入住中状态改为已退住状态
+    //   const index = tableData.value.findIndex(item =>
+    //     item.applicationId === evaluationId || item.personId === evaluationId
+    //   )
+    //   if (index !== -1) {
+    //     tableData.value[index].status = 40 // 已退住
+    //   }
+
+    //   handleCloseDialog()
+    // } else {
+    //   ElMessage.error(response.message || '评价提交失败')
+    // }
   } catch (error) {
     console.error('提交评价失败:', error)
     ElMessage.error('评价提交失败')
@@ -627,7 +604,7 @@ const getStatusType = (status?: number): string => {
     case 10: // 申请中
       return 'warning'
     case 20: // 待入住
-      return 'primary'
+      return 'info'
     case 30: // 入住中
       return 'success'
     case 40: // 已退住
@@ -721,6 +698,24 @@ const getOverallGradeValue = (overall: string): number => {
   }
 }
 
+// 将综合评价数值转换为字符串（根据API文档反转换）
+const getOverallGradeByNumber = (grade?: number): string => {
+  switch (grade) {
+    case 1:
+      return 'excellent' // 优秀
+    case 2:
+      return 'good' // 良好
+    case 3:
+      return 'average' // 一般
+    case 4:
+      return 'poor' // 较差
+    case 5:
+      return 'bad' // 差
+    default:
+      return 'average' // 默认一般
+  }
+}
+
 // 生命周期
 onMounted(() => {
   // 初始化数据
@@ -760,14 +755,40 @@ onMounted(() => {
   max-height: calc(100vh - 360px);
   overflow-y: scroll;
   /* 隐藏滚动条 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 和 Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
 }
 
 /* 隐藏表格的 Webkit 滚动条 */
 .application-table::-webkit-scrollbar {
   display: none;
 }
+
+.applicant-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .applicant-avatar {
+    flex-shrink: 0;
+  }
+
+  .applicant-details {
+    .applicant-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .applicant-id {
+      font-size: 12px;
+      color: #999;
+    }
+  }
+}
+
 :deep(.el-table__header-wrapper) {
   position: sticky;
   top: 0;
@@ -788,8 +809,10 @@ onMounted(() => {
 
 /* 隐藏表格内部各种滚动条 */
 :deep(.el-table__body-wrapper) {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 和 Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
 }
 
 :deep(.el-table__body-wrapper::-webkit-scrollbar) {
@@ -815,17 +838,22 @@ onMounted(() => {
 :deep(.el-table__fixed .el-table__body-wrapper::-webkit-scrollbar) {
   display: none;
 }
+
 .application-table {
   max-height: calc(100vh - 360px);
   overflow-y: scroll;
   /* 隐藏滚动条 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 和 Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
 }
+
 /* 隐藏表格的 Webkit 滚动条 */
 .application-table::-webkit-scrollbar {
   display: none;
 }
+
 .pagination-container {
   display: flex;
   justify-content: center;

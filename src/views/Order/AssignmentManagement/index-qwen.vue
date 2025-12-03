@@ -6,7 +6,6 @@
 
     <ApplicationStatusFilter v-model="activeTab" @update:modelValue="handleTabChange" />
 
-
     <!-- 数据表格 -->
     <div class="table-container">
       <!-- 标题区和操作区 -->
@@ -68,32 +67,56 @@
 
         <!-- 待分配表格列 -->
         <template v-if="activeTab === 'pending'">
+
           <!-- 人员信息列 -->
-          <el-table-column prop="name" label="人员信息" min-width="100">
+          <!-- <el-table-column prop="name" label="人员信息" min-width="100">
             <template #default="{ row }">
-                <div class="info-text">
-                  <div class="name">{{ row.name }}</div>
-                </div>
+              <div class="info-text">
+                <div class="name">{{ row.name }}</div>
+              </div>
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <!-- 身份证 -->
-          <el-table-column prop="idCardMasked" label="身份证号" min-width="120">
+          <!-- <el-table-column prop="idCardMasked" label="身份证号" min-width="120">
             <template #default="{ row }">
               <div class="id-card">{{ row.idCardMasked }}</div>
             </template>
-          </el-table-column>
+          </el-table-column> -->
 
           <!-- 性别列 -->
-          <el-table-column prop="gender" label="性别" min-width="100">
+          <!-- <el-table-column prop="gender" label="性别" min-width="100">
             <template #default="{ row }">
               {{ row.gender === 1 ? '男' : row.gender === 2 ? '女' : '-' }}
             </template>
-          </el-table-column>
+          </el-table-column> -->
 
           <!-- 年龄列 -->
-          <el-table-column prop="age" label="年龄" min-width="100">
+          <!-- <el-table-column prop="age" label="年龄" min-width="100">
             <template #default="{ row }">
               {{ row.age !== null && row.age !== undefined ? row.age : '-' }}
+            </template>
+          </el-table-column> -->
+
+
+          <el-table-column label="挂单人" min-width="150">
+            <template #default="{ row }">
+              <div class="applicant-info">
+                <el-avatar :size="40" class="applicant-avatar">
+                  <el-icon>
+                    <User />
+                  </el-icon>
+                </el-avatar>
+                <div class="applicant-details">
+                  <div class="applicant-name">{{ row.name }}</div>
+                  <div class="applicant-id">{{ row.idCardMasked }}</div>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="性别/年龄" min-width="100">
+            <template #default="{ row }">
+              <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
             </template>
           </el-table-column>
 
@@ -146,9 +169,9 @@
           <!-- 人员信息列 -->
           <el-table-column prop="name" label="人员信息" min-width="120">
             <template #default="{ row }">
-                <div class="info-text">
-                  <div class="name">{{ row.name }}</div>
-                </div>
+              <div class="info-text">
+                <div class="name">{{ row.name }}</div>
+              </div>
             </template>
           </el-table-column>
 
@@ -211,11 +234,7 @@
     <!-- 分配床位弹窗 -->
     <AssignBedModal v-model="showAssignBedModal" :selected-person="selectedPerson" @success="handleAssignSuccess" />
     <!-- 查看详情 -->
-    <ApplicationDetailDialog
-      v-model="detailVisible"
-      :application-id="currentAppId"
-      @close="onDetailClosed"
-    />
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
 
     <!-- 审核流程 -->
     <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
@@ -391,7 +410,7 @@ const handleTabChange = (tabName: string | number) => {
   tableData.value = []
   activeTab.value = tabNameStr as 'pending' | 'assigned' | 'checkedIn' | 'checkedOut'
   fetchData() // 重新加载数据
-  
+
 }
 
 // 获取数据的方法
@@ -513,6 +532,9 @@ const handleBatchAssign = () => {
 
 // 单个分配按钮点击事件
 const handleAssign = (row: AssignmentListItemVO | AssignedLodgingVO) => {
+
+  console.log(row)
+  console.log(activeTab.value)
   // 只有待分配的可以分配床位
   if (activeTab.value === 'pending') {
     selectedPerson.value = row as AssignmentListItemVO
@@ -585,6 +607,29 @@ const handleAssignSuccess = () => {
     }
   }
 
+}
+
+.applicant-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .applicant-avatar {
+    flex-shrink: 0;
+  }
+
+  .applicant-details {
+    .applicant-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .applicant-id {
+      font-size: 12px;
+      color: #999;
+    }
+  }
 }
 
 .assignment-list-container {
@@ -832,4 +877,7 @@ const handleAssignSuccess = () => {
     }
   }
 }
+
+
+
 </style>

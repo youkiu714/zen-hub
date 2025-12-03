@@ -13,7 +13,7 @@
 
         <el-table-column prop="gender" label="性别" width="80" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.gender === 'male' ? 'primary' : 'success'">
+            <el-tag :type="row.gender === 'male' ? 'info' : 'success'">
               {{ row.gender === 'male' ? '男' : '女' }}
             </el-tag>
           </template>

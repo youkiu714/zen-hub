@@ -96,15 +96,11 @@
 
 
     <!-- 历史记录弹窗 -->
-    <el-dialog v-model="historyVisible" title="挂单历史记录" width="800px" :before-close="handleCloseHistory">
-      <div v-if="currentRow" class="history-content">
-        <p>{{ currentRow.name }} 的历史记录功能正在开发中...</p>
-        <p>挂单总次数: {{ currentRow.totalCount }}</p>
-      </div>
-      <template #footer>
-        <el-button @click="historyVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
+    <PersonHistoryDialog
+      v-model="historyVisible"
+      :current-person="currentRow"
+      @close="handleHistoryClose"
+    />
   </div>
 </template>
 
@@ -121,6 +117,7 @@ import {
 import PageHeader from '@/components/PageHeader.vue'
 import { departmentOptions } from '@/utils/constants'
 import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
+import PersonHistoryDialog from '@/components/PersonHistoryDialog.vue'
 
 // 查询表单数据
 const queryForm = reactive({
@@ -235,17 +232,15 @@ const onDetailClosed = () => {
 }
 
 // 查看历史记录
-const handleViewHistory = async (row: PersonProfileVO) => {
-  try {
-    currentRow.value = row
-    ElMessage.info('历史记录功能开发中')
-    // TODO: 实现历史记录查询接口
-    // currentHistory.value = await getPendingHistory(row.personId)
-    // historyVisible.value = true
-  } catch (error) {
-    console.error('获取历史记录失败:', error)
-    ElMessage.error('获取历史记录失败')
-  }
+const handleViewHistory = (row: PersonProfileVO) => {
+  currentRow.value = row
+  historyVisible.value = true
+}
+
+// 关闭历史记录弹窗
+const handleHistoryClose = () => {
+  historyVisible.value = false
+  currentRow.value = null
 }
 
 // 分页处理
@@ -267,10 +262,6 @@ const handleSortChange = ({ prop, order }: any) => {
 }
 
 
-const handleCloseHistory = () => {
-  historyVisible.value = false
-  currentRow.value = null
-}
 
 // 工具函数
 const maskIdCard = (idCard: string) => {

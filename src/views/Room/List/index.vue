@@ -43,7 +43,7 @@
           <el-table-column prop="roomNo" label="房间号" />
           <el-table-column prop="gender" label="房间类型">
             <template #default="{ row }">
-              <el-tag :type="row.gender === 1 ? 'info' : 'pink'" size="small">
+              <el-tag :type="row.gender === 1 ? 'info' : 'danger'" size="small">
                 {{ row.gender === 1 ? '男众' : '女众' }}
               </el-tag>
             </template>
@@ -121,7 +121,7 @@
           <el-table-column prop="bedNo" label="床位号" width="120" />
           <el-table-column prop="bedType" label="床位类型" width="120">
             <template #default="{ row }">
-              <el-tag :type="row.bedType === 1 ? 'primary' : 'success'" size="small">
+              <el-tag :type="row.bedType === 1 ? 'info' : 'success'" size="small">
                 {{ row.bedType === 1 ? '上铺' : '下铺' }}
               </el-tag>
             </template>

@@ -1,13 +1,10 @@
 <template>
   <div class="application-management">
     <PageHeader title="挂单管理">
-      <el-button
-        type="primary"
-        size="large"
-        @click="handleNewApplication"
-        class="new-application-btn"
-      >
-        <el-icon class="icon"><Plus /></el-icon> 申请挂单
+      <el-button type="primary" size="large" @click="handleNewApplication" class="new-application-btn">
+        <el-icon class="icon">
+          <Plus />
+        </el-icon> 申请挂单
       </el-button>
     </PageHeader>
 
@@ -15,37 +12,41 @@
 
     <div class="table-container">
       <div class="filter-bar">
-        <el-input
-          v-model="nameKeyword"
-          placeholder="输入姓名进行筛选"
-          :suffix-icon="Search"
-          @clear="handleKeywordSearch"
-          @keyup.enter="handleKeywordSearch"
-          style="width: 240px"
-        />
-        <el-input
-          v-model="mobileKeyword"
-          placeholder="输入手机号进行筛选"
-          :suffix-icon="Search"
-          @clear="handleKeywordSearch"
-          @keyup.enter="handleKeywordSearch"
-          style="width: 240px"
-        />
+        <el-input v-model="nameKeyword" placeholder="输入姓名进行筛选" :suffix-icon="Search" @clear="handleKeywordSearch"
+          @keyup.enter="handleKeywordSearch" style="width: 240px" />
+        <el-input v-model="mobileKeyword" placeholder="输入手机号进行筛选" :suffix-icon="Search" @clear="handleKeywordSearch"
+          @keyup.enter="handleKeywordSearch" style="width: 240px" />
 
         <!-- <el-button size="medium" plain class="search-btn" @click="handleKeywordSearch">
           <el-icon class="icon"><Search /></el-icon> 查询
         </el-button> -->
       </div>
 
-      <el-table
-        :data="applications"
-        style="width: 100%"
-        size="large"
+      <el-table :data="applications" style="width: 100%" size="large"
         :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
-        class="application-table"
-        v-loading="loading"
-      >
+        class="application-table" v-loading="loading">
+
         <el-table-column prop="applicantName" label="申请人" width="120" fixed="left" />
+        <!-- <el-table-column label="挂单人" min-width="150">
+          <template #default="{ row }">
+            <div class="applicant-info">
+              <el-avatar :size="40" class="applicant-avatar">
+                <el-icon>
+                  <User />
+                </el-icon>
+              </el-avatar>
+              <div class="applicant-details">
+                <div class="applicant-name">{{ row.applicantName }}</div>
+                <div class="applicant-id">{{ row.idCardMasked }}</div>
+              </div>
+            </div>
+          </template>
+        </el-table-column> -->
+        <el-table-column label="性别/年龄" width="100">
+          <template #default="{ row }">
+            <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
+          </template>
+        </el-table-column>
         <el-table-column prop="mobile" label="手机号" width="130" />
         <el-table-column prop="applicationType" label="挂单类型" min-width="90">
           <template #default="{ row }">
@@ -65,24 +66,14 @@
         </el-table-column>
         <el-table-column label="申请状态" min-width="100">
           <template #default="{ row }">
-            <el-tag
-              :type="getApplicationStatusType(row.status)"
-              effect="dark"
-              round
-              class="status-tag"
-            >
+            <el-tag :type="getApplicationStatusType(row.status)" effect="dark" round class="status-tag">
               {{ APPLICATION_STATUS_MAP[row.status] }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="申请日期" min-width="120">
-          <template #default="{ row }">
-            {{ formatDate(row.createdAt || row.updatedAt) }}
-          </template>
-        </el-table-column>
         <el-table-column prop="checkinDate" label="入住日期" min-width="110" />
         <el-table-column prop="checkoutDate" label="退住日期" min-width="110" />
-
+        <el-table-column prop="days" label="挂单时长（天）" min-width="130" />
         <el-table-column prop="bedInfo" label="分配床位" width="120">
           <template #default="{ row }">
             {{ row.bedInfo ? row.bedInfo.bedNumber : '暂未分配' }}
@@ -92,7 +83,9 @@
         <!-- <el-table-column label="操作" min-width="480" fixed="right">
           <template #default="{ row }">
             <el-button @click="() => handleViewDetail(row.id)" link>
-              <el-icon class="btn-icon"><View /></el-icon>
+              <el-icon class="btn-icon">
+                <View />
+              </el-icon>
               查看
             </el-button>
             <el-button type="success" class="btn-success" @click="() => handleReview(row.id)">
@@ -101,49 +94,32 @@
               </el-icon>
               审核流程
             </el-button>
-            <el-popconfirm
-              v-if="
-                row.status === ApplicationStatus.PENDING_REVIEW ||
-                row.status === ApplicationStatus.WAITING_CHECKIN
-              "
-              class="box-item"
-              title="确认取消申请吗？"
-              placement="top"
-              :hide-icon="true"
-              confirm-button-text="确认"
-              cancel-button-text="取消"
-              @confirm="() => handleCancelApplication(row.id)"
-            >
+            <el-popconfirm v-if="
+              row.status === ApplicationStatus.PENDING_REVIEW ||
+              row.status === ApplicationStatus.WAITING_CHECKIN
+            " class="box-item" title="确认取消申请吗？" placement="top" :hide-icon="true" confirm-button-text="确认"
+              cancel-button-text="取消" @confirm="() => handleCancelApplication(row.id)">
               <template #reference>
-                <el-button class="btn-error"
-                  ><el-icon class="btn-icon"><Close /></el-icon>取消申请</el-button
-                >
+                <el-button class="btn-error"><el-icon class="btn-icon">
+                    <Close />
+                  </el-icon>取消申请</el-button>
               </template>
             </el-popconfirm>
 
-            <el-button
-              v-if="row.status !== ApplicationStatus.CANCELED"
-              type="primary"
-              class="btn-primary"
-              @click="() => handleEditApplication(row)"
-              ><el-icon class="btn-icon"><EditPen /></el-icon>修改信息</el-button
-            >
+            <el-button v-if="row.status !== ApplicationStatus.CANCELED" type="primary" class="btn-primary"
+              @click="() => handleEditApplication(row)"><el-icon class="btn-icon">
+                <EditPen />
+              </el-icon>修改信息</el-button>
 
-            <el-button
-              v-if="row.status === ApplicationStatus.CHECKED_IN"
-              type="primary"
-              class="btn-primary"
-              @click="() => handleRenewalApplication(row)"
-              ><el-icon class="btn-icon"><EditPen /></el-icon>续单申请</el-button
-            >
+            <el-button v-if="row.status === ApplicationStatus.CHECKED_IN" type="primary" class="btn-primary"
+              @click="() => handleRenewalApplication(row)"><el-icon class="btn-icon">
+                <EditPen />
+              </el-icon>续单申请</el-button>
 
-            <el-button
-              v-if="row.status === ApplicationStatus.CHECKED_IN"
-              type="primary"
-              class="btn-primary"
-              @click="() => handleCheckoutApplication(row)"
-              ><el-icon class="btn-icon"><EditPen /></el-icon>退单</el-button
-            >
+            <el-button v-if="row.status === ApplicationStatus.CHECKED_IN" type="primary" class="btn-primary"
+              @click="() => handleCheckoutApplication(row)"><el-icon class="btn-icon">
+                <EditPen />
+              </el-icon>退单</el-button>
           </template>
         </el-table-column> -->
 
@@ -232,49 +208,28 @@
 
       <!-- 分页 - 只有当总数据量大于单页数据量时才显示 -->
       <div v-if="total > 10" class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" />
       </div>
     </div>
 
     <!-- 查看详情 -->
-    <ApplicationDetailDialog
-      v-model="detailVisible"
-      :application-id="currentAppId"
-      @close="onDetailClosed"
-    />
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
 
     <!-- 审核流程 -->
     <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
 
     <!-- 修改申请信息弹窗 -->
-    <EditApplication
-      v-model="editVisible"
-      :application-data="currentEditData"
-      :application-id="currentEditId"
-      @submit="handleEditSubmit"
-    />
+    <EditApplication v-model="editVisible" :application-data="currentEditData" :application-id="currentEditId"
+      @submit="handleEditSubmit" />
 
     <!-- 续单申请弹窗 -->
-    <RenewalApplicationDialog
-      v-model="renewalVisible"
-      :order-data="currentRenewalData"
-      @submit="handleRenewalSubmit"
-    />
+    <RenewalApplicationDialog v-model="renewalVisible" :order-data="currentRenewalData" @submit="handleRenewalSubmit" />
 
     <!-- 退单申请弹窗 -->
-    <CheckoutApplicationDialog
-      v-model="checkoutVisible"
-      :order-data="currentCheckoutData"
-      @submit="handleCheckoutSubmit"
-    />
+    <CheckoutApplicationDialog v-model="checkoutVisible" :order-data="currentCheckoutData"
+      @submit="handleCheckoutSubmit" />
   </div>
 </template>
 
@@ -552,6 +507,7 @@ const handleEditSubmit = async (data: any, id: number) => {
 .icon {
   margin-right: 4px;
 }
+
 .table-container {
   background-color: white;
   padding: 12px 10px;
@@ -577,14 +533,17 @@ const handleEditSubmit = async (data: any, id: number) => {
   max-height: calc(100vh - 360px);
   overflow-y: scroll;
   /* 隐藏滚动条 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 和 Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
 }
 
 /* 隐藏表格的 Webkit 滚动条 */
 .application-table::-webkit-scrollbar {
   display: none;
 }
+
 :deep(.el-table__header-wrapper) {
   position: sticky;
   top: 0;
@@ -605,8 +564,10 @@ const handleEditSubmit = async (data: any, id: number) => {
 
 /* 隐藏表格内部各种滚动条 */
 :deep(.el-table__body-wrapper) {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 和 Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
 }
 
 :deep(.el-table__body-wrapper::-webkit-scrollbar) {
@@ -637,6 +598,30 @@ const handleEditSubmit = async (data: any, id: number) => {
   padding: 20px;
   background-color: #fdf6e3;
   //   min-height: 100vh;
+}
+
+
+.applicant-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .applicant-avatar {
+    flex-shrink: 0;
+  }
+
+  .applicant-details {
+    .applicant-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .applicant-id {
+      font-size: 12px;
+      color: #999;
+    }
+  }
 }
 
 .new-application-btn {
@@ -671,6 +656,7 @@ const handleEditSubmit = async (data: any, id: number) => {
   &.default {
     background-color: #909399; // 默认颜色
   }
+
   color: white;
 }
 
@@ -704,6 +690,7 @@ const handleEditSubmit = async (data: any, id: number) => {
 // 查询按钮样式
 .search-btn {
   font-weight: 600;
+
   &:hover,
   &:active,
   &:focus {
@@ -716,19 +703,24 @@ const handleEditSubmit = async (data: any, id: number) => {
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
   color: rgb(55 65 81 / var(--tw-text-opacity, 1));
 }
+
 .btn-icon {
   margin-right: 2px;
 }
+
 .btn-error {
   color: rgb(185 28 28 / var(--tw-text-opacity, 1));
   background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1));
 }
+
 .btn-success {
   background-color: #31bf30;
 }
+
 .btn-primary {
   background-color: #19b2ff;
 }
+
 .btn-primary,
 .btn-error,
 .btn-default,
