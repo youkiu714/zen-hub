@@ -2,7 +2,7 @@
   <div class="header">
     <div class="header-left">
       <el-button
-        type="text"
+        link
         class="collapse-btn"
         @click="toggleSidebar"
       >
@@ -17,7 +17,7 @@
       <!-- 主题切换 -->
       <!-- <el-tooltip content="主题切换" placement="bottom">
         <el-button
-          type="text"
+          link
           class="header-btn"
           @click="toggleTheme"
         >
@@ -31,7 +31,7 @@
       <!-- 全屏 -->
       <el-tooltip content="全屏" placement="bottom">
         <el-button
-          type="text"
+          link
           class="header-btn"
           @click="toggleFullscreen"
         >

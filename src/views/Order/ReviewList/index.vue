@@ -31,16 +31,27 @@
 
       <!-- 表格 -->
       <el-table :data="reviewList" :stripe="true" style="width: 100%" :row-class-name="tableRowClassName"
-        @row-dblclick="handleView" :fit="true" class="application-table">
-        <el-table-column prop="applicantName" label="申请人" :min-width="120">
-          <template #default="scope">
-            <div class="applicant-cell">
-              <!-- <el-avatar size="small" :src="getAvatarUrl(scope.row)" /> -->
-              <span>{{ scope.row.applicantName }}</span>
+        @row-dblclick="handleView" :fit="true" class="application-table" :loading="loading">
+        <el-table-column label="挂单人" min-width="150">
+          <template #default="{ row }">
+            <div class="applicant-info">
+              <el-avatar :size="40" class="applicant-avatar">
+                <el-icon>
+                  <User />
+                </el-icon>
+              </el-avatar>
+              <div class="applicant-details">
+                <div class="applicant-name">{{ row.applicantName }}</div>
+                <div class="applicant-id">{{ row.idCardMasked }}</div>
+              </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="idCardMasked" label="身份证号" :min-width="120" />
+        <el-table-column label="性别/年龄" min-width="120">
+          <template #default="{ row }">
+            <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
+          </template>
+        </el-table-column>
         <el-table-column prop="applicationType" label="申请类型" :min-width="100">
           <template #default="scope">
             <el-tag :type="getApplicationTypeTagType(scope.row.applicationType)" size="small">
@@ -54,7 +65,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="days" label="挂单天数" :min-width="100" />
-        <el-table-column prop="reviewStatus" label="状态" :min-width="120">
+        <el-table-column prop="reviewStatus" label="状态" :min-width="100">
           <template #default="scope">
             <el-tag :type="getReviewStatusTagType(scope.row.reviewStatus)" size="small">
               {{ ReviewStatusMap[scope.row.reviewStatus] || '-' }}
@@ -64,11 +75,11 @@
         <!-- 操作列设置为固定宽度 -->
         <el-table-column label="操作" fixed="right" align="center" :min-width="160">
           <template #default="scope">
-            <el-button type="text" @click="handleView(scope.row)">查看</el-button>
-            <el-button type="text" @click="handleWorkflow(scope.row)">流程</el-button>
-            <!-- <el-button v-if="(scope.row.reviewStatus === 10 || scope.row.reviewStatus === 20) && userStore.roles == 'MASTER'" type="text" @click="handleReview(scope.row)">审核</el-button> -->
-            <el-button v-if="scope.row" type="text" @click="handleReview(scope.row)">审核</el-button>
-            <el-button v-else-if="scope.row.reviewStatus === 40" type="text"
+            <el-button link @click="handleView(scope.row)">查看</el-button>
+            <el-button link @click="handleWorkflow(scope.row)">流程</el-button>
+            <!-- <el-button v-if="(scope.row.reviewStatus === 10 || scope.row.reviewStatus === 20) && userStore.roles == 'MASTER'" link @click="handleReview(scope.row)">审核</el-button> -->
+            <el-button v-if="scope.row" link @click="handleReview(scope.row)">审核</el-button>
+            <el-button v-else-if="scope.row.reviewStatus === 40" link
               @click="handleReReview(scope.row)">重新审核</el-button>
           </template>
         </el-table-column>
@@ -82,11 +93,7 @@
     </div>
 
     <!-- 查看详情 -->
-    <ApplicationDetailDialog
-      v-model="detailVisible"
-      :application-id="currentAppId"
-      @close="onDetailClosed"
-    />
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
 
     <!-- 审核流程 -->
     <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
@@ -96,7 +103,7 @@
 
   </div>
 
-  
+
 </template>
 
 <script setup lang="ts">
@@ -133,6 +140,7 @@ const ReviewStatusMap = {
 const filterStatus = ref(ReviewStatus.WAITING_REVIEW)
 
 // =============== 响应式状态 ===============
+const loading = ref(false);
 const reviewList = ref<ReviewListItemVO[]>([]);
 const total = ref(0);
 const currentPage = ref(1);
@@ -183,7 +191,7 @@ const onReviewClosed = () => {
 }
 
 const fetchData = async () => {
-
+  loading.value = true;
   try {
     const params = {
       keyword: searchKeyword.value || undefined,
@@ -194,7 +202,7 @@ const fetchData = async () => {
       ...getDateRangeParams(selectedDateRange.value),
     };
     const res = await getReviews(params);
-    reviewList.value = res
+    reviewList.value = res.records || []
     console.log(res);
 
     // if (res.code === 80) {
@@ -205,6 +213,8 @@ const fetchData = async () => {
     // }
   } catch (err) {
     ElMessage.error('网络错误');
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -243,7 +253,7 @@ const getApplicationTypeTagType = (type?: number) => {
   if (type === 1) return 'success';
   if (type === 2) return 'info';
   if (type === 3) return 'warning';
-  if (type === 4) return 'primary';
+  if (type === 4) return 'info';
   if (type === 5) return 'danger';
   return 'default';
 };
@@ -490,5 +500,28 @@ onMounted(() => {
   /* Firefox */
   -ms-overflow-style: none;
   /* IE 和 Edge */
+}
+
+.applicant-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .applicant-avatar {
+    flex-shrink: 0;
+  }
+
+  .applicant-details {
+    .applicant-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .applicant-id {
+      font-size: 12px;
+      color: #999;
+    }
+  }
 }
 </style>

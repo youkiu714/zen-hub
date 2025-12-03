@@ -16,37 +16,17 @@
           </template>
         </el-input>
 
-        <el-select v-model="queryForm.departmentCode" placeholder="全部部组" clearable style="width: 120px" @change="handleSearch">
+        <el-select v-model="queryForm.departmentCode" placeholder="全部部组" clearable style="width: 120px"
+          @change="handleSearch">
           <el-option label="全部部组" value="" />
-          <el-option
-            v-for="dept in departmentOptions"
-            :key="dept.value"
-            :label="dept.label"
-            :value="dept.value"
-          />
+          <el-option v-for="dept in departmentOptions" :key="dept.value" :label="dept.label" :value="dept.value" />
         </el-select>
 
-        <el-date-picker
-          v-model="queryForm.startDate"
-          type="date"
-          placeholder="开始日期"
-          clearable
-          style="width: 150px"
-          @change="handleSearch"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-        />
+        <el-date-picker v-model="queryForm.startDate" type="date" placeholder="开始日期" clearable style="width: 150px"
+          @change="handleSearch" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
 
-        <el-date-picker
-          v-model="queryForm.endDate"
-          type="date"
-          placeholder="结束日期"
-          clearable
-          style="width: 150px"
-          @change="handleSearch"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-        />
+        <el-date-picker v-model="queryForm.endDate" type="date" placeholder="结束日期" clearable style="width: 150px"
+          @change="handleSearch" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
 
         <el-button type="primary" @click="handleFilter">
           <el-icon>
@@ -57,12 +37,35 @@
       </div>
 
       <el-table v-loading="loading" :data="tableData" stripe style="width: 100%" @sort-change="handleSortChange">
-        <el-table-column type="index" label="序号" width="80" />
+        <!-- <el-table-column type="index" label="序号" width="80" />
         <el-table-column prop="name" label="姓名" width="120">
           <template #default="{ row }">
             <span class="name-text">{{ row.name }}</span>
           </template>
+        </el-table-column> -->
+
+        <el-table-column label="挂单人" min-width="150">
+          <template #default="{ row }">
+            <div class="applicant-info">
+              <el-avatar :size="40" class="applicant-avatar">
+                <el-icon>
+                  <User />
+                </el-icon>
+              </el-avatar>
+              <div class="applicant-details">
+                <div class="applicant-name">{{ row.name }}</div>
+                <div class="applicant-id">{{ row.idCardMasked }}</div>
+              </div>
+            </div>
+          </template>
         </el-table-column>
+
+        <el-table-column label="性别/年龄" min-width="100">
+          <template #default="{ row }">
+            <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
+          </template>
+        </el-table-column>
+
         <el-table-column prop="departmentName" label="部组" width="120">
           <template #default="{ row }">
             {{ row.departmentName || getDepartmentName(row.departmentCode) }}
@@ -250,7 +253,7 @@ const getStatusType = (status?: number): string => {
     case 10: // 申请中
       return 'warning'
     case 20: // 待入住
-      return 'primary'
+      return 'info'
     case 30: // 入住中
       return 'success'
     case 40: // 已退住
@@ -316,11 +319,36 @@ onMounted(() => {
       }
     }
   }
+
   .history-content {
     text-align: center;
     padding: 40px 20px;
     color: #666;
     font-size: 16px;
+  }
+}
+
+
+.applicant-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .applicant-avatar {
+    flex-shrink: 0;
+  }
+
+  .applicant-details {
+    .applicant-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .applicant-id {
+      font-size: 12px;
+      color: #999;
+    }
   }
 }
 </style>

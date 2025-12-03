@@ -173,7 +173,7 @@ const viewDetail = (applicationId: number) => {
 // 获取状态标签
 const getStatusTag = (status: number) => {
   const statusMap: Record<number, { label: string; type: 'success' | 'info' | 'warning' | 'danger' | 'primary' }> = {
-    [ApplicationStatus.ALL]: { label: '全部状态', type: 'primary' },
+    [ApplicationStatus.ALL]: { label: '全部状态', type: '' },
     [ApplicationStatus.APPLIED]: { label: '申请中', type: 'warning' },
     [ApplicationStatus.PENDING]: { label: '待入住', type: 'info' },
     [ApplicationStatus.CHECKED_IN]: { label: '入住中', type: 'success' },
