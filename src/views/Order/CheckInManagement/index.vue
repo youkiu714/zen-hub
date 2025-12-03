@@ -4,7 +4,7 @@
 
     <TabNavigation :tabs="tabs" :active-tab="activeTab" @change="handleTabChange" />
 
-    <div class="main-card" shadow="hover">
+    <div class="table-container" shadow="hover">
       <FilterSection v-model:keyword="searchKeyword" v-model:roomType="selectedRoomType" v-model:status="selectedStatus"
         :search-placeholder="searchPlaceholder" :room-options="ROOM_TYPE_OPTIONS" :status-options="STATUS_OPTIONS"
         @search="handleSearchInput" @filter="handleFilterChange" />
@@ -61,8 +61,7 @@ import {
   ROOM_TYPE_OPTIONS,
   SEARCH_PLACEHOLDER_MAP,
   STATUS_OPTIONS,
-  CheckinTabKey,
-  getOrderTypeTagType
+  CheckinTabKey
 } from './utils'
 
 const userStore = useUserStore()
@@ -275,15 +274,15 @@ onMounted(() => {
    1. 页面整体布局样式 (Page Layout)
    ========================================= */
 .checkin-management {
-  padding: 24px;
+  padding: 20px;
   background-color: #fdf6e3;
-  min-height: 100vh;
+  // min-height: 100vh;
 }
 
-.main-card {
-  border-radius: 12px;
-  padding: 12px 10px;
+.table-container {
   background-color: white;
+  padding: 12px 10px;
+  border-radius: 12px;
 }
 
 .pagination-container {
@@ -292,77 +291,14 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-/* Tab 导航样式覆盖 */
-:deep(.tab-navigation) {
-  border-bottom: 1px solid #f0f2f5;
-  padding: 12px 24px;
-
-  .tab-buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .tab-btn {
-    background: #f5f7fa;
-    border: 1px solid #ebeef5;
-    border-radius: 20px;
-    padding: 8px 14px;
-    cursor: pointer;
-    color: #606266;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s;
-
-    &.active {
-      background: #ecf5ff;
-      color: #409eff;
-      border-color: #d9ecff;
-    }
-  }
-}
-
-/* 筛选区样式覆盖 */
-:deep(.filter-section) {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 24px;
+/* 隐藏 Webkit 浏览器的滚动条 */
+.table-container::-webkit-scrollbar {
+  display: none;
 }
 
 /* 表格内容区域 */
 .table-content {
   padding: 0;
-
-  /* 表格内部文字样式 */
-  :deep(.guest-info) {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  :deep(.guest-name),
-  :deep(.room-info .room-number),
-  :deep(.date-info .date),
-  :deep(.days-info .days) {
-    font-weight: 500;
-    color: #303133;
-  }
-
-  :deep(.guest-id),
-  :deep(.room-info .bed-number),
-  :deep(.room-info .room-capacity),
-  :deep(.date-info .time) {
-    font-size: 14px;
-    color: #909399;
-  }
-
-  :deep(.action-buttons) {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-  }
 }
 
 </style>
