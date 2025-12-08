@@ -64,6 +64,7 @@ declare module 'vue' {
     Layout: typeof import('./src/components/Layout/index.vue')['default']
     MemberCard: typeof import('./src/components/MemberCard.vue')['default']
     PageHeader: typeof import('./src/components/PageHeader.vue')['default']
+    PageTabs: typeof import('./src/components/PageTabs.vue')['default']
     PersonHistoryDialog: typeof import('./src/components/PersonHistoryDialog.vue')['default']
     ReviewPage: typeof import('./src/components/ReviewPage.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

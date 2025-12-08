@@ -483,11 +483,11 @@ export const CHECKOUT_STATUS_MAP: Record<CheckoutStatus, { label: string; color:
 
 // 用于筛选的状态枚举
 export enum AssignmentBedStatus {
-  PENDING = 'pending', // 待分配
-  ASSIGNED = 'assigned', // 已分配
+  PENDING = 'pending',       // 待分配
+  ASSIGNED = 'assigned',     // 已分配
+  CHECKED_IN = 'checked_in', // 已入住
+  CHECKED_OUT = 'checked_out' // 已退住
 }
-
-
 
 // 用于展示的状态标签
 export interface StatusTag {

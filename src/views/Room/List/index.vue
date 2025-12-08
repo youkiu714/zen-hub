@@ -49,7 +49,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="floor" label="楼层" />
-          <!-- <el-table-column prop="bedCount" label="床位数量" /> -->
+          <el-table-column prop="bedCount" label="床位数量" />
           <el-table-column prop="usedBedCount" label="已用床位" />
           <el-table-column prop="status" label="状态">
             <template #default="{ row }">

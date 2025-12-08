@@ -1,13 +1,7 @@
 <template>
-  <el-dialog
-    v-model="visible"
-    title="分配床位"
-    width="600px"
-    :close-on-click-modal="false"
-    custom-class="assign-bed-dialog"
-    @close="handleClose"
-  >
-    <div class="dialog-content">
+  <el-dialog v-model="visible" title="分配床位1" width="600px" :close-on-click-modal="false" custom-class="assign-bed-dialog"
+    @close="handleClose">
+    <div class="dialog-body">
       <!-- 人员信息 -->
       <div class="person-info">
         <h4 class="section-title">挂单人信息</h4>
@@ -36,28 +30,15 @@
         <h4 class="section-title">床位选择</h4>
         <el-form :model="form" label-width="100px">
           <el-form-item label="房间号" required>
-            <el-input
-              v-model="form.roomNumber"
-              placeholder="请输入房间号"
-              clearable
-            />
+            <el-input v-model="form.roomNumber" placeholder="请输入房间号" clearable />
           </el-form-item>
 
           <el-form-item label="床位号" required>
-            <el-input
-              v-model="form.bedNumber"
-              placeholder="请输入床位号"
-              clearable
-            />
+            <el-input v-model="form.bedNumber" placeholder="请输入床位号" clearable />
           </el-form-item>
 
           <el-form-item label="备注">
-            <el-input
-              v-model="form.remark"
-              type="textarea"
-              :rows="3"
-              placeholder="请输入备注信息（可选）"
-            />
+            <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注信息（可选）" />
           </el-form-item>
         </el-form>
       </div>
@@ -161,13 +142,33 @@ const handleSubmit = () => {
 </script>
 
 <style scoped lang="scss">
-.assign-bed-dialog {
-  .dialog-content {
-    padding: 20px;
-    max-height: 70vh;
-    overflow-y: auto;
+.dialog-body {
+  // padding: 20px;
+  max-height: 70vh;
+  /* 限制内容高度为屏幕高度的 60%，预留头部和底部空间 */
+  overflow-y: auto;
+  /* 超出部分显示滚动条 */
+  padding-right: 10px;
+  /* 右侧预留一点间距，防止滚动条遮挡内容 */
+  margin-right: -10px;
+  /* 配合 padding 保持视觉对齐 */
+
+  /* 可选：美化滚动条 (Webkit内核浏览器) */
+  &::-webkit-scrollbar {
+    width: 6px;
   }
 
+  &::-webkit-scrollbar-thumb {
+    background: #dcdfe6;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.assign-bed-dialog {
   .person-info {
     margin-bottom: 24px;
     padding: 16px;

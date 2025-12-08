@@ -42,6 +42,18 @@ const statusOptions = computed<StatusTag[]>(() => [
     type: 'default',
     icon: 'Edit'
   },
+  {
+    value: AssignmentBedStatus.CHECKED_IN,
+    label: '已入住',
+    type: 'default',
+    icon: 'User' // 建议引入 User 图标表示入住
+  },
+  {
+    value: AssignmentBedStatus.CHECKED_OUT,
+    label: '已退住',
+    type: 'default',
+    icon: 'SwitchButton' // 建议引入 SwitchButton 表示离开/结束
+  },
 ])
 
 const handleStatusChange = (value: string) => {

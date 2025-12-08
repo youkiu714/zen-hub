@@ -110,7 +110,8 @@ export const asyncRoutes: RouteRecordRaw[] = [
       {
         path: '/hall-management/bed-change-application',
         name: 'BedChangeApplication',
-        component: () => import('@/views/Order/BedChangeApplication/index.vue'),
+        // component: () => import('@/views/Order/BedChangeApplication/index.vue'),
+        component: () => import('@/views/Order/BedChangeApplication/BedExchangeList.vue'),
         meta: {
           title: '换床申请',
           icon: 'Operation'
@@ -146,7 +147,8 @@ export const asyncRoutes: RouteRecordRaw[] = [
       {
         path: '/hall-management/assignment-management',
         name: 'AssignmentManagement',
-        component: () => import('@/views/Order/AssignmentManagement/index-qwen.vue'),
+        // component: () => import('@/views/Order/AssignmentManagement/index-qwen.vue'),
+        component: () => import('@/views/Order/AssignmentManagement/AssignmentList.vue'),
         meta: {
           title: '挂单分床',
           icon: 'House'
