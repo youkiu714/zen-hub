@@ -68,7 +68,7 @@
       </div>
       <div class="table-wrapper" v-loading="loading">
         <el-table :data="tableData" stripe style="width: 100%" @selection-change="handleSelectionChange"
-          class="application-table">
+          class="assignment-table">
           <el-table-column v-if="activeTab === 'pending'" type="selection" width="55" />
 
           <template v-if="activeTab === 'pending'">
@@ -542,10 +542,29 @@ const getTypeTagType = (typeName?: string) => {
 </script>
 
 <style scoped lang="scss">
+
 .table-container {
   background-color: white;
   padding: 12px 10px;
-  border-radius: 12px;
+
+  .header-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .section-title {
+      font-size: 18px;
+      color: #8b5e3c;
+      font-weight: normal;
+      margin: 0;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+    }
+  }
 }
 
 .filter-bar {
@@ -592,7 +611,7 @@ const getTypeTagType = (typeName?: string) => {
 }
 
 
-.application-table {
+.assignment-table {
   max-height: calc(100vh - 360px);
   overflow-y: scroll;
   /* 隐藏滚动条 */
@@ -603,7 +622,7 @@ const getTypeTagType = (typeName?: string) => {
 }
 
 /* 隐藏表格的 Webkit 滚动条 */
-.application-table::-webkit-scrollbar {
+.assignment-table::-webkit-scrollbar {
   display: none;
 }
 
@@ -663,30 +682,6 @@ const getTypeTagType = (typeName?: string) => {
   // min-height: 100vh;
 }
 
-
-.table-container {
-  border-radius: 8px;
-
-  .header-action {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-
-    .section-title {
-      font-size: 18px;
-      color: #8b5e3c;
-      font-weight: normal;
-      margin: 0;
-    }
-
-    .search-box {
-      display: flex;
-      gap: 10px;
-    }
-  }
-}
-
 .date-text {
   display: flex;
   align-items: center;
@@ -723,20 +718,4 @@ const getTypeTagType = (typeName?: string) => {
   }
 }
 
-/* 覆盖 Element Plus 样式 */
-// :deep(.el-table) {
-//   --el-table-header-bg-color: #f9fafc;
-//   border-radius: 8px;
-//   overflow: hidden;
-
-//   th.el-table__cell {
-//     font-weight: 600;
-//     color: #333;
-//   }
-// }
-
-// :deep(.el-button--link) {
-//   padding: 4px 8px;
-//   height: auto;
-// }
 </style>
