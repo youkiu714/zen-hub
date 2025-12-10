@@ -168,7 +168,7 @@ const submit = async () => {
       }
 
       if (props.isEditMode && form.id) {
-        await updateRoom(form.id, payload)
+        await updateRoom(payload)
         ElMessage.success('房间更新成功')
       } else {
         await createRoom(payload)
@@ -178,7 +178,7 @@ const submit = async () => {
       emit('success')
     } catch (error) {
       console.error('保存房间失败:', error)
-      ElMessage.error(props.isEditMode ? '房间更新失败，请重试' : '房间添加失败，请重试')
+      ElMessage.error(props.isEditMode ? '房间更新失败，'+error : '房间添加失败，'+error)
     } finally {
       submitting.value = false
     }

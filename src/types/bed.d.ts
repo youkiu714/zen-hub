@@ -45,3 +45,71 @@ export interface BedAppliedItem {
   status?: number;           // 状态码
   statusName?: string;       // 状态名称 (如：审批中)
 }
+
+
+
+// 文件路径: src/types/bed.ts
+
+/**
+ * 单个床位新增/修改请求对象
+ * 对应后端: com.cecs.dto.BedUpsertRequest
+ */
+export interface BedUpsertRequest {
+  /**
+   * 主键ID
+   * - 新增时: 不传
+   * - 编辑时: 必传
+   */
+  id?: number;
+
+  /**
+   * 房间ID
+   * - 新建时: 必须
+   */
+  roomId?: number;
+
+  /**
+   * 床位号
+   * 例如: "1-上", "2-A"
+   */
+  bedNo?: string;
+
+  /**
+   * 床位类型
+   * 1 - 上铺
+   * 2 - 下铺
+   */
+  bedType?: number;
+
+  /**
+   * 床位状态
+   * 0 - 空闲
+   * 1 - 占用
+   * 2 - 锁定
+   * 3 - 待打扫
+   */
+  status?: number;
+
+  /**
+   * 任意其他扩展属性
+   */
+  [property: string]: any;
+}
+
+/**
+ * 批量床位操作请求包装类
+ * 对应后端: BedBatchUpsertRequest
+ */
+export interface BedBatchUpsertRequest {
+    /**
+     * 目标房间ID
+     */
+    roomId: number;
+
+    /**
+     * 床位列表
+     */
+    beds: BedUpsertRequest[];
+
+    [property: string]: any;
+}

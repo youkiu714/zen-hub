@@ -41,12 +41,11 @@ export const createBed = (
  * 更新床位信息
  */
 export const updateBed = (
-  id: number,
   data: UpdateBedRequest
 ): Promise<ApiResponse<number>> => {
   return request({
-    url: `/beds/${id}`,
-    method: 'PUT',
+    url: `/beds`,
+    method: 'POST',
     data,
   });
 };

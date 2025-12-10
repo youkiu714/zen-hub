@@ -74,15 +74,25 @@ const props = defineProps<{
 // 定义 emits
 const emit = defineEmits(['update:modelValue', 'submitSuccess'])
 
+
+const resetForm = () => {
+  formData.pass = true
+  formData.comment = ''
+  formData.returnReasons = []
+  formData.otherReason = ''
+}
+
 // 弹窗显隐控制
 const visible = ref(props.modelValue)
 watch(
   () => props.modelValue,
   (val) => {
     visible.value = val
+    if (val) {
+      resetForm()
+    }
   }
 )
-
 // 表单数据
 const formData = reactive({
   pass: true, // 默认通过

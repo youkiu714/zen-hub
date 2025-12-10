@@ -1,4 +1,6 @@
 import request from '@/utils/request' // 引用你上传的 request.ts
+import type { BedUpsertRequest } from '@/types/bed.d'
+
 import type { 
   BedQueryParams, 
   PageResult, 
@@ -52,3 +54,15 @@ export const submitBedChangeApply = (data: BedChangeApplyRequest) => {
     data
   });
 };
+
+
+/**
+ * 批量增加床位
+ */
+export function batchCreateBeds(data: BedBatchUpsertRequest) {
+  return request({
+    url: '/beds/batch',
+    method: 'post',
+    data
+  })
+}

@@ -85,7 +85,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="用斋选择" prop="mealPreference">
+          <el-form-item label="入住当天用斋选择" prop="mealPreference">
             <el-select v-model="form.mealPreference" placeholder="请选择所属部组" clearable>
               <el-option
                 v-for="item in mealOptions"
@@ -158,7 +158,7 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="推荐人" prop="recommenderName">
-            <el-input v-model="form.recommenderName" placeholder="请输入推荐人姓名" clearable />
+            <el-input v-model="form.recommenderName" placeholder="请输入推荐人姓名" clearable maxlength="18"/>
           </el-form-item>
         </el-col>
         <el-col :span="12">

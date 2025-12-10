@@ -11,18 +11,8 @@
       <div class="table-header">
         <span class="header-title">房间列表</span>
         <div class="search-controls">
-          <el-input
-            v-model="searchQuery"
-            placeholder="搜索房间号或类型"
-            clearable
-            prefix-icon="Search"
-            @input="handleSearch"
-          />
-          <el-select
-            v-model="selectedGender"
-            placeholder="全部房间类型"
-            @change="handleFilterChange"
-          >
+          <el-input v-model="searchQuery" placeholder="搜索房间号或类型" clearable prefix-icon="Search" @input="handleSearch" />
+          <el-select v-model="selectedGender" placeholder="全部房间类型" @change="handleFilterChange">
             <el-option label="全部房间类型" value="" />
             <el-option label="男众" :value="1" />
             <el-option label="女众" :value="2" />
@@ -31,14 +21,9 @@
         </div>
       </div>
 
-      <el-table
-        :data="filterStatus === 0 ? roomList : assignedList"
-        stripe
-        style="width: 100%"
-        :row-class-name="tableRowClassName"
-        class="room-table"
-        :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
-      >
+      <el-table :data="filterStatus === 0 ? roomList : assignedList" stripe style="width: 100%"
+        :row-class-name="tableRowClassName" class="room-table"
+        :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }">
         <!-- 未分配床位状态的列 -->
         <template v-if="filterStatus === 0">
           <el-table-column prop="roomNo" label="房间号" />
@@ -61,9 +46,8 @@
           <el-table-column label="操作" min-width="150">
             <!-- 关键：为操作列设置最小宽度 -->
             <template #default="{ row }">
-              <el-button type="primary" link @click.stop="handleBedManagement(row)"
-                >床位管理</el-button
-              >
+              <el-button type="primary" link @click.stop="handleBedManagement(row)">床位管理</el-button>
+              <el-button type="warning" link @click.stop="handleBedAdd(row)">增加床位</el-button>
               <el-button type="warning" link @click.stop="handleEditRoom(row)">编辑</el-button>
               <el-button type="danger" link @click.stop="handleToggleStatus(row)">
                 {{ row.status === 1 ? '关闭' : '启用' }}
@@ -89,28 +73,15 @@
       </el-table>
 
       <div class="pagination">
-        <span
-          >显示 {{ (currentPage - 1) * pageSize + 1 }} 至
-          {{ Math.min(currentPage * pageSize, total) }} 条，共 {{ total }} 条</span
-        >
-        <el-pagination
-          background
-          layout="prev, pager, next, jumper"
-          :total="total"
-          :page-size="pageSize"
-          :current-page="currentPage"
-          @current-change="handlePageChange"
-        />
+        <span>显示 {{ (currentPage - 1) * pageSize + 1 }} 至
+          {{ Math.min(currentPage * pageSize, total) }} 条，共 {{ total }} 条</span>
+        <el-pagination background layout="prev, pager, next, jumper" :total="total" :page-size="pageSize"
+          :current-page="currentPage" @current-change="handlePageChange" />
       </div>
     </div>
 
     <!-- 床位管理对话框 -->
-    <el-dialog
-      v-model="bedManagementDialogVisible"
-      title="床位管理"
-      width="700px"
-      @close="resetBedManagementForm"
-    >
+    <el-dialog v-model="bedManagementDialogVisible" title="床位管理" width="700px" @close="resetBedManagementForm">
       <div class="bed-management-content">
         <div class="bed-management-header">
           <h3>房间 {{ currentRoom?.roomNo }} 的床位管理</h3>
@@ -144,25 +115,15 @@
 
         <!-- 分页 -->
         <div class="pagination" style="margin-top: 20px">
-          <el-pagination
-            background
-            layout="prev, pager, next, jumper"
-            :total="bedTotal"
-            :page-size="bedPageSize"
-            :current-page="bedCurrentPage"
-            @current-change="handleBedPageChange"
-          />
+          <el-pagination background layout="prev, pager, next, jumper" :total="bedTotal" :page-size="bedPageSize"
+            :current-page="bedCurrentPage" @current-change="handleBedPageChange" />
         </div>
       </div>
     </el-dialog>
 
     <!-- 新增/编辑床位对话框 -->
-    <el-dialog
-      v-model="addBedDialogVisible"
-      :title="isBedEditMode ? '编辑床位' : '新增床位'"
-      width="500px"
-      @close="resetAddBedForm"
-    >
+    <el-dialog v-model="addBedDialogVisible" :title="isBedEditMode ? '编辑床位' : '新增床位'" width="500px"
+      @close="resetAddBedForm">
       <el-form ref="addBedFormRef" :model="addBedForm" :rules="addBedRules" label-width="100px">
         <el-form-item label="房间号" prop="roomId">
           <el-input :value="currentRoom?.roomNo" disabled />
@@ -195,12 +156,13 @@
       </template>
     </el-dialog>
 
-    <AddRoomDialog
-      v-model="addRoomDialogVisible"
-      :is-edit-mode="isEditMode"
-      :room-data="editingRoom"
-      @success="handleRoomSaved"
-    />
+    <AddRoomDialog v-model="addRoomDialogVisible" :is-edit-mode="isEditMode" :room-data="editingRoom"
+      @success="handleRoomSaved" />
+
+    <BatchAddBedDialog v-model="batchAddDialogVisible" :room-id="currentRoomForBatch.id"
+      :room-no="currentRoomForBatch.roomNo" :existing-bed-max-no="currentRoomForBatch.maxBedNo"
+      @success="handleRoomSaved" />
+
   </div>
 </template>
 
@@ -216,11 +178,20 @@ import type { IPageRoomSummaryVO, RoomSummaryVO } from '@/types/room'
 import PageHeader from '@/components/PageHeader.vue'
 import BedStatusFilter from './components/BedStatusFilter.vue'
 import AddRoomDialog from './components/AddRoomDialog.vue'
+import BatchAddBedDialog from './components/BatchAddBedDialog.vue'
 
 const pageSize = ref(5)
 
 // 床位分配状态：0-未分配床位，1-已分配床位
 const filterStatus = ref(0)
+
+// 批量新增床位相关
+const batchAddDialogVisible = ref(false)
+const currentRoomForBatch = reactive({
+  id: 0,
+  roomNo: '',
+  maxBedNo: 0 // 用于推断下一个起始号，可选实现，如果后端不返给前端，可以先传0
+})
 
 // =============== 响应式状态 ===============
 const roomList = ref<IPageRoomSummaryVO[]>([])
@@ -275,7 +246,7 @@ const statusChange = () => {
 const fetchRooms = async () => {
   try {
     const params = {
-      keyword: searchQuery.value || undefined,
+      roomNo: searchQuery.value || undefined,
       gender: selectedGender.value || undefined,
       pageNo: currentPage.value,
       pageSize: 10
@@ -397,6 +368,16 @@ const handleBedManagement = async (row: RoomSummaryVO) => {
   await loadBedList(row.id!)
 }
 
+const handleBedAdd = (row: IPageRoomSummaryVO) => {
+  currentRoomForBatch.id = row.id!;
+  currentRoomForBatch.roomNo = row.roomNo!;
+  // 简单推断：假设当前有N个床位，大概率下个号是从 N/2 + 1 开始（如果是成对的话）
+  // 或者这里如果不确定，就传 0，让组件默认从 1 开始
+  currentRoomForBatch.maxBedNo = Math.ceil((row.bedCount || 0) / 2);
+
+  batchAddDialogVisible.value = true;
+}
+
 const loadBedList = async (roomId: number) => {
   try {
     // 使用 bed API 中的 getBedsByRoomId
@@ -467,7 +448,7 @@ const submitAddBed = async () => {
 
           if (isBedEditMode.value && editingBedId.value) {
             // 编辑床位
-            const response = await updateBed(editingBedId.value, {
+            const response = await updateBed({
               ...bedData,
               id: editingBedId.value
             })
@@ -599,9 +580,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
-
-
 .room-table {
   max-height: calc(100vh - 360px);
   overflow-y: scroll;

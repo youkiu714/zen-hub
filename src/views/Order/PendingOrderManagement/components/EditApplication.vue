@@ -48,10 +48,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="用餐选择" prop="mealPreference">
+          <el-form-item label="入住当天用斋选择" prop="mealPreference">
             <el-select
               v-model="formData.mealPreference"
-              placeholder="请选择用餐类型"
+              placeholder="请选择用斋类型"
               style="width: 100%"
             >
               <el-option
