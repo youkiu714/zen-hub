@@ -97,10 +97,10 @@
               </template>
             </el-table-column>
 
-            <el-table-column prop="typeName" label="类型" min-width="100">
+            <el-table-column prop="recordTypeName" label="类型" min-width="100">
               <template #default="{ row }">
-                <el-tag v-if="row.typeName" size="small" :type="getTypeTagType(row.typeName)" effect="light">
-                  {{ row.typeName }}
+                <el-tag v-if="row.recordTypeName" size="small" :type="getTypeTagType(row.recordTypeName)" effect="light">
+                  {{ row.recordTypeName }}
                 </el-tag>
               </template>
             </el-table-column>
@@ -532,8 +532,8 @@ const handleAssignSuccess = () => {
 }
 
 // 工具函数
-const getTypeTagType = (typeName?: string) => {
-  switch (typeName) {
+const getTypeTagType = (recordTypeName?: string) => {
+  switch (recordTypeName) {
     case '新住': return 'success'
     case '换床': return 'warning'
     default: return 'info'
@@ -612,7 +612,7 @@ const getTypeTagType = (typeName?: string) => {
 
 
 .assignment-table {
-  max-height: calc(100vh - 360px);
+  max-height: calc(100vh - 370px);
   overflow-y: scroll;
   /* 隐藏滚动条 */
   scrollbar-width: none;

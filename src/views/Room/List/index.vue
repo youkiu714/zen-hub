@@ -36,6 +36,7 @@
         stripe
         style="width: 100%"
         :row-class-name="tableRowClassName"
+        class="room-table"
         :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
       >
         <!-- 未分配床位状态的列 -->
@@ -598,10 +599,79 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+
+
+.room-table {
+  max-height: calc(100vh - 360px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+/* 隐藏表格的 Webkit 滚动条 */
+.room-table::-webkit-scrollbar {
+  display: none;
+}
+
+:deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:deep(.el-table__fixed-header-wrapper) {
+  z-index: 11;
+}
+
+:deep(.el-table__fixed-right) {
+  z-index: 12;
+}
+
+:deep(.el-table__fixed-left) {
+  z-index: 12;
+}
+
+/* 隐藏表格内部各种滚动条 */
+:deep(.el-table__body-wrapper) {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+:deep(.el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏固定列的滚动条 */
+:deep(.el-table__fixed) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:deep(.el-table__fixed::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏固定列内部的滚动条 */
+:deep(.el-table__fixed .el-table__body-wrapper) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:deep(.el-table__fixed .el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
+
 .room-management-container {
   background-color: #fff8e7;
-  min-height: 100vh;
-  padding: 20px 40px;
+  /* min-height: 100vh; */
+  padding: 20px;
   box-sizing: border-box;
 }
 

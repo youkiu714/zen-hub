@@ -77,13 +77,13 @@
           <template #default="scope">
             <el-button link @click="handleView(scope.row)">查看</el-button>
             <el-button link @click="handleWorkflow(scope.row)">流程</el-button>
-            <el-button v-if="(scope.row.reviewStatus === 10 || scope.row.reviewStatus === 20) && userStore.roles == 'MASTER'" link @click="handleReview(scope.row)">审核</el-button>
-            <!-- <el-button v-if="scope.row" link @click="handleReview(scope.row)">审核</el-button> -->
+            <el-button  v-if="canReview(scope.row.reviewStatus)" link @click="handleReview(scope.row)">审核</el-button>
             <el-button v-else-if="scope.row.reviewStatus === 40" link
               @click="handleReReview(scope.row)">重新审核</el-button>
           </template>
         </el-table-column>
       </el-table>
+
 
       <!-- 分页 -->
       <div class="pagination">
@@ -245,9 +245,11 @@ const getDateRangeParams = (range: string) => {
   return { startFrom, startTo };
 };
 
-const getAvatarUrl = (row: ReviewListItemVO) => {
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(row.applicantName || '未知')}&background=random`;
-};
+const canReview = (status?: number) => {
+  // return status === 10  || status === 20 // 待审核或待法师审核
+  return (status === 10 && ( userStore.roles == 'MASTER' || userStore.roles == 'VOLUNTEER' ))
+      || (status === 20 &&  userStore.roles == 'MASTER' )
+}
 
 const getApplicationTypeTagType = (type?: number) => {
   if (type === 1) return 'success';
