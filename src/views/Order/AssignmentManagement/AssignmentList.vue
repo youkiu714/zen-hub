@@ -500,6 +500,7 @@ const handleBatchAssign = () => {
 }
 
 const handleAssign = (row: AssignmentListItemVO) => {
+  console.log(row)
   selectedPerson.value = row
   showAssignBedModal.value = true
 }

@@ -14,6 +14,8 @@ export interface AssignmentListItemVO {
   idCardMasked?: string;
   name?: string;
   personId?: number;
+  checkinDate?: string;
+  checkoutDate?: string;
   /**
    * 入住时长（checkout - checkin）
    */

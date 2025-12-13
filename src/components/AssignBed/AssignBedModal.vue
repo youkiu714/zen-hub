@@ -115,8 +115,8 @@
               </el-icon>
               入住时间
             </label>
-            <el-date-picker v-model="checkinTime" type="datetime" placeholder="选择入住时间" format="YYYY-MM-DD HH:mm:ss"
-              value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
+            <el-date-picker v-model="checkinTime" type="datetime" placeholder="选择入住时间" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" style="width: 100%" />
           </div>
           <div class="time-item">
             <label class="form-label">
@@ -125,8 +125,8 @@
               </el-icon>
               退住时间
             </label>
-            <el-date-picker v-model="checkoutTime" type="datetime" placeholder="选择退住时间" format="YYYY-MM-DD HH:mm:ss"
-              value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" />
+            <el-date-picker v-model="checkoutTime" type="datetime" placeholder="选择退住时间" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" style="width: 100%" />
           </div>
         </div>
 
@@ -235,8 +235,8 @@ const initializeData = async () => {
   selectedBed.value = undefined
   rooms.value = []
   beds.value = []
-  checkinTime.value = ''
-  checkoutTime.value = ''
+  checkinTime.value = props.selectedPerson?.checkinDate || ''
+  checkoutTime.value = props.selectedPerson?.checkoutDate || ''
   remark.value = ''
 
   // 加载楼层列表
@@ -332,35 +332,40 @@ const handleSubmit = async () => {
   }
 
   submitting.value = true
-  // try {
-  const params: AllocateBedRequest = {
-    applicationId: props.selectedPerson.applicationId,
-    bedId: selectedBed.value,
-    checkinAt: checkinTime.value,
-    checkoutAt: checkoutTime.value,
-    remark: remark.value,
-    type: 1 // 1=新住
+  try {
+    const params: AllocateBedRequest = {
+      applicationId: props.selectedPerson.applicationId,
+      bedId: selectedBed.value,
+      checkinAt: checkinTime.value,
+      checkoutAt: checkoutTime.value,
+      remark: remark.value,
+      type: 1 // 1=新住
+    }
+
+    const response = await allocateBed(params)
+
+    if (response.code === 0) {
+      ElMessage.success('床位分配成功')
+      emit('success')
+      handleClose()
+    } else {
+      ElMessage.error(response.message || '分配失败')
+    }
+  } catch (error: any) {
+    console.error('分配床位失败:', error)
+
+    // 处理具体的错误信息
+    let errorMessage = '分配床位失败，请重试'
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+
+    ElMessage.error(errorMessage)
+  } finally {
+    submitting.value = false
   }
-
-  const response = await allocateBed(params)
-  //   console.log(response);
-  // ElMessage.success('床位分配成功')
-  emit('success')
-  handleClose()
-
-  //   if (response.code === 0) {
-  //     ElMessage.success('床位分配成功')
-  //     emit('success')
-  //     handleClose()
-  //   } else {
-  //     ElMessage.error(response.message || '分配失败')
-  //   }
-  // } catch (error) {
-  //   console.error('分配床位失败:', error)
-  //   ElMessage.error('分配床位失败，请重试')
-  // } finally {
-  //   submitting.value = false
-  // }
 }
 
 // 关闭弹窗

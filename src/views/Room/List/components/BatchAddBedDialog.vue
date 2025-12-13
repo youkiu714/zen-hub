@@ -39,37 +39,42 @@
             <div class="preview-area">
                 <div class="preview-header">
                     <span>床位预览与微调 ({{ formList.length }})</span>
-                    <span class="sub-text">您可以直接修改下面的卡片内容</span>
+                    <span class="sub-text">可以直接修改卡片内的编号</span>
                 </div>
 
                 <el-scrollbar max-height="400px">
-                    <div class="cards-grid">
-                        <div v-for="(item, index) in formList" :key="index" class="bed-card"
-                            :class="{ 'is-upper': item.bedType === 1, 'is-lower': item.bedType === 2 }">
-                            <div class="card-header">
-                                <span class="index-badge">#{{ index + 1 }}</span>
-                                <el-button type="danger" circle size="small" icon="Close" text class="remove-btn"
-                                    @click="removeBed(index)" />
+                    <div class="beds-grid">
+                        <div v-for="(item, index) in formList" :key="index" class="bed-item" :class="{
+                            'bed-upper': item.bedType === 1,
+                            'bed-lower': item.bedType === 2
+                        }">
+                            <div class="close-badge" @click.stop="removeBed(index)">
+                                <el-icon>
+                                    <Close />
+                                </el-icon>
                             </div>
 
-                            <div class="card-body">
-                                <el-input v-model="item.bedNo" placeholder="床位号" class="bed-no-input">
-                                    <template #prefix><el-icon>
-                                            <Ticket />
-                                        </el-icon></template>
-                                </el-input>
+                            <div class="bed-number-wrapper">
+                                <el-input v-model="item.bedNo" placeholder="床号" size="small" class="bed-number-input" />
+                            </div>
 
-                                <el-radio-group v-model="item.bedType" size="small" class="bed-type-group">
+                            <div class="bed-type-wrapper">
+                                <el-radio-group v-model="item.bedType" size="small">
                                     <el-radio-button :label="1">上铺</el-radio-button>
                                     <el-radio-button :label="2">下铺</el-radio-button>
                                 </el-radio-group>
                             </div>
+
+                            <div class="bed-status-wrapper">
+                                <el-tag type="success" size="small" effect="light">新增</el-tag>
+                            </div>
                         </div>
 
-                        <div class="add-one-btn" @click="addOneBed">
+                        <div class="bed-item add-bed-item" @click="addOneBed">
                             <el-icon size="24">
                                 <Plus />
                             </el-icon>
+                            <span>添加</span>
                         </div>
                     </div>
                 </el-scrollbar>
@@ -83,7 +88,7 @@
                 </div>
                 <div class="actions">
                     <el-button @click="visible = false">取消</el-button>
-                    <el-button type="primary" @click="submit" :loading="submitting" color="#2c3e50">
+                    <el-button type="primary" @click="submit" :loading="submitting" color="#8B5A2B">
                         确认创建
                     </el-button>
                 </div>
@@ -93,17 +98,18 @@
 </template>
 
 <script setup lang="ts">
+// ... script 部分代码保持不变，逻辑无需修改 ...
 import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, Plus, Close, Ticket } from '@element-plus/icons-vue'
 import { batchCreateBeds } from '@/api/bed.d'
-import type { BedUpsertRequest } from '@/types/bed.d'
+import type { BedUpsertRequest } from '@/types/bed'
 
 const props = defineProps<{
     modelValue: boolean
     roomId: number
     roomNo: string
-    existingBedMaxNo?: number // 可选：传入当前房间最大的床号，用于自动计算起始值
+    existingBedMaxNo?: number
 }>()
 
 const emit = defineEmits(['update:modelValue', 'success'])
@@ -115,56 +121,43 @@ const visible = computed({
 
 const submitting = ref(false)
 
-// 配置项
 const config = reactive({
     count: 8,
     startNo: 1,
-    pattern: 'pair-cn' // pair-cn (1-上), pair-ab (1-A), single (1, 2, 3)
+    pattern: 'pair-cn'
 })
 
-// 生成的表单列表
 const formList = ref<BedUpsertRequest[]>([])
 
-// 监听弹窗打开，自动重置并生成
 watch(() => props.modelValue, (val) => {
     if (val) {
-        // 智能推断起始号：如果外部传入了 existingBedMaxNo，则 +1，否则默认为 1
         config.startNo = props.existingBedMaxNo ? props.existingBedMaxNo + 1 : 1
-        config.count = 8 // 重置默认数量
+        config.count = 8
         generatePreview()
     }
 })
 
-// 核心逻辑：生成预览列表
 const generatePreview = () => {
     const list: BedUpsertRequest[] = []
     let currentNo = config.startNo
 
     for (let i = 0; i < config.count; i++) {
         let bedNoStr = ''
-        let bedType = 1 // 默认上铺
+        let bedType = 1
 
         if (config.pattern === 'single') {
-            // 纯数字模式：1, 2, 3
             bedNoStr = `${currentNo}`
-            bedType = 1 // 默认都算下铺或者根据需求
+            bedType = 1
             currentNo++
         } else {
-            // 配对模式
-            const isEven = i % 2 === 0 // 偶数索引 (0, 2...)
-            // 逻辑：每两个床位共用一个数字编号
-            // i=0 -> num=1, 上
-            // i=1 -> num=1, 下
-            // i=2 -> num=2, 上
+            const isEven = i % 2 === 0
             const pairIndex = Math.floor(i / 2)
             const num = config.startNo + pairIndex
 
             if (isEven) {
-                // 上铺
                 bedType = 1
                 bedNoStr = config.pattern === 'pair-cn' ? `${num}-上` : `${num}-A`
             } else {
-                // 下铺
                 bedType = 2
                 bedNoStr = config.pattern === 'pair-cn' ? `${num}-下` : `${num}-B`
             }
@@ -174,13 +167,12 @@ const generatePreview = () => {
             roomId: props.roomId,
             bedNo: bedNoStr,
             bedType: bedType,
-            status: 0 // 默认空闲
+            status: 0
         })
     }
     formList.value = list
 }
 
-// 手动添加一个
 const addOneBed = () => {
     formList.value.push({
         roomId: props.roomId,
@@ -194,13 +186,11 @@ const removeBed = (index: number) => {
     formList.value.splice(index, 1)
 }
 
-// 统计辅助函数
 const countType = (type: number) => {
     return formList.value.filter(item => item.bedType === type).length
 }
 
 const submit = async () => {
-    // 简单校验
     if (formList.value.length === 0) {
         ElMessage.warning('请至少添加一个床位')
         return
@@ -216,8 +206,7 @@ const submit = async () => {
             roomId: props.roomId,
             beds: formList.value
         })
-        console.log(res);
-        
+
         ElMessage.success(`成功创建 ${formList.value.length} 个床位`)
         visible.value = false
         emit('success')
@@ -232,6 +221,7 @@ const submit = async () => {
 </script>
 
 <style scoped>
+/* 1. 顶部配置区样式 */
 .batch-bed-dialog :deep(.el-dialog__header) {
     margin-right: 0;
     border-bottom: 1px solid #f0f0f0;
@@ -239,15 +229,17 @@ const submit = async () => {
 }
 
 .config-panel {
-    background-color: #f8f9fa;
-    padding: 20px;
+    background-color: #FFF8E7;
+    /* 保持系统主色调背景 */
+    padding: 16px 20px;
     border-radius: 8px;
     margin-bottom: 20px;
+    border: 1px solid #F5F5DC;
 }
 
 .panel-header {
-    margin-bottom: 15px;
-    color: #606266;
+    margin-bottom: 12px;
+    color: #8B5A2B;
 }
 
 .generator-form :deep(.el-form-item) {
@@ -271,125 +263,133 @@ const submit = async () => {
     color: #909399;
 }
 
-/* Grid 布局核心 */
-.cards-grid {
+/* 2. 复刻 AssignBedModal 的网格布局 */
+.beds-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
     padding: 4px;
-    /* 防止阴影被裁剪 */
 }
 
-/* 乔布斯风格卡片 */
-.bed-card {
-    background: white;
-    border: 1px solid #e4e7ed;
-    border-radius: 12px;
-    padding: 12px;
-    transition: all 0.3s ease;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.bed-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #c0c4cc;
-}
-
-/* 上下铺视觉区分 */
-.bed-card.is-upper {
-    border-left: 4px solid #409eff;
-    /* 蓝色条表示上铺 */
-}
-
-.bed-card.is-lower {
-    border-left: 4px solid #67c23a;
-    /* 绿色条表示下铺 */
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.index-badge {
-    font-size: 12px;
-    color: #c0c4cc;
-    background: #f5f7fa;
-    padding: 2px 6px;
+/* 3. 卡片样式重构 - 仿照 bed-item */
+.bed-item {
+    border: 1px solid #dcdfe6;
+    /* 默认灰色边框 */
     border-radius: 4px;
-}
-
-.card-body {
+    padding: 12px 8px;
+    text-align: center;
+    position: relative;
+    background-color: #fff;
+    transition: all 0.3s;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-/* 调整输入框和按钮组样式使其更紧凑 */
-.bed-no-input :deep(.el-input__wrapper) {
+.bed-item:hover {
+    /* 悬停时加深阴影 */
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* 上铺：蓝色边框 + 浅蓝背景 */
+.bed-item.bed-upper {
+    border: 1px solid #409eff;
+    /* 四边蓝色 */
+    background-color: #ecf5ff;
+    /* 浅蓝背景，让区分更明显 */
+}
+
+/* 下铺：绿色边框 + 浅绿背景 */
+.bed-item.bed-lower {
+    border: 1px solid #67c23a;
+    /* 四边绿色 */
+    background-color: #f0f9eb;
+    /* 浅绿背景 */
+}
+
+/* 删除按钮样式 */
+.close-badge {
+    position: absolute;
+    top: -8px;
+    /* 稍微往外移一点，避免挡住边框 */
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background-color: #f56c6c;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    /* 加点阴影让它浮起来 */
+}
+
+.bed-item:hover .close-badge {
+    opacity: 1;
+}
+
+/* 内容区域微调 */
+.bed-number-wrapper {
+    /* 对应 bed-number 的位置 */
+    font-weight: bold;
+}
+
+.bed-number-input :deep(.el-input__wrapper) {
+    padding: 1px 8px;
     box-shadow: none;
     border-bottom: 1px solid #dcdfe6;
     border-radius: 0;
-    padding-left: 0;
+    text-align: center;
 }
 
-.bed-no-input :deep(.el-input__wrapper.is-focus) {
-    box-shadow: none;
-    border-bottom-color: #409eff;
+.bed-number-input :deep(.el-input__inner) {
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: #303133;
 }
 
-.bed-type-group {
-    width: 100%;
+.bed-type-wrapper {
+    /* 对应 bed-type 的位置 */
 }
 
-.bed-type-group :deep(.el-radio-button__inner) {
-    width: 50%;
-    padding: 5px 0;
-    border: none;
-    background: #f5f7fa;
-    border-radius: 4px;
-    margin: 0 2px;
+/* 调整 Radio Group 样式使其适应小卡片 */
+.bed-type-wrapper :deep(.el-radio-button__inner) {
+    padding: 5px 8px;
+    font-size: 12px;
 }
 
-.bed-type-group :deep(.el-radio-button:first-child .el-radio-button__inner) {
-    border-radius: 4px;
-}
-
-.bed-type-group :deep(.el-radio-button:last-child .el-radio-button__inner) {
-    border-radius: 4px;
-}
-
-.bed-type-group :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-    background-color: #303133;
-    /* 选中变黑，苹果风 */
-    color: white;
-    box-shadow: none;
+.bed-status-wrapper {
+    /* 对应 bed-status 的位置 */
+    margin-top: auto;
+    /* 推到底部 */
 }
 
 /* 添加按钮样式 */
-.add-one-btn {
+.add-bed-item {
     border: 1px dashed #dcdfe6;
-    border-radius: 12px;
-    display: flex;
+    cursor: pointer;
+    color: #909399;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
-    min-height: 110px;
-    color: #909399;
-    transition: all 0.2s;
+    min-height: 120px;
+    /* 保持和其他卡片差不多高度 */
 }
 
-.add-one-btn:hover {
-    border-color: #409eff;
-    color: #409eff;
-    background-color: #ecf5ff;
+.add-bed-item:hover {
+    border-color: #8B5A2B;
+    color: #8B5A2B;
+    background-color: #fdf6ec;
 }
 
+/* 底部栏 */
 .dialog-footer {
     display: flex;
     justify-content: space-between;

@@ -5,17 +5,10 @@
       <span v-if="!sidebarCollapsed" class="logo-text">挂单管理系统</span>
     </div>
     <!-- 菜单 -->
-    <el-menu
-      :default-active="activeMenu"
-      :collapse="sidebarCollapsed"
-      :unique-opened="false"
-      :default-openeds="defaultOpeneds"
-      background-color="#ffffff"
-      text-color="#1a1c1f"
-      active-text-color="#326bfb"
-      router
-    >
-      <template v-for="item in menuList" :key="item.path">
+    <el-menu :default-active="activeMenu" :collapse="sidebarCollapsed" :unique-opened="false"
+      :default-openeds="defaultOpeneds" background-color="#ffffff" text-color="#1a1c1f" active-text-color="#326bfb"
+      router>
+      <template v-for="item in filteredMenuList" :key="item.path">
         <SidebarItem :item="item" />
       </template>
     </el-menu>
@@ -26,16 +19,63 @@
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/store/modules/app'
+import { useUserStore } from '@/store/modules/user'
 import SidebarItem from './SidebarItem.vue'
 
 const route = useRoute()
 const appStore = useAppStore()
+const userStore = useUserStore()
 const sidebarCollapsed = computed(() => appStore.sidebarCollapsed)
 const activeMenu = computed(() => route.path)
+const userRoles = computed(() => userStore.roles)
+
+console.log(userRoles.value);
+
+
+// 检查用户是否有权限访问菜单项
+const hasMenuPermission = (menuItem: any): boolean => {
+  console.log(menuItem);
+  console.log(menuItem.meta?.roles);
+  if (!menuItem.meta?.roles || menuItem.meta.roles.length === 0) {
+    return true // 没有角色限制则所有人可访问
+  }
+  console.log(userRoles.value);
+  const roles1 = userRoles.value || []
+  const roles = Array.isArray(roles1) ? roles1 : [roles1];
+
+  if (!Array.isArray(roles)) {
+    console.log(roles);
+
+    console.log('如果不是数组，说明用户角色数据有问题，拒绝访问');
+
+    return false // 如果不是数组，说明用户角色数据有问题，拒绝访问
+  }
+  console.log(roles);
+  return roles.some(role => menuItem.meta.roles.includes(role))
+}
+
+// 过滤菜单列表，只显示用户有权限的菜单项
+const filteredMenuList = computed(() => {
+  return menuList.value
+    .filter(menuItem => hasMenuPermission(menuItem))
+    .map(menuItem => {
+      if (menuItem.children && menuItem.children.length > 0) {
+        return {
+          ...menuItem,
+          children: menuItem.children.filter(child => hasMenuPermission(child))
+        }
+      }
+      return menuItem
+    })
+    .filter(menuItem => {
+      // 如果父菜单没有子菜单了，也隐藏它
+      return !menuItem.children || menuItem.children.length > 0
+    })
+})
 
 // 获取所有有子菜单的父菜单路径，用于默认展开
 const defaultOpeneds = computed(() => {
-  return menuList.value
+  return filteredMenuList.value
     .filter((item) => item.children && item.children.length > 0)
     .map((item) => item.path)
 })
@@ -55,7 +95,8 @@ const menuList = ref([
     name: 'ContactApplication',
     meta: {
       title: '对接人申请界面',
-      icon: 'UserFilled'
+      icon: 'UserFilled',
+      roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
     },
     children: [
       {
@@ -63,7 +104,8 @@ const menuList = ref([
         name: 'PendingManagement',
         meta: {
           title: '挂单管理',
-          icon: 'Document'
+          icon: 'Document',
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
         }
       },
       {
@@ -71,7 +113,8 @@ const menuList = ref([
         name: 'PendingApplication',
         meta: {
           title: '挂单申请',
-          icon: 'Plus'
+          icon: 'Plus',
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
         }
       }
     ]
@@ -81,7 +124,8 @@ const menuList = ref([
     name: 'HallManagement',
     meta: {
       title: '客堂管理界面',
-      icon: 'OfficeBuilding'
+      icon: 'OfficeBuilding',
+      roles: ['VOLUNTEER', 'MASTER']
     },
     children: [
       {
@@ -147,7 +191,8 @@ const menuList = ref([
     name: 'AccommodationManagement',
     meta: {
       title: '住宿管理界面',
-      icon: 'School'
+      icon: 'School',
+      roles: ['CHECKIN_VOLUNTEER']
     },
     children: [
       {
@@ -155,7 +200,8 @@ const menuList = ref([
         name: 'AssignmentManagement',
         meta: {
           title: '挂单分床',
-          icon: 'House'
+          icon: 'House',
+          roles: ['CHECKIN_VOLUNTEER']
         }
       },
       {
@@ -163,23 +209,25 @@ const menuList = ref([
         name: 'RoomBedManagement',
         meta: {
           title: '房间及床位管理',
-          icon: 'List'
+          icon: 'List',
+          roles: ['CHECKIN_VOLUNTEER']
         }
       },
-    {
-        path: '/accommodation-management/room-bed-management-two',
-        name: 'RoomBedManagement2',
-        meta: {
-          title: '房间及床位管理2',
-          icon: 'List'
-        }
-      },
+      // {
+      //   path: '/accommodation-management/room-bed-management-two',
+      //   name: 'RoomBedManagement2',
+      //   meta: {
+      //     title: '房间及床位管理2',
+      //     icon: 'List'
+      //   }
+      // },
       {
         path: '/accommodation-management/room-bed-edit',
         name: 'RoomBedEdit',
         meta: {
           title: '房间及床位编辑',
-          icon: 'Edit'
+          icon: 'Edit',
+          roles: ['CHECKIN_VOLUNTEER']
         }
       }
     ]
@@ -189,7 +237,8 @@ const menuList = ref([
     name: 'PersonManagement',
     meta: {
       title: '人员管理界面',
-      icon: 'School'
+      icon: 'School',
+      roles: ['MASTER']
     },
     children: [
       {
@@ -198,6 +247,14 @@ const menuList = ref([
         meta: {
           title: '人员管理',
           icon: 'List'
+        }
+      },
+      {
+        path: '/person-management/checklist',
+        name: 'personManagementCheckList',
+        meta: {
+          title: '基础信息校验',
+          icon: 'CircleCheck'
         }
       }
     ]
@@ -235,17 +292,20 @@ const menuList = ref([
 
   :deep(.el-menu--collapse) {
     width: auto !important;
+
     .el-sub-menu__title {
       display: flex;
       justify-content: center;
       padding: 0;
     }
   }
+
   :deep(.el-menu-tooltip__trigger) {
     display: flex;
     justify-content: center;
     padding: 0;
   }
+
   :deep(.el-menu) {
     background-color: #ffffff !important;
     border-right: none;
@@ -433,6 +493,7 @@ const menuList = ref([
           box-shadow: none !important; // 显式移除阴影
           outline: none !important; // 显式移除焦点轮廓
           position: relative;
+
           &::before {
             // 移除左侧蓝色竖条
             content: '';

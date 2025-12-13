@@ -119,7 +119,7 @@
             </div>
             <div class="info-right" v-if="item.contactName">
               <div class="base-info-label">电话：</div>
-              <div class="base-info-value">12333</div>
+              <div class="base-info-value">{{ item.contactPhone }}</div>
             </div>
           </div>
           <div class="flex-space-between line-margin">

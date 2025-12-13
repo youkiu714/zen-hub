@@ -51,7 +51,7 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="年龄" prop="age">
-            <el-input v-model="form.age" placeholder="请输入年龄" clearable disabled />
+            <el-input v-model="form.age" placeholder="请输入年龄" clearable  disabled/>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -296,15 +296,15 @@ const rules = reactive<FormRules>({
   ],
   gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
   age: [
-    { required: true, message: '请输入年龄', trigger: 'blur' },
+    { required: true, message: '请输入年龄', trigger: 'change' },
     {
       validator: (rule, value, callback) => {
         if (!value) {
           callback(new Error('请输入年龄'))
         } else if (!/^\d+$/.test(value)) {
           callback(new Error('年龄必须是数字'))
-        } else if (parseInt(value) < 1 || parseInt(value) > 120) {
-          callback(new Error('年龄必须在1-120之间'))
+        } else if (parseInt(value) < 7 || parseInt(value) > 75) {
+          callback(new Error('年龄必须在7-75之间'))
         } else {
           callback()
         }

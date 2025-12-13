@@ -80,6 +80,7 @@ const formRef = ref<FormInstance>()
 const loadingFloors = ref(false)
 const submitting = ref(false)
 const floorList = ref<number[]>([])
+
 const form = reactive({
   id: 0,
   roomNo: '',

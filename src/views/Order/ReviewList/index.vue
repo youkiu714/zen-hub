@@ -32,7 +32,7 @@
       <!-- 表格 -->
       <el-table :data="reviewList" :stripe="true" style="width: 100%" :row-class-name="tableRowClassName"
         @row-dblclick="handleView" :fit="true" class="review-table" :loading="loading">
-        <el-table-column label="挂单人" min-width="150">
+        <el-table-column label="挂单人" min-width="150" >
           <template #default="{ row }">
             <div class="applicant-info">
               <el-avatar :size="40" class="applicant-avatar">

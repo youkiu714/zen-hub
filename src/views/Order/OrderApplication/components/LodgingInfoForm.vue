@@ -185,6 +185,21 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <el-row :gutter="20">
+        <el-col :span="24">
+          <el-form-item label="自我评价" prop="selfEvaluation">
+            <el-input
+              v-model="form.selfEvaluation"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入自我评价"
+              clearable
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
     </el-form>
   </div>
 </template>
