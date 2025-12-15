@@ -116,6 +116,8 @@ export interface FloorResponse {
 export interface RoomRequest {
   floor: number;
   gender?: number;
+  start?: string;
+  end?: string;
 }
 
 export interface RoomResponse {

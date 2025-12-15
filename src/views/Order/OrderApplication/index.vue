@@ -47,7 +47,13 @@ import BaseInfo from '@/views/Order/OrderApplication/components/BaseInfo.vue'
 import PracticeInfoForm from '@/views/Order/OrderApplication/components/PracticeInfoForm.vue'
 import LodgingInfoForm from '@/views/Order/OrderApplication/components/LodgingInfoForm.vue'
 import { applications } from '@/api/pendingOrder'
+import { useUserStore } from '@/store/modules/user'
 
+const userStore = useUserStore()
+const user = computed(() => userStore.user)
+
+console.log(user);
+console.log(user.value.department);
 const basicFormRef = ref<FormInstance>()
 const practiceFormRef = ref<FormInstance>()
 const lodgingFormRef = ref<FormInstance>()
@@ -121,7 +127,7 @@ const formData = reactive<{
     ],
     age: undefined,
     birthDate: '',
-    departmentCode: ''
+    departmentCode: user.value.department
   },
   practice: {
     refugeTakenDate: '',
@@ -145,7 +151,8 @@ const formData = reactive<{
     departureDate: '',
     mealPreference: undefined,
     returnDate: '',
-    shortStayReason: ''
+    shortStayReason: '',
+    departmentCode: user.value.department
   }
 })
 

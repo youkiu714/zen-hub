@@ -17,6 +17,7 @@ export const login = async (data: LoginForm): Promise<{ token: string; user: Use
         user: {
           id: response.userId,
           username: response.displayName || data.username,
+          department: response.departmentCode,
           email: '',
           avatar: '',
           roles: response.roleCode || ['user'],

@@ -39,6 +39,30 @@
           <span class="section-title">床位选择</span>
         </div>
 
+        <!-- 时间设置 -->
+        <div class="time-section">
+          <div class="time-item">
+            <label class="form-label">
+              <el-icon>
+                <Clock />
+              </el-icon>
+              入住时间
+            </label>
+            <el-date-picker v-model="checkinTime" type="datetime" placeholder="选择入住时间" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" style="width: 100%" @change="handleFloorChange" readonly/>
+          </div>
+          <div class="time-item">
+            <label class="form-label">
+              <el-icon>
+                <Clock />
+              </el-icon>
+              退住时间
+            </label>
+            <el-date-picker v-model="checkoutTime" type="datetime" placeholder="选择退住时间" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" style="width: 100%" @change="handleFloorChange" readonly/>
+          </div>
+        </div>
+
         <!-- 楼层选择 -->
         <div class="form-item">
           <label class="form-label">
@@ -106,29 +130,7 @@
           </div>
         </div>
 
-        <!-- 时间设置 -->
-        <div class="time-section">
-          <div class="time-item">
-            <label class="form-label">
-              <el-icon>
-                <Clock />
-              </el-icon>
-              入住时间
-            </label>
-            <el-date-picker v-model="checkinTime" type="datetime" placeholder="选择入住时间" format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD" style="width: 100%" />
-          </div>
-          <div class="time-item">
-            <label class="form-label">
-              <el-icon>
-                <Clock />
-              </el-icon>
-              退住时间
-            </label>
-            <el-date-picker v-model="checkoutTime" type="datetime" placeholder="选择退住时间" format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD" style="width: 100%" />
-          </div>
-        </div>
+       
 
         <!-- 备注 -->
         <div class="form-item">
@@ -157,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   User, House, Grid,
@@ -212,6 +214,7 @@ const beds = ref<Bed[]>([])
 const checkinTime = ref('')
 const checkoutTime = ref('')
 const remark = ref('')
+
 
 // 监听弹窗显示状态
 watch(() => props.modelValue, (newVal) => {
@@ -276,7 +279,9 @@ const handleFloorChange = async () => {
   try {
     const params: RoomRequest = {
       floor: selectedFloor.value,
-      gender: props.selectedPerson.gender
+      gender: props.selectedPerson.gender,
+      start: checkinTime.value,
+      end: checkoutTime.value
     }
     const response = await getRoomsByFloor(params)
     rooms.value = response.data || response || []
@@ -326,6 +331,9 @@ const handleBedClick = (bed: Bed) => {
 
 // 提交分配
 const handleSubmit = async () => {
+  // 【新增】第一道防线：如果正在提交中，直接阻断后续逻辑
+  if (submitting.value) return
+
   if (!props.selectedPerson || !selectedBed.value) {
     ElMessage.warning('请选择床位')
     return
@@ -343,7 +351,6 @@ const handleSubmit = async () => {
     }
 
     const response = await allocateBed(params)
-    ElMessage.success('床位分配成功')
     emit('success')
     handleClose()
   } catch (error: any) {
