@@ -16,7 +16,7 @@ export function setupRouterGuards(router: Router) {
     const userStore = useUserStore()
     const isAuthenticated = userStore.isAuthenticated
 
-    console.log('路由守卫:', { to: to.path, from: from.path, isAuthenticated })
+    // console.log('路由守卫:', { to: to.path, from: from.path, isAuthenticated })
 
     if (isAuthenticated) {
       if (to.path === '/login') {

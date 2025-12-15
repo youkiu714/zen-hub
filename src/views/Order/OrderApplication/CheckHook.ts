@@ -41,10 +41,10 @@ export const useFormValidationRules = (): FormRules => {
     
     // 紧急联系人电话校验
     'emergencyContacts.0.contactPhone': [
-      { validator: mobileValidator, trigger: 'blur', required: true }
+      { validator: mobileValidator, trigger: 'blur', required: true },
     ],
     'emergencyContacts.1.contactPhone': [
-      { validator: mobileValidator, trigger: 'blur' , required: true}
+      { validator: mobileValidator, trigger: 'blur' , required: true},
     ],
     
     // 推荐人联系方式校验

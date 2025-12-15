@@ -408,7 +408,7 @@ const handleTabChange = (tabName: string | number) => {
   checkoutNameFilter.value = ''
   checkoutRoomFilter.value = ''
   tableData.value = []
-  activeTab.value = tabNameStr as 'pending' | 'assigned' | 'checkedIn' | 'checkedOut'
+  activeTab.value = tabNameStr as 'pending' | 'assigned' | 'checked_in' | 'checked_out'
   fetchData() // 重新加载数据
 
 }
@@ -417,7 +417,8 @@ const handleTabChange = (tabName: string | number) => {
 const fetchData = async () => {
   try {
     let response
-
+    console.log(activeTab.value);
+    
     // 根据当前tab调用不同的API
     switch (activeTab.value) {
       case 'pending':
@@ -441,7 +442,7 @@ const fetchData = async () => {
         response = await getAssignedList(assignedParams)
         break
 
-      case 'checkedIn':
+      case 'checked_in':
         const checkedInParams: CheckedInRequest = {
           pageNo: pagination.value.currentPage,
           pageSize: pagination.value.pageSize,
@@ -452,7 +453,7 @@ const fetchData = async () => {
         response = await getCheckedInList(checkedInParams)
         break
 
-      case 'checkedOut':
+      case 'checked_out':
         const checkedOutParams: CheckedOutRequest = {
           pageNo: pagination.value.currentPage,
           pageSize: pagination.value.pageSize,
@@ -539,6 +540,8 @@ const handleAssign = (row: AssignmentListItemVO | AssignedLodgingVO) => {
   if (activeTab.value === 'pending') {
     selectedPerson.value = row as AssignmentListItemVO
     showAssignBedModal.value = true
+    console.log(showAssignBedModal.value);
+    
   } else {
     ElMessage.info('已分配人员无法重新分配床位')
   }

@@ -3,22 +3,13 @@
     <!-- 页面标题 -->
     <PageHeader title="退单确认" />
 
-    <FilterTab
-      v-model="filterStatus"
-      @update:modelValue="handleTabChange"
-      :statusOptions="statusOptions"
-    />
+    <FilterTab v-model="filterStatus" @update:modelValue="handleTabChange" :statusOptions="statusOptions" />
 
     <el-card class="table-card" shadow="hover">
       <el-form :model="queryForm" inline class="filter-form">
         <el-form-item label="关键词搜索">
-          <el-input
-            v-model="queryForm.keyword"
-            placeholder="申请编号、申请人姓名或房间号"
-            clearable
-            style="width: 250px"
-            @input="handleSearch"
-          >
+          <el-input v-model="queryForm.keyword" placeholder="申请编号、申请人姓名或房间号" clearable style="width: 250px"
+            @input="handleSearch">
             <template #prefix>
               <el-icon>
                 <Search />
@@ -27,32 +18,15 @@
           </el-input>
         </el-form-item>
         <el-form-item label="申请类型">
-          <el-select
-            v-model="queryForm.applicationType"
-            placeholder="全部类型"
-            clearable
-            style="width: 120px"
-            @change="handleSearch"
-          >
-            <el-option
-              v-for="item in applicationTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+          <el-select v-model="queryForm.applicationType" placeholder="全部类型" clearable style="width: 120px"
+            @change="handleSearch">
+            <el-option v-for="item in applicationTypeOptions" :key="item.value" :label="item.label"
+              :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="退单日期">
-          <el-date-picker
-            v-model="queryForm.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-            @change="handleSearch"
-          />
+          <el-date-picker v-model="queryForm.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" @change="handleSearch" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleFilter">
@@ -64,13 +38,8 @@
         </el-form-item>
       </el-form>
 
-      <el-table
-        v-loading="loading"
-        :data="tableData"
-        style="width: 100%"
-        size="large"
-        :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
-      >
+      <el-table v-loading="loading" :data="tableData" style="width: 100%" size="large" class="cancel-table"
+        :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }">
         <el-table-column label="申请人" min-width="150">
           <template #default="{ row }">
             <div class="applicant-info">
@@ -101,7 +70,7 @@
         <el-table-column prop="checkoutDate" label="原定退单" width="120" />
         <el-table-column prop="actualCheckoutDate" label="实际退单" width="120" />
         <el-table-column prop="stayDays" label="住宿天数" width="100" />
-        <el-table-column label="操作" width="220" fixed="right" >
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button @click="() => handleViewDetail(row)" link>
               查看
@@ -118,71 +87,31 @@
 
       <!-- 分页 -->
       <div v-if="total > 10" class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" />
       </div>
     </el-card>
 
-    <el-dialog
-      v-model="confirmDialogVisible"
-      title="确认退单"
-      width="520px"
-      :close-on-click-modal="false"
-      @close="handleConfirmDialogClose"
-    >
+    <el-dialog v-model="confirmDialogVisible" title="确认退单" width="520px" :close-on-click-modal="false"
+      @close="handleConfirmDialogClose">
       <el-form ref="confirmFormRef" :model="confirmForm" :rules="confirmRules" label-width="110px">
         <el-form-item label="实际退单日期" prop="actualCheckoutDate" required>
-          <el-date-picker
-            v-model="confirmForm.actualCheckoutDate"
-            type="date"
-            placeholder="请选择实际退单日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-            style="width: 100%"
-          />
+          <el-date-picker v-model="confirmForm.actualCheckoutDate" type="date" placeholder="请选择实际退单日期"
+            format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%" />
         </el-form-item>
         <el-form-item label="在寺表现" prop="performanceLevel" required>
-          <el-select
-            v-model="confirmForm.performanceLevel"
-            placeholder="请选择在寺表现"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="item in performanceOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+          <el-select v-model="confirmForm.performanceLevel" placeholder="请选择在寺表现" style="width: 100%">
+            <el-option v-for="item in performanceOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="在寺表现描述" prop="performanceRemark">
-          <el-input
-            v-model="confirmForm.performanceRemark"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入在寺表现描述"
-            maxlength="200"
-            show-word-limit
-            resize="none"
-          />
+          <el-input v-model="confirmForm.performanceRemark" type="textarea" :rows="3" placeholder="请输入在寺表现描述"
+            maxlength="200" show-word-limit resize="none" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
-          <el-input
-            v-model="confirmForm.remark"
-            type="textarea"
-            :rows="2"
-            placeholder="请输入备注信息"
-            maxlength="200"
-            show-word-limit
-            resize="none"
-          />
+          <el-input v-model="confirmForm.remark" type="textarea" :rows="2" placeholder="请输入备注信息" maxlength="200"
+            show-word-limit resize="none" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -193,11 +122,7 @@
       </template>
     </el-dialog>
     <!-- 查看详情 -->
-    <ApplicationDetailDialog
-      v-model="detailVisible"
-      :application-id="currentAppId"
-      @close="onDetailClosed"
-    />
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
   </div>
 </template>
 
@@ -456,19 +381,110 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-:deep(.el-card__body) {
-  padding: 19px;
+.table-card {
+  border-radius: 12px;
+  background-color: white;
+  padding: 12px 10px;
+
+  .header-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .section-title {
+      font-size: 18px;
+      color: #8b5e3c;
+      font-weight: normal;
+      margin: 0;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+    }
+  }
 }
+
+:deep(.el-card__body) {
+  padding: 0px;
+}
+
 :deep(.el-card__header) {
   border-bottom: 0;
   padding-bottom: 0;
 }
+
 .filter-form {
-    margin-bottom: 12px;
+  margin-bottom: 12px;
 }
-.table-card {
-  border-radius: 12px;
+
+
+.cancel-table {
+  max-height: calc(100vh - 380px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
 }
+
+/* 隐藏表格的 Webkit 滚动条 */
+.cancel-table::-webkit-scrollbar {
+  display: none;
+}
+
+:deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:deep(.el-table__fixed-header-wrapper) {
+  z-index: 11;
+}
+
+:deep(.el-table__fixed-right) {
+  z-index: 12;
+}
+
+:deep(.el-table__fixed-left) {
+  z-index: 12;
+}
+
+/* 隐藏表格内部各种滚动条 */
+:deep(.el-table__body-wrapper) {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+:deep(.el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏固定列的滚动条 */
+:deep(.el-table__fixed) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:deep(.el-table__fixed::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏固定列内部的滚动条 */
+:deep(.el-table__fixed .el-table__body-wrapper) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:deep(.el-table__fixed .el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
 .cancel-confirmation {
   padding: 20px;
 
@@ -551,8 +567,9 @@ onMounted(() => {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 20px;
-      padding-top: 20px;
+      margin-top: 5px;
+      padding-top: 5px;
+
       .pagination-info {
         color: #666;
         font-size: 14px;
@@ -593,6 +610,7 @@ onMounted(() => {
     }
   }
 }
+
 .pagination-container {
   display: flex;
   justify-content: center;

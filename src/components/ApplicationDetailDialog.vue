@@ -1,12 +1,6 @@
 <template>
-  <el-drawer
-    v-model="visible"
-    title="挂单详情"
-    width="800px"
-    class="application-detail-dialog"
-    @close="handleClose"
-    close-on-click-modal
-  >
+  <el-drawer v-model="visible" title="挂单详情" width="40%" class="application-detail-dialog" @close="handleClose"
+    close-on-click-modal>
     <template #header>
       <div class="dialog-header">
         <span class="dialog-title">挂单详情</span>
@@ -108,18 +102,15 @@
             </div>
           </div>
 
-          <div
-            class="flex-space-between line-margin"
-            v-for="(item, index) in detail?.basic?.emergencyContacts || []"
-            :key="item.id"
-          >
+          <div class="flex-space-between line-margin" v-for="(item, index) in detail?.basic?.emergencyContacts || []"
+            :key="item.id">
             <div class="info-left" v-if="item.contactName">
               <div class="base-info-label">{{ `紧急联系人${index + 1}:` }}</div>
               <div class="base-info-value">{{ item.contactName }}</div>
             </div>
             <div class="info-right" v-if="item.contactName">
               <div class="base-info-label">电话：</div>
-              <div class="base-info-value">12333</div>
+              <div class="base-info-value">{{ item.contactPhone }}</div>
             </div>
           </div>
           <div class="flex-space-between line-margin">
@@ -185,8 +176,8 @@
                 {{
                   detail?.practice?.hasTakenPrecepts
                     ? preceptsOptions.find(
-                        (item) => item.label == detail?.practice?.hasTakenPrecepts
-                      )?.text
+                      (item) => item.label == detail?.practice?.hasTakenPrecepts
+                    )?.text
                     : '无'
                 }}
               </div>
@@ -241,8 +232,8 @@
                 {{
                   detail?.lodging?.applicationType
                     ? applicationTypeOptions.find(
-                        (item) => item.value === detail?.lodging.applicationType
-                      )?.label
+                      (item) => item.value === detail?.lodging.applicationType
+                    )?.label
                     : '暂无信息'
                 }}
               </div>
@@ -253,8 +244,8 @@
                 {{
                   detail?.lodging?.departmentCode
                     ? departmentOptions.find(
-                        (item) => item.value == detail?.lodging?.departmentCode
-                      )?.label
+                      (item) => item.value == detail?.lodging?.departmentCode
+                    )?.label
                     : '其他'
                 }}
               </div>
@@ -450,6 +441,7 @@ const provinceCity = computed(() => {
 .info-right {
   width: 50%;
 }
+
 .info-fill {
   width: 100%;
 }
@@ -457,6 +449,7 @@ const provinceCity = computed(() => {
 .line-margin {
   margin-bottom: 6px;
 }
+
 .base-info-label {
   font-size: 14px;
   line-height: 20px;
@@ -464,6 +457,7 @@ const provinceCity = computed(() => {
   font-weight: 500;
   margin-bottom: 2px;
 }
+
 .base-info-value {
   font-size: 18px;
   line-height: 32px;
@@ -472,6 +466,7 @@ const provinceCity = computed(() => {
   max-height: 70px;
   overflow: auto;
 }
+
 .application-detail-dialog {
   --el-dialog-title-font-size: 18px;
   --el-dialog-title-color: #8b6546;
@@ -505,6 +500,7 @@ const provinceCity = computed(() => {
   display: flex;
   align-items: flex-start;
   margin-bottom: 20px;
+
   &-avatar {
     margin-right: 20px;
     width: 100px;
@@ -540,6 +536,7 @@ const provinceCity = computed(() => {
     margin-right: 8px;
     white-space: nowrap;
   }
+
   &-more {
     width: 90px;
   }
@@ -578,9 +575,11 @@ const provinceCity = computed(() => {
   border-bottom: 1px solid #e4e7ed !important;
   padding-bottom: 12px !important;
 }
+
 .el-descriptions__label:not(.is-bordered-label) {
   margin-right: 10px;
 }
+
 .el-descriptions__content {
   color: #222 !important;
   font-weight: 600;

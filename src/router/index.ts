@@ -48,12 +48,22 @@ export const asyncRoutes: RouteRecordRaw[] = [
     path: '/',
     name: 'Layout',
     component: () => import('@/components/Layout/index.vue'),
-    redirect: '/dashboard',
+    redirect: '/statistics',  // /dashboard
     children: [
+      // {
+      //   path: '/dashboard',
+      //   name: 'Dashboard',
+      //   component: () => import('@/views/dashboard/index.vue'),
+      //   meta: {
+      //     title: '首页',
+      //     icon: 'House',
+      //     affix: true
+      //   }
+      // },
       {
-        path: '/dashboard',
-        name: 'Dashboard',
-        component: () => import('@/views/dashboard/index.vue'),
+        path: '/statistics',
+        name: 'Statistics',
+        component: () => import('@/views/statistics/index.vue'),
         meta: {
           title: '首页',
           icon: 'House',
@@ -67,7 +77,8 @@ export const asyncRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/Order/PendingOrderManagement/index.vue'),
         meta: {
           title: '挂单管理',
-          icon: 'Document'
+          icon: 'Document',
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
         }
       },
       {
@@ -76,7 +87,9 @@ export const asyncRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/Order/OrderApplication/index.vue'),
         meta: {
           title: '挂单申请',
-          icon: 'Plus'
+          icon: 'Plus',
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
+
         }
       },
       // 客堂管理界面子菜单
@@ -110,7 +123,8 @@ export const asyncRoutes: RouteRecordRaw[] = [
       {
         path: '/hall-management/bed-change-application',
         name: 'BedChangeApplication',
-        component: () => import('@/views/Order/BedChangeApplication/index.vue'),
+        // component: () => import('@/views/Order/BedChangeApplication/index.vue'),
+        component: () => import('@/views/Order/BedChangeApplication/BedExchangeList.vue'),
         meta: {
           title: '换床申请',
           icon: 'Operation'
@@ -146,10 +160,12 @@ export const asyncRoutes: RouteRecordRaw[] = [
       {
         path: '/hall-management/assignment-management',
         name: 'AssignmentManagement',
-        component: () => import('@/views/Order/AssignmentManagement/index-qwen.vue'),
+        // component: () => import('@/views/Order/AssignmentManagement/index-qwen.vue'),
+        component: () => import('@/views/Order/AssignmentManagement/AssignmentList.vue'),
         meta: {
           title: '挂单分床',
-          icon: 'House'
+          icon: 'House',
+          roles: ['LIAISON']
         }
       },
       // 住宿管理界面子菜单 - 暂时指向现有组件
@@ -159,25 +175,27 @@ export const asyncRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/Room/Management/index.vue'),
         meta: {
           title: '房间及床位管理',
-          icon: 'List'
+          icon: 'List',
+          roles: ['LIAISON']
         }
       },
-      {
-        path: '/accommodation-management/room-bed-management2',
-        name: 'RoomBedManagement2',
-        component: () => import('@/views/RoomManagement/index.vue'),
-        meta: {
-          title: '房间及床位管理2',
-          icon: 'List'
-        }
-      },
+      // {
+      //   path: '/accommodation-management/room-bed-management2',
+      //   name: 'RoomBedManagement2',
+      //   component: () => import('@/views/RoomManagement/index.vue'),
+      //   meta: {
+      //     title: '房间及床位管理2',
+      //     icon: 'List'
+      //   }
+      // },
       {
         path: '/accommodation-management/room-bed-edit',
         name: 'RoomBedEdit',
         component: () => import('@/views/Room/List/index.vue'),
         meta: {
           title: '房间及床位编辑',
-          icon: 'Edit'
+          icon: 'Edit',
+          roles: ['LIAISON']
         }
       },
       {
@@ -196,6 +214,15 @@ export const asyncRoutes: RouteRecordRaw[] = [
         meta: {
           title: '人员管理',
           icon: 'List'
+        }
+      },
+      {
+        path: '/person-management/checklist',
+        name: 'personManagementCheckList',
+        component: () => import('@/views/Person/checklist/index.vue'),
+        meta: {
+          title: '基础信息校验',
+          icon: 'CircleCheck' // 建议使用 Element Plus 的校验类图标
         }
       }
     ]

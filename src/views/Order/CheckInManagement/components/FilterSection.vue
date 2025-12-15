@@ -87,7 +87,7 @@ const statusModel = computed({
 <style scoped lang="scss">
 .filter-section {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 12px;
 }
 </style>

@@ -301,7 +301,7 @@ const canReapply = (app: any) => {
 }
 
 .info-item {
-  flex: 1 1 30%;
+  flex: 1 1 40%;
   min-width: 200px;
   display: flex;
   align-items: center;

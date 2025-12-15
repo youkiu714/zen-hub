@@ -1,6 +1,6 @@
 <template>
-  <el-table :data="data" stripe :loading="loading" size="large"
-    :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }">
+  <el-table :data="data" :loading="loading" size="large"
+    :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }" class="checkin-table">
     <!-- 客人信息列 - 所有状态都有 -->
     <el-table-column label="客人信息" min-width="200">
       <template #default="{ row }">
@@ -223,12 +223,7 @@
 
 <script setup lang="ts">
 import {
-  Check,
-  Grid,
-  Right,
   View,
-  Calendar,
-  Operation,
   Message,
   Star
 } from '@element-plus/icons-vue'
@@ -297,6 +292,39 @@ const getActionColumnWidth = (): number => {
 </script>
 
 <style scoped lang="scss">
+.checkin-table {
+  max-height: calc(100vh - 360px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+/* 隐藏表格的 Webkit 滚动条 */
+.checkin-table::-webkit-scrollbar {
+  display: none;
+}
+/* 固定表头 */
+:deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:deep(.el-table__fixed-header-wrapper) {
+  z-index: 11;
+}
+
+:deep(.el-table__fixed-right) {
+  z-index: 12;
+}
+
+:deep(.el-table__fixed-left) {
+  z-index: 12;
+}
+
 .guest-info {
   display: flex;
   align-items: center;
