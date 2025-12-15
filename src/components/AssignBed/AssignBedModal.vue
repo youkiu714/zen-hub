@@ -1,200 +1,154 @@
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    title="分配床位"
-    width="700px"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
-    @close="handleClose"
-  >
-    <!-- 人员信息 -->
-    <div class="person-info-section">
-      <div class="info-header">
-        <el-icon class="info-icon"><User /></el-icon>
-        <span class="info-title">人员信息</span>
-      </div>
-      <div class="info-content">
-        <div class="info-item">
-          <span class="label">姓名：</span>
-          <span class="value">{{ selectedPerson?.name || '-' }}</span>
+  <el-dialog v-model="dialogVisible" title="分配床位" width="700px" :close-on-click-modal="false"
+    :close-on-press-escape="false" @close="handleClose">
+    <div class="dialog-body">
+      <!-- 人员信息 -->
+      <div class="person-info-section">
+        <div class="info-header">
+          <el-icon class="info-icon">
+            <User />
+          </el-icon>
+          <span class="info-title">人员信息</span>
         </div>
-        <div class="info-item">
-          <span class="label">性别：</span>
-          <span class="value">{{ getGenderText(selectedPerson?.gender) }}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">年龄：</span>
-          <span class="value">{{ selectedPerson?.age || '-' }}岁</span>
-        </div>
-        <div class="info-item">
-          <span class="label">身份证号：</span>
-          <span class="value">{{ selectedPerson?.idCardMasked || '-' }}</span>
+        <div class="info-content">
+          <div class="info-item">
+            <span class="label">姓名：</span>
+            <span class="value">{{ selectedPerson?.name || '-' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">性别：</span>
+            <span class="value">{{ getGenderText(selectedPerson?.gender) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">年龄：</span>
+            <span class="value">{{ selectedPerson?.age || '-' }}岁</span>
+          </div>
+          <div class="info-item">
+            <span class="label">身份证号：</span>
+            <span class="value">{{ selectedPerson?.idCardMasked || '-' }}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 分配区域 -->
-    <div class="assignment-section">
-      <div class="section-header">
-        <el-icon class="section-icon"><House /></el-icon>
-        <span class="section-title">床位选择</span>
-      </div>
+      <!-- 分配区域 -->
+      <div class="assignment-section">
+        <div class="section-header">
+          <el-icon class="section-icon">
+            <House />
+          </el-icon>
+          <span class="section-title">床位选择</span>
+        </div>
 
-      <!-- 楼层选择 -->
-      <div class="form-item">
-        <label class="form-label">
-          <el-icon><School /></el-icon>
-          楼层选择
-        </label>
-        <el-select
-          v-model="selectedFloor"
-          placeholder="请选择楼层"
-          @change="handleFloorChange"
-          :loading="loadingFloors"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="floor in floors"
-            :key="floor"
-            :label="`${floor}楼`"
-            :value="floor"
-          />
-        </el-select>
-      </div>
+        <!-- 楼层选择 -->
+        <div class="form-item">
+          <label class="form-label">
+            <el-icon>
+              <School />
+            </el-icon>
+            楼层选择
+          </label>
+          <el-select v-model="selectedFloor" placeholder="请选择楼层" @change="handleFloorChange" :loading="loadingFloors"
+            style="width: 100%">
+            <el-option v-for="floor in floors" :key="floor" :label="`${floor}楼`" :value="floor" />
+          </el-select>
+        </div>
 
-      <!-- 房间选择 -->
-      <div class="form-item">
-        <label class="form-label">
-          <el-icon><House /></el-icon>
-          房间选择
-        </label>
-        <el-select
-          v-model="selectedRoom"
-          placeholder="请选择房间"
-          @change="handleRoomChange"
-          :loading="loadingRooms"
-          :disabled="!selectedFloor"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="room in rooms"
-            :key="room.roomId"
-            :label="`${room.roomNo}房 (可用${room.capacity - room.occupiedCount}床)`"
-            :value="room.roomId"
-            :disabled="room.full"
-          >
-            <div class="room-option">
-              <span class="room-no">{{ room.roomNo }}</span>
-              <el-tag
-                :type="room.full ? 'danger' : 'success'"
-                size="small"
-                effect="light"
-              >
-                {{ room.full ? '满员' : `${room.capacity - room.occupiedCount}/${room.capacity}` }}
-              </el-tag>
-            </div>
-          </el-option>
-        </el-select>
-      </div>
+        <!-- 房间选择 -->
+        <div class="form-item">
+          <label class="form-label">
+            <el-icon>
+              <House />
+            </el-icon>
+            房间选择
+          </label>
+          <el-select v-model="selectedRoom" placeholder="请选择房间" @change="handleRoomChange" :loading="loadingRooms"
+            :disabled="!selectedFloor" style="width: 100%">
+            <el-option v-for="room in rooms" :key="room.roomId"
+              :label="`${room.roomNo}房 (可用${room.capacity - room.occupiedCount}床)`" :value="room.roomId"
+              :disabled="room.full">
+              <div class="room-option">
+                <span class="room-no">{{ room.roomNo }}</span>
+                <el-tag :type="room.full ? 'danger' : 'success'" size="small" effect="light">
+                  {{ room.full ? '满员' : `${room.capacity - room.occupiedCount}/${room.capacity}` }}
+                </el-tag>
+              </div>
+            </el-option>
+          </el-select>
+        </div>
 
-      <!-- 床位选择 -->
-      <div class="form-item">
-        <label class="form-label">
-          <el-icon><Key /></el-icon>
-          床位选择
-        </label>
-        <div v-loading="loadingBeds" class="beds-grid">
-          <div
-            v-for="bed in beds"
-            :key="bed.id"
-            class="bed-item"
-            :class="{
+        <!-- 床位选择 -->
+        <div class="form-item">
+          <label class="form-label">
+            <el-icon>
+              <Key />
+            </el-icon>
+            床位选择
+          </label>
+          <div v-loading="loadingBeds" class="beds-grid">
+            <div v-for="bed in beds" :key="bed.id" class="bed-item" :class="{
               'bed-available': bed.status === 0,
               'bed-occupied': bed.status === 1,
               'bed-locked': bed.status === 2,
               'bed-cleaning': bed.status === 3,
               'bed-selected': selectedBed === bed.id
-            }"
-            @click="handleBedClick(bed)"
-          >
-            <div class="bed-number">{{ bed.bedNo }}</div>
-            <div class="bed-type">{{ getBedTypeText(bed.bedType) }}</div>
-            <div class="bed-status">
-              <el-tag
-                :type="getBedStatusType(bed.status)"
-                size="small"
-                effect="light"
-              >
-                {{ getBedStatusText(bed.status) }}
-              </el-tag>
+            }" @click="handleBedClick(bed)">
+              <div class="bed-number">{{ bed.bedNo }}</div>
+              <div class="bed-type">{{ getBedTypeText(bed.bedType) }}</div>
+              <div class="bed-status">
+                <el-tag :type="getBedStatusType(bed.status)" size="small" effect="light">
+                  {{ getBedStatusText(bed.status) }}
+                </el-tag>
+              </div>
+            </div>
+            <div v-if="beds.length === 0" class="no-beds">
+              <el-empty description="暂无可用床位" :image-size="80" />
             </div>
           </div>
-          <div v-if="beds.length === 0" class="no-beds">
-            <el-empty description="暂无可用床位" :image-size="80" />
+        </div>
+
+        <!-- 时间设置 -->
+        <div class="time-section">
+          <div class="time-item">
+            <label class="form-label">
+              <el-icon>
+                <Clock />
+              </el-icon>
+              入住时间
+            </label>
+            <el-date-picker v-model="checkinTime" type="datetime" placeholder="选择入住时间" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" style="width: 100%" />
+          </div>
+          <div class="time-item">
+            <label class="form-label">
+              <el-icon>
+                <Clock />
+              </el-icon>
+              退住时间
+            </label>
+            <el-date-picker v-model="checkoutTime" type="datetime" placeholder="选择退住时间" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" style="width: 100%" />
           </div>
         </div>
-      </div>
 
-      <!-- 时间设置 -->
-      <div class="time-section">
-        <div class="time-item">
+        <!-- 备注 -->
+        <div class="form-item">
           <label class="form-label">
-            <el-icon><Clock /></el-icon>
-            入住时间
+            <el-icon>
+              <EditPen />
+            </el-icon>
+            备注
           </label>
-          <el-date-picker
-            v-model="checkinTime"
-            type="datetime"
-            placeholder="选择入住时间"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            style="width: 100%"
-          />
+          <el-input v-model="remark" type="textarea" :rows="3" placeholder="请输入备注信息（可选）" maxlength="200"
+            show-word-limit />
         </div>
-        <div class="time-item">
-          <label class="form-label">
-            <el-icon><Clock /></el-icon>
-            退住时间
-          </label>
-          <el-date-picker
-            v-model="checkoutTime"
-            type="datetime"
-            placeholder="选择退住时间"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            style="width: 100%"
-          />
-        </div>
-      </div>
-
-      <!-- 备注 -->
-      <div class="form-item">
-        <label class="form-label">
-          <el-icon><EditPen /></el-icon>
-          备注
-        </label>
-        <el-input
-          v-model="remark"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入备注信息（可选）"
-          maxlength="200"
-          show-word-limit
-        />
       </div>
     </div>
-
     <!-- 操作按钮 -->
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleClose">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="submitting"
-          :disabled="!selectedBed"
-          @click="handleSubmit"
-          :style="{ backgroundColor: '#8B5E3C', borderColor: '#8B5E3C' }"
-        >
+        <el-button type="primary" :loading="submitting" :disabled="!selectedBed" @click="handleSubmit"
+          :style="{ backgroundColor: '#8B5E3C', borderColor: '#8B5E3C' }">
           确认分配
         </el-button>
       </div>
@@ -261,11 +215,10 @@ const remark = ref('')
 
 // 监听弹窗显示状态
 watch(() => props.modelValue, (newVal) => {
-//   dialogVisible.value = newVal
-// console.log("props.selectedPerson:", props.selectedPerson)
-//   if (newVal && props.selectedPerson) {
-//     initializeData()
-//   }
+  dialogVisible.value = newVal
+  if (newVal && props.selectedPerson) {
+    initializeData()
+  }
 })
 
 // 监听弹窗关闭
@@ -282,8 +235,8 @@ const initializeData = async () => {
   selectedBed.value = undefined
   rooms.value = []
   beds.value = []
-  checkinTime.value = ''
-  checkoutTime.value = ''
+  checkinTime.value = props.selectedPerson?.checkinDate || ''
+  checkoutTime.value = props.selectedPerson?.checkoutDate || ''
   remark.value = ''
 
   // 加载楼层列表
@@ -350,7 +303,7 @@ const handleRoomChange = async () => {
     const response = await getBedsByRoom(params)
     console.log(response);
     console.log(response.data);
-    
+
     beds.value = response.data || response || []
     console.log(beds.value);
 
@@ -379,7 +332,7 @@ const handleSubmit = async () => {
   }
 
   submitting.value = true
-  // try {
+  try {
     const params: AllocateBedRequest = {
       applicationId: props.selectedPerson.applicationId,
       bedId: selectedBed.value,
@@ -390,29 +343,30 @@ const handleSubmit = async () => {
     }
 
     const response = await allocateBed(params)
-  //   console.log(response);
-    // ElMessage.success('床位分配成功')
+    ElMessage.success('床位分配成功')
     emit('success')
     handleClose()
+  } catch (error: any) {
+    console.error('分配床位失败:', error)
 
-  //   if (response.code === 0) {
-  //     ElMessage.success('床位分配成功')
-  //     emit('success')
-  //     handleClose()
-  //   } else {
-  //     ElMessage.error(response.message || '分配失败')
-  //   }
-  // } catch (error) {
-  //   console.error('分配床位失败:', error)
-  //   ElMessage.error('分配床位失败，请重试')
-  // } finally {
-  //   submitting.value = false
-  // }
+    // 处理具体的错误信息
+    let errorMessage = '分配床位失败，请重试'
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+
+    ElMessage.error(errorMessage)
+  } finally {
+    submitting.value = false
+  }
 }
 
 // 关闭弹窗
 const handleClose = () => {
   dialogVisible.value = false
+  emit('update:modelValue', false)
 }
 
 // 工具函数
@@ -450,6 +404,32 @@ const getBedStatusType = (status?: number) => {
 </script>
 
 <style scoped lang="scss">
+.dialog-body {
+  // padding: 20px;
+  max-height: 60vh;
+  /* 限制内容高度为屏幕高度的 60%，预留头部和底部空间 */
+  overflow-y: auto;
+  /* 超出部分显示滚动条 */
+  padding-right: 10px;
+  /* 右侧预留一点间距，防止滚动条遮挡内容 */
+  margin-right: -10px;
+  /* 配合 padding 保持视觉对齐 */
+
+  /* 可选：美化滚动条 (Webkit内核浏览器) */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #dcdfe6;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
 .person-info-section {
   background-color: #f8f9fa;
   border-radius: 8px;

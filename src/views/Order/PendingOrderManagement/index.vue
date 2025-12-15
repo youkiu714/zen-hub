@@ -23,10 +23,11 @@
       </div>
 
       <el-table :data="applications" style="width: 100%" size="large"
-        :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }"
+        :header-cell-style="{ position: 'sticky', top: 0, backgroundColor: '#f5f7fa' }"
         class="application-table" v-loading="loading">
 
-        <el-table-column prop="applicantName" label="申请人" width="120" fixed="left" />
+        <el-table-column fixed prop="applicantName" label="申请人" width="120"  />  <!-- fixed="left" -->
+        
         <!-- <el-table-column label="挂单人" min-width="150">
           <template #default="{ row }">
             <div class="applicant-info">
@@ -47,7 +48,7 @@
             <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
           </template>
         </el-table-column>
-        <el-table-column prop="mobile" label="手机号" width="130" />
+        <el-table-column prop="mobileMasked" label="手机号" width="130" />
         <el-table-column prop="applicationType" label="挂单类型" min-width="90">
           <template #default="{ row }">
             <span class="dot" :class="getApplicationTypeClass(row.applicationType)"></span>
@@ -76,10 +77,9 @@
         <el-table-column prop="days" label="挂单时长（天）" min-width="130" />
         <el-table-column prop="bedInfo" label="分配床位" width="120">
           <template #default="{ row }">
-            {{ row.bedInfo ? row.bedInfo.bedNumber : '暂未分配' }}
+            {{ row.assignedRoomNo ? row.assignedRoomNo+" ("+ row.assignedBedNo+")" : '暂未分配' }}
           </template>
         </el-table-column>
-        <el-table-column prop="days" label="挂单时长（天）" min-width="130" />
         <!-- <el-table-column label="操作" min-width="480" fixed="right">
           <template #default="{ row }">
             <el-button @click="() => handleViewDetail(row.id)" link>
@@ -135,7 +135,7 @@
                 class="action-link main-action"
                 @click="() => handleReview(row.id)"
               >
-                审核
+                流程
               </el-button>
 
               <el-button v-else link class="action-link" @click="() => handleViewDetail(row.id)">

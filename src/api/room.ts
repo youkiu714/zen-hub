@@ -52,12 +52,11 @@ export const createRoom = (
  * 更新房间
  */
 export const updateRoom = (
-  id: number,
   data: CreateRoomRequest
 ): Promise<ApiResponse<number>> => {
   return request({
-    url: `/rooms/${id}`,
-    method: 'PUT',
+    url: `/rooms`,
+    method: 'POST',
     data,
   });
 };

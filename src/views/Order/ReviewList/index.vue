@@ -1,6 +1,6 @@
 <!-- src/views/ReviewList.vue -->
 <template>
-  <div class="review-list-page">
+  <div class="review-list-container">
     <!-- 标题区 -->
     <PageHeader title="挂单审核" />
 
@@ -31,8 +31,8 @@
 
       <!-- 表格 -->
       <el-table :data="reviewList" :stripe="true" style="width: 100%" :row-class-name="tableRowClassName"
-        @row-dblclick="handleView" :fit="true" class="application-table" :loading="loading">
-        <el-table-column label="挂单人" min-width="150">
+        @row-dblclick="handleView" :fit="true" class="review-table" :loading="loading">
+        <el-table-column label="挂单人" min-width="150" >
           <template #default="{ row }">
             <div class="applicant-info">
               <el-avatar :size="40" class="applicant-avatar">
@@ -77,13 +77,13 @@
           <template #default="scope">
             <el-button link @click="handleView(scope.row)">查看</el-button>
             <el-button link @click="handleWorkflow(scope.row)">流程</el-button>
-            <!-- <el-button v-if="(scope.row.reviewStatus === 10 || scope.row.reviewStatus === 20) && userStore.roles == 'MASTER'" link @click="handleReview(scope.row)">审核</el-button> -->
-            <el-button v-if="scope.row" link @click="handleReview(scope.row)">审核</el-button>
+            <el-button  v-if="canReview(scope.row.reviewStatus)" link @click="handleReview(scope.row)">审核</el-button>
             <el-button v-else-if="scope.row.reviewStatus === 40" link
               @click="handleReReview(scope.row)">重新审核</el-button>
           </template>
         </el-table-column>
       </el-table>
+
 
       <!-- 分页 -->
       <div class="pagination">
@@ -99,7 +99,7 @@
     <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
 
     <!-- 审核 -->
-    <ReviewModal v-model="showReview" :application-id="currentAppId" @submit-success="handleReviewSuccess" />
+    <ReviewModal v-model="showReview" :application-id="currentAppId" :status="status" @submit-success="handleReviewSuccess" />
 
   </div>
 
@@ -245,9 +245,11 @@ const getDateRangeParams = (range: string) => {
   return { startFrom, startTo };
 };
 
-const getAvatarUrl = (row: ReviewListItemVO) => {
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(row.applicantName || '未知')}&background=random`;
-};
+const canReview = (status?: number) => {
+  // return status === 10  || status === 20 // 待审核或待法师审核
+  return (status === 10 && ( userStore.roles == 'MASTER' || userStore.roles == 'VOLUNTEER' ))
+      || (status === 20 &&  userStore.roles == 'MASTER' )
+}
 
 const getApplicationTypeTagType = (type?: number) => {
   if (type === 1) return 'success';
@@ -293,8 +295,9 @@ const handleReview = (row: ReviewListItemVO) => {
 
 const handleReReview = (row: ReviewListItemVO) => {
   currentItem.value = row;
+  currentAppId.value = row.id
   isViewOnly.value = false;
-  detailVisible.value = true;
+  showReview.value = true
 };
 
 const handlePageChange = (page: number) => {
@@ -308,29 +311,29 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.review-list-page {
-  padding: 20px;
-  background-color: #fdf6e3;
-  min-height: calc(100vh - 150px);
-  /* padding-bottom: 120px; */
-  /* 为底部留空间 */
-}
-
-
-
-.review-tabs {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 0 16px;
-  margin: 0 20px 30px;
-  /* 保持与表格区30px的距离 */
-}
 
 .table-container {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  padding: 12px 10px;
+
+  .header-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .section-title {
+      font-size: 18px;
+      color: #8b5e3c;
+      font-weight: normal;
+      margin: 0;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+    }
+  }
 }
 
 .filter-bar {
@@ -355,6 +358,121 @@ onMounted(() => {
   flex: 1;
   gap: 10px;
 }
+
+/* 隐藏 Webkit 浏览器的滚动条 */
+.table-container::-webkit-scrollbar {
+  display: none;
+}
+
+.applicant-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .applicant-avatar {
+    flex-shrink: 0;
+  }
+
+  .applicant-details {
+    .applicant-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .applicant-id {
+      font-size: 12px;
+      color: #999;
+    }
+  }
+}
+
+
+.review-table {
+  max-height: calc(100vh - 380px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+/* 隐藏表格的 Webkit 滚动条 */
+.review-table::-webkit-scrollbar {
+  display: none;
+}
+
+
+:deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:deep(.el-table__fixed-header-wrapper) {
+  z-index: 11;
+}
+
+:deep(.el-table__fixed-right) {
+  z-index: 12;
+}
+
+:deep(.el-table__fixed-left) {
+  z-index: 12;
+}
+
+/* 隐藏表格内部各种滚动条 */
+:deep(.el-table__body-wrapper) {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+:deep(.el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏固定列的滚动条 */
+:deep(.el-table__fixed) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:deep(.el-table__fixed::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏固定列内部的滚动条 */
+:deep(.el-table__fixed .el-table__body-wrapper) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:deep(.el-table__fixed .el-table__body-wrapper::-webkit-scrollbar) {
+  display: none;
+}
+
+
+.review-list-container {
+  padding: 20px;
+  background-color: #fdf6e3;
+  /* min-height: calc(100vh - 150px); */
+  /* padding-bottom: 120px; */
+  /* 为底部留空间 */
+}
+
+
+
+.review-tabs {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 0 16px;
+  margin: 0 20px 30px;
+  /* 保持与表格区30px的距离 */
+}
+
 
 .applicant-cell {
   display: flex;
@@ -492,36 +610,4 @@ onMounted(() => {
   color: rgb(139 90 43 / var(--tw-border-opacity, 1));
 }
 
-.application-table {
-  max-height: calc(100vh - 390px);
-  overflow-y: scroll;
-  /* 隐藏滚动条 */
-  scrollbar-width: none;
-  /* Firefox */
-  -ms-overflow-style: none;
-  /* IE 和 Edge */
-}
-
-.applicant-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  .applicant-avatar {
-    flex-shrink: 0;
-  }
-
-  .applicant-details {
-    .applicant-name {
-      font-weight: 500;
-      color: #333;
-      margin-bottom: 2px;
-    }
-
-    .applicant-id {
-      font-size: 12px;
-      color: #999;
-    }
-  }
-}
 </style>

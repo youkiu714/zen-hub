@@ -52,4 +52,5 @@ const emit = defineEmits<{
     border: 1px solid #d8b08c;
   }
 }
+
 </style>

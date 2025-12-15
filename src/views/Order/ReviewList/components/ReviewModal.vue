@@ -20,7 +20,7 @@
         <label class="form-label">审核结果</label>
         <div class="radio-group">
           <el-radio v-model="formData.pass" :label="true">
-            信息完整，提交给客堂法师审核
+            信息完整{{ props.status==10?'，提交给客堂法师审核':''}}
           </el-radio>
           <el-radio v-model="formData.pass" :label="false">
             信息不完整，退回申请人
@@ -65,14 +65,25 @@ const userStore = useUserStore()
 // 获取用户信息的响应式引用
 const currentUser = computed(() => userStore.user)
 
+console.log('角色');
+console.log(userStore.roles);
+
 // 定义 props
 const props = defineProps<{
   modelValue: boolean // 控制弹窗显隐
   applicationId: number // 申请ID
+  status: number
 }>()
 
 // 定义 emits
 const emit = defineEmits(['update:modelValue', 'submitSuccess'])
+
+const resetForm = () => {
+  formData.pass = true
+  formData.comment = ''
+  formData.returnReasons = []
+  formData.otherReason = ''
+}
 
 // 弹窗显隐控制
 const visible = ref(props.modelValue)
@@ -80,9 +91,11 @@ watch(
   () => props.modelValue,
   (val) => {
     visible.value = val
+    if (val) {
+      resetForm()
+    }
   }
 )
-
 // 表单数据
 const formData = reactive({
   pass: true, // 默认通过

@@ -1,12 +1,11 @@
 <template>
-  <div class="pending-records">
+  <div class="pending-records-container">
     <!-- 页面标题 -->
     <PageHeader title="挂单记录查询" />
 
     <!-- 搜索和筛选区域 -->
     <div class="table-container">
       <div class="filter-bar">
-
         <el-input v-model="queryForm.keyword" placeholder="请输入姓名/手机号" clearable style="width: 200px"
           @input="handleSearch">
           <template #prefix>
@@ -36,7 +35,7 @@
         </el-button>
       </div>
 
-      <el-table v-loading="loading" :data="tableData" stripe style="width: 100%" @sort-change="handleSortChange">
+      <el-table v-loading="loading" :data="tableData" stripe style="width: 100%" @sort-change="handleSortChange" class="pendingrecords-table">
         <!-- <el-table-column type="index" label="序号" width="80" />
         <el-table-column prop="name" label="姓名" width="120">
           <template #default="{ row }">
@@ -274,6 +273,10 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.pending-records-container {
+  padding: 20px;
+}
+
 .table-container {
   background-color: white;
   padding: 12px 10px;
@@ -292,42 +295,38 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-.pending-records {
-  padding: 20px;
-
-  .filter-card {
-    margin-bottom: 20px;
-  }
-
-  .table-card {
-    .name-text {
-      color: #8B5A2B;
-      font-weight: 500;
-    }
-
-    .pagination-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid #f0f0f0;
-
-      .pagination-info {
-        color: #666;
-        font-size: 14px;
-      }
-    }
-  }
-
-  .history-content {
-    text-align: center;
-    padding: 40px 20px;
-    color: #666;
-    font-size: 16px;
-  }
+.pendingrecords-table {
+  max-height: calc(100vh - 284px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
 }
 
+/* 隐藏表格的 Webkit 滚动条 */
+.pendingrecords-table::-webkit-scrollbar {
+  display: none;
+}
+/* 固定表头 */
+:deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:deep(.el-table__fixed-header-wrapper) {
+  z-index: 11;
+}
+
+:deep(.el-table__fixed-right) {
+  z-index: 12;
+}
+
+:deep(.el-table__fixed-left) {
+  z-index: 12;
+}
 
 .applicant-info {
   display: flex;

@@ -1,15 +1,15 @@
 <template>
-  <div class="renewal-review page-container">
+  <div class="renewal-review">
     <PageHeader title="续单审核" />
 
     <ApplicationStatusFilter v-model="filterStatus" @update:modelValue="handleTabChange" />
 
-    <div class="table-container-section">
+    <div class="table-container">
       <div class="filter-bar">
         <el-input v-model="currentFilters.keyword" placeholder="搜索申请人姓名或身份证号" clearable :suffix-icon="Search"
           @clear="handleKeywordInput" @keyup.enter="handleKeywordInput" style="width: 240px" />
 
-        <el-select v-model="currentFilters.type" placeholder="全部申请类型" clearable class="filter-select"
+        <el-select v-model="currentFilters.type" placeholder="全部申请类型" clearable style="width: 240px"
           @change="handleFilterChange">
           <el-option v-for="option in applicationTypeOptions" :key="option.value" :label="option.label"
             :value="option.value" />
@@ -22,7 +22,7 @@
       </div>
       <!-- 数据表格 -->
       <el-table :data="tableData" style="width: 100%" size="large" :header-cell-style="{ backgroundColor: '#f5f7fa' }"
-        class="application-table" v-loading="loading">
+        class="renewal-table" v-loading="loading">
         <!-- <el-table-column prop="applicantName" label="申请人" min-width="120" /> -->
         <el-table-column label="挂单人" min-width="150">
           <template #default="{ row }">
@@ -95,7 +95,7 @@
       </div>
     </div>
     <!-- 查看详情对话框 -->
-    <ReviewDialog v-model="reviewDialogVisible" :order-data="selectedOrder" />
+    <ReviewDialog v-model="reviewDialogVisible" :order-data="selectedOrder" @submit="handleReviewSuccess" />
   </div>
 </template>
 
@@ -112,6 +112,8 @@ import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
 import { ApplicationTypeMap, applicationTypeOptions, DepartmentMap } from '@/utils/constants'
 import { getGenderText } from '@/utils/index.ts'
 import ReviewDialog from '@/views/Order/RenewalReview/components/RenewalDetailDialog.vue'
+import { useUserStore } from '@/store/modules/user'
+const userStore = useUserStore()
 
 // 响应式数据
 const loading = ref(false)
@@ -259,7 +261,17 @@ const getDepartmentLabel = (departmentCode?: string) => {
 }
 
 const canReview = (status?: number) => {
-  return status === 10 || status === 20 // 待审核或待法师审核
+  // return status === 10  || status === 20 // 待审核或待法师审核
+  return (status === 10 && ( userStore.roles == 'MASTER' || userStore.roles == 'VOLUNTEER' ))
+      || (status === 20 &&  userStore.roles == 'MASTER' )
+}
+
+// 新增：处理审核提交成功的回调
+const handleReviewSuccess = () => {
+  // 关闭弹窗（虽然子组件已经emit了关闭，这里双重保险或用于后续逻辑）
+  reviewDialogVisible.value = false
+  // 刷新列表数据
+  fetchData()
 }
 
 // 生命周期
@@ -269,6 +281,40 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+
+.renewal-table {
+  max-height: calc(100vh - 350px);
+  overflow-y: scroll;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 和 Edge */
+}
+
+/* 隐藏表格的 Webkit 滚动条 */
+.renewal-table::-webkit-scrollbar {
+  display: none;
+}
+/* 固定表头 */
+:deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+:deep(.el-table__fixed-header-wrapper) {
+  z-index: 11;
+}
+
+:deep(.el-table__fixed-right) {
+  z-index: 12;
+}
+
+:deep(.el-table__fixed-left) {
+  z-index: 12;
+}
+
 .renewal-review {
   padding: 20px;
   background-color: #fdf6e3;
@@ -278,12 +324,6 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
-}
-
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
 }
 
 .applicant-info {
@@ -307,5 +347,22 @@ onMounted(() => {
       color: #999;
     }
   }
+}
+
+.table-container {
+  background-color: white;
+  padding: 12px 10px;
+  border-radius: 12px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* 隐藏 Webkit 浏览器的滚动条 */
+.table-container::-webkit-scrollbar {
+  display: none;
 }
 </style>
