@@ -73,12 +73,12 @@ export const getRoomOverview = (): Promise<ApiResponse<DashboardOverviewVO>> => 
 
 
 export const getRoomStatus = (
- params: {
-    start?: string;
-    end?: string;
-    floor?: number;
-    gender?: number;
-}
+  params: {
+    start?: number
+    end?: number
+    floor?: number
+    gender?: number
+  }
 ): Promise<ApiResponse<RoomStatusDashboardVO>> => {
   return request({
     url: '/dashboard/room-status',

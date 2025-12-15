@@ -148,8 +148,8 @@ const filters = ref({ dateRange: null, gender: 'all', group: '' })
 
 const genderOptions = [
   { label: '全', value: 'all' },
-  { label: '♂', value: 'M' },
-  { label: '♀', value: 'F' }
+  { label: '男', value: 'M' },
+  { label: '女', value: 'F' }
 ]
 
 const filteredMembers = computed(() => {

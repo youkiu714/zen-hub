@@ -3,7 +3,7 @@
     <PageHeader title="床位安排管理" />
     <div class="room">
       <Bed class="bed" @add-member="addMember"/>
-      <Room :selectedMembers="selectedMembers"/>
+      <Room :selectedMembers="selectedMembers" :roomStatusData="roomStatusData"/>
     </div>
   </div>
 </template>
