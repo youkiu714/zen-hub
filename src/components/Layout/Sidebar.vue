@@ -192,7 +192,7 @@ const menuList = ref([
     meta: {
       title: '住宿管理界面',
       icon: 'School',
-      roles: ['CHECKIN_VOLUNTEER']
+      roles: ['CHECKIN_VOLUNTEER','CHECKIN_MASTER']
     },
     children: [
       {
@@ -201,7 +201,7 @@ const menuList = ref([
         meta: {
           title: '挂单分床',
           icon: 'House',
-          roles: ['CHECKIN_VOLUNTEER']
+          roles: ['CHECKIN_VOLUNTEER','CHECKIN_MASTER']
         }
       },
       {
@@ -210,7 +210,7 @@ const menuList = ref([
         meta: {
           title: '房间及床位管理',
           icon: 'List',
-          roles: ['CHECKIN_VOLUNTEER']
+          roles: ['CHECKIN_VOLUNTEER','CHECKIN_MASTER']
         }
       },
       // {
@@ -227,7 +227,7 @@ const menuList = ref([
         meta: {
           title: '房间及床位编辑',
           icon: 'Edit',
-          roles: ['CHECKIN_VOLUNTEER']
+          roles: ['CHECKIN_VOLUNTEER','CHECKIN_MASTER']
         }
       }
     ]

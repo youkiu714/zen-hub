@@ -343,14 +343,9 @@ const handleSubmit = async () => {
     }
 
     const response = await allocateBed(params)
-
-    if (response.code === 0) {
-      ElMessage.success('床位分配成功')
-      emit('success')
-      handleClose()
-    } else {
-      ElMessage.error(response.message || '分配失败')
-    }
+    ElMessage.success('床位分配成功')
+    emit('success')
+    handleClose()
   } catch (error: any) {
     console.error('分配床位失败:', error)
 

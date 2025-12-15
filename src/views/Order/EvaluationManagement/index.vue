@@ -85,7 +85,7 @@
 
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="handleViewProfile(row)">
+            <el-button link type="primary" size="small" @click="handleViewDetail(row)">   <!-- handleViewProfile -->
               查看
             </el-button>
             <el-button v-if="row.status === 10" link type="info" size="small" @click="handleStartEvaluation(row)">
@@ -118,6 +118,9 @@
     <!-- 导出选项弹窗 -->
     <ExportDialog v-model:visible="exportDialog.visible" :form="exportForm" :exporting="exporting"
       @close="exportDialog.visible = false" @confirm-export="handleConfirmExport" />
+
+       <!-- 查看详情 -->
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
   </div>
 </template>
 
@@ -151,6 +154,7 @@ import {
   type PersonInfo,
 } from '@/api/review'
 
+import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
 
 // 响应式数据
 const loading = ref(false)
@@ -159,6 +163,22 @@ const exporting = ref(false)
 const activeTab = ref('pending')
 
 const filterStatus = ref(EvaluationStatus.PENDING)
+
+// 详情对话框状态
+const detailVisible = ref(false)
+const currentAppId = ref<number | null>(null)
+
+// 查看详情
+const handleViewDetail = async (row: EvaluationDetailVO) => {
+  currentAppId.value = row.applicationId
+  detailVisible.value = true
+}
+
+// 关闭详情对话框
+const onDetailClosed = () => {
+  detailVisible.value = false
+  currentAppId.value = null
+}
 
 // 搜索表单
 const searchForm = reactive({

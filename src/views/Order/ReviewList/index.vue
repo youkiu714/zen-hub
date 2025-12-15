@@ -99,7 +99,7 @@
     <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
 
     <!-- 审核 -->
-    <ReviewModal v-model="showReview" :application-id="currentAppId" @submit-success="handleReviewSuccess" />
+    <ReviewModal v-model="showReview" :application-id="currentAppId" :status="status" @submit-success="handleReviewSuccess" />
 
   </div>
 
