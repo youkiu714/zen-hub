@@ -97,9 +97,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="挂单申请类型" prop="applicationTypeOptions">
+          <el-form-item label="挂单申请类型" prop="applicationType">
             <el-select
-              v-model="form.applicationTypeOptions"
+              v-model="form.applicationType"
               placeholder="请选择挂单申请类型"
               clearable
             >
@@ -258,7 +258,7 @@ const rules = reactive<FormRules>({
   recommenderName: [{ required: true, message: '请输入推荐人姓名', trigger: 'blur' }],
   departmentCode: [{ required: true, message: '请选择所属部组', trigger: 'change' }],
   mealPreference: [{ required: true, message: '请选择用斋类型', trigger: 'change' }],
-  applicationTypeOptions: [{ required: true, message: '请申请挂单类型', trigger: 'change' }]
+  applicationType: [{ required: true, message: '请申请挂单类型', trigger: 'change' }]
 })
 
 const formRef = ref<FormInstance>()

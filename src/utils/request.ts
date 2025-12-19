@@ -10,7 +10,6 @@ export interface ApiResponse<T = any> {
   data: T
 }
 
-
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
   baseURL: '/lodging/api',
@@ -22,14 +21,14 @@ service.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     const userStore = useUserStore()
     const token = userStore.token || getToken()
-    
+
     if (token) {
       config.headers = {
         ...config.headers,
         'X-Auth-Token': token
       }
     }
-    
+
     return config
   },
   (error) => {
@@ -48,7 +47,13 @@ service.interceptors.response.use(
         if (data.code === 0) {
           return data.data
         } else {
-          return Promise.reject(new Error(data.message || '请求失败'))
+          const errorMsg = data.message || '请求失败'
+          ElMessage.error({
+            message: errorMsg,
+            duration: 5000
+          })
+          return Promise.reject(new Error(errorMsg))
+          // return Promise.reject(new Error(data.message || '请求失败'))
         }
       }
 
@@ -70,18 +75,21 @@ service.interceptors.response.use(
   },
   (error) => {
     const { response } = error
-    
+
     if (response) {
       switch (response.status) {
         case 401:
           ElMessage.error('登录已过期，请重新登录')
           const userStore = useUserStore()
           userStore.resetState()
-          router.push('/login?force=1').then(() => {
-            console.log('成功跳转到登录页')
-          }).catch(err => {
-            console.error('跳转到登录页失败:', err)
-          })
+          router
+            .push('/login?force=1')
+            .then(() => {
+              console.log('成功跳转到登录页')
+            })
+            .catch((err) => {
+              console.error('跳转到登录页失败:', err)
+            })
           break
         case 403:
           ElMessage.error('没有权限访问')
@@ -98,7 +106,7 @@ service.interceptors.response.use(
     } else {
       ElMessage.error('网络错误，请检查网络连接')
     }
-    
+
     return Promise.reject(error)
   }
 )

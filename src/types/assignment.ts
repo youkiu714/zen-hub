@@ -139,6 +139,8 @@ export interface RoomBriefVO {
 // 床位相关类型
 export interface BedRequest {
   roomId: number;
+  start: string;
+  end: string;
 }
 
 export interface BedResponse {

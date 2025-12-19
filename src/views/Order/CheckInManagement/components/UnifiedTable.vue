@@ -113,13 +113,13 @@
       </template>
     </el-table-column>
 
-    <el-table-column v-if="status === 'checked-in'" label="住宿ID" min-width="100">
+    <!-- <el-table-column v-if="status === 'checked-in'" label="住宿ID" min-width="100">
       <template #default="{ row }">
         <el-tag type="info" size="small">
           {{ row.bedStayId }}
         </el-tag>
       </template>
-    </el-table-column>
+    </el-table-column> -->
 
     <el-table-column v-if="status === 'checked-out'" label="住宿天数" min-width="100">
       <template #default="{ row }">
@@ -165,11 +165,12 @@
                 查看详情
               </el-button>
             </el-tooltip>
-            <el-tooltip content="退房处理" placement="top">
+            <!-- 暂时隐藏退房操作 -->
+            <!-- <el-tooltip content="退房处理" placement="top">
               <el-button type="danger" size="small" @click="emit('checkout', row)">
                 退房
               </el-button>
-            </el-tooltip>
+            </el-tooltip> -->
             <!-- <el-tooltip content="续单确认" placement="top">
               <el-button type="primary" size="small" circle @click="emit('renewal', row)">
                 <el-icon><Calendar /></el-icon>
@@ -356,7 +357,7 @@ const getActionColumnWidth = (): number => {
 .action-buttons {
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: center; // flex-end
 }
 
 .room-info,

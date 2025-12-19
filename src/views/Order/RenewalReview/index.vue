@@ -96,6 +96,12 @@
     </div>
     <!-- 查看详情对话框 -->
     <ReviewDialog v-model="reviewDialogVisible" :order-data="selectedOrder" @submit="handleReviewSuccess" />
+    <RenewalAuditDialog 
+      v-model="auditVisible" 
+      :order-data="currentAuditRow"
+      @success="handleAuditSuccess"
+    />
+    
   </div>
 </template>
 
@@ -111,7 +117,8 @@ import { throttle } from 'lodash-es'
 import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
 import { ApplicationTypeMap, applicationTypeOptions, DepartmentMap } from '@/utils/constants'
 import { getGenderText } from '@/utils/index.ts'
-import ReviewDialog from '@/views/Order/RenewalReview/components/RenewalDetailDialog.vue'
+import ReviewDialog from './components/RenewalDetailDialog.vue'
+import RenewalAuditDialog from './components/RenewalAuditDialog.vue'
 import { useUserStore } from '@/store/modules/user'
 const userStore = useUserStore()
 
@@ -138,6 +145,9 @@ const currentFilters = ref({
 })
 
 const tableData = ref<ExtensionReviewItem[]>([])
+
+const auditVisible = ref(false)
+const currentAuditRow = ref({})
 
 const fetchData = async () => {
   console.log('1')
@@ -230,8 +240,11 @@ const handleSizeChange = (size: number) => {
 }
 
 const handleReview = (row: ExtensionReviewItem) => {
-  selectedOrder.value = row
-  reviewDialogVisible.value = true
+  // selectedOrder.value = row
+  // reviewDialogVisible.value = true
+
+  currentAuditRow.value = row
+  auditVisible.value = true
 }
 
 const formatDateRange = (checkinDate?: string, checkoutDate?: string) => {
@@ -273,6 +286,13 @@ const handleReviewSuccess = () => {
   // 刷新列表数据
   fetchData()
 }
+const handleAuditSuccess = () => {
+  // 关闭弹窗（虽然子组件已经emit了关闭，这里双重保险或用于后续逻辑）
+  auditVisible.value = false
+  // 刷新列表数据
+  fetchData()
+}
+
 
 // 生命周期
 onMounted(() => {

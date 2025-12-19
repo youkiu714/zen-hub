@@ -29,28 +29,28 @@ const sidebarCollapsed = computed(() => appStore.sidebarCollapsed)
 const activeMenu = computed(() => route.path)
 const userRoles = computed(() => userStore.roles)
 
-console.log(userRoles.value);
+// console.log(userRoles.value);
 
 
 // 检查用户是否有权限访问菜单项
 const hasMenuPermission = (menuItem: any): boolean => {
-  console.log(menuItem);
-  console.log(menuItem.meta?.roles);
+  // console.log(menuItem);
+  // console.log(menuItem.meta?.roles);
   if (!menuItem.meta?.roles || menuItem.meta.roles.length === 0) {
     return true // 没有角色限制则所有人可访问
   }
-  console.log(userRoles.value);
+  // console.log(userRoles.value);
   const roles1 = userRoles.value || []
   const roles = Array.isArray(roles1) ? roles1 : [roles1];
 
   if (!Array.isArray(roles)) {
-    console.log(roles);
+    // console.log(roles);
 
     console.log('如果不是数组，说明用户角色数据有问题，拒绝访问');
 
     return false // 如果不是数组，说明用户角色数据有问题，拒绝访问
   }
-  console.log(roles);
+  // console.log(roles);
   return roles.some(role => menuItem.meta.roles.includes(role))
 }
 

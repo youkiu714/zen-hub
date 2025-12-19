@@ -16,167 +16,211 @@
     </template>
 
     <div class="dialog-body scrollbar-hide">
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="120px" label-position="top">
-        <div class="section-container">
-          <h4 class="section-title">审核流程</h4>
-          <div class="timeline-box">
-            <el-steps direction="vertical" :active="events.length - 1" finish-status="success">
-              <el-step v-for="(event, index) in events" :key="index">
-                <template #title>
-                  <span class="step-title">{{ event.title }}</span>
-                </template>
-                <template #description>
-                  <div class="step-content">
-                    <!-- operator 显示：如果是 'null' 或 null，显示“系统”或其他 -->
-                    <div class="step-row">
-                      操作人:
-                      <span v-if="event.operator === 'null' || !event.operator">系统</span>
-                      <span v-else>{{ getOperatorName(event.operator) }}</span>
-                    </div>
 
-                    <!-- content 有值才显示 -->
-                    <div v-if="event.comment" class="step-row">{{ event.comment }}</div>
-
-                    <!-- time 有值才显示 -->
-                    <div v-if="event.timestamp" class="step-row time">{{ event.timestamp }}</div>
+      <div class="section-container">
+        <h4 class="section-title">审核流程</h4>
+        <div class="timeline-box">
+          <el-steps direction="vertical" :active="events.length - 1" finish-status="success">
+            <el-step v-for="(event, index) in events" :key="index">
+              <template #title>
+                <span class="step-title">{{ event.title }}</span>
+              </template>
+              <template #description>
+                <div class="step-content">
+                  <!-- operator 显示：如果是 'null' 或 null，显示“系统”或其他 -->
+                  <div class="step-row">
+                    操作人:
+                    <span v-if="event.operator === 'null' || !event.operator">系统</span>
+                    <span v-else>{{ getOperatorName(event.operator) }}</span>
                   </div>
-                </template>
-              </el-step>
-            </el-steps>
-          </div>
+
+                  <!-- content 有值才显示 -->
+                  <div v-if="event.comment" class="step-row">{{ event.comment }}</div>
+
+                  <!-- time 有值才显示 -->
+                  <div v-if="event.timestamp" class="step-row time">{{ event.timestamp }}</div>
+                </div>
+              </template>
+            </el-step>
+          </el-steps>
         </div>
+      </div>
 
-        <div class="grid-layout mb-8">
-          <div class="info-card">
-            <div class="card-header">
-              <el-icon class="header-icon">
-                <User />
-              </el-icon>
-              <span class="header-text">申请人基本信息</span>
-            </div>
-            <div class="fields-grid">
-              <div class="field-item">
-                <div class="field-label">姓名</div>
-                <div class="field-value">{{ detail?.basic?.name }}</div>
-              </div>
-              <div class="field-item">
-                <div class="field-label">性别</div>
-                <div class="field-value">{{ detail?.basic?.gender == 1 ? '男' : '女' }}</div>
-              </div>
-              <div class="field-item">
-                <div class="field-label">年龄</div>
-                <div class="field-value">{{ detail?.basic?.age }}岁</div>
-              </div>
-              <div class="field-item">
-                <div class="field-label">民族</div>
-                <div class="field-value">{{ detail?.basic?.ethnic }}</div>
-              </div>
-              <div class="field-item">
-                <div class="field-label">联系电话</div>
-                <div class="field-value editable">{{ detail?.basic?.mobile }}</div>
-              </div>
-              <div class="field-item">
-                <div class="field-label">微信号</div>
-                <div class="field-value editable">{{ detail?.basic?.weChat }}</div>
-              </div>
-              <div class="field-item">
-                <div class="field-label">证件类型</div>
-                <div class="field-value">居民身份证</div>
-              </div>
-              <div class="field-item">
-                <div class="field-label">证件号码</div>
-                <div class="field-value">{{ detail?.basic?.idCard }}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="info-card">
-
-            <div class="card-header">
-              <el-icon class="header-icon">
-                <Document />
-              </el-icon>
-              <span class="header-text">续单信息</span>
-            </div>
-            <div class="fields-grid">
-              <div class="field-item">
-                <div class="field-label">原挂单日期</div>
-                <div class="field-value">
-                  <el-input v-model="formData.originalCheckoutDate" placeholder="原计划退住日期" readonly style="width: 100%"
-                    disabled />
-                </div>
-              </div>
-              <div class="field-item">
-                <div class="field-label">申请续住至</div>
-                <div class="field-value">
-                  <el-date-picker v-model="formData.requestedCheckoutDate" type="date" placeholder="年/月/日"
-                    format="YYYY/MM/DD" value-format="YYYY-MM-DD" style="width: 100%" :disabled-date="disabledDate" />
-                </div>
-              </div>
-
-              <div class="field-item full-width">
-                <div class="field-label">续住原因</div>
-                <div class="field-value">
-                  <el-input v-model="formData.reason" type="textarea" :rows="4" placeholder="请输入续住原因" maxlength="200"
-                    show-word-limit resize="none" style="width: 100%" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="info-card mb-8">
-          <div class="card-header border-b">
-            <el-icon class="header-icon text-warning">
-              <StarFilled />
+      <div class="grid-layout mb-8">
+        <div class="info-card">
+          <div class="card-header">
+            <el-icon class="header-icon">
+              <User />
             </el-icon>
-            <span class="header-text">在寺表现评价</span>
+            <span class="header-text">申请人基本信息</span>
           </div>
-          <div class="eval-body pt-4">
-            <div class="rating-grid">
-              <div class="rating-col">
-                <div class="field-label mb-2">遵守寺规情况</div>
-                <div class="rating-wrapper">
-                  <el-rate v-model="formData.scoreRules" allow-half size="large"
-                    :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
-                  <span class="rating-badge" :class="getRatingClass(formData.scoreRules)">
-                    {{ getRatingText(formData.scoreRules) }}
-                  </span>
-                </div>
-              </div>
-              <div class="rating-col">
-                <div class="field-label mb-2">参与共修情况</div>
-                <div class="rating-wrapper">
-                  <el-rate v-model="formData.scorePractice" allow-half size="large"
-                    :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
-                  <span class="rating-badge" :class="getRatingClass(formData.scorePractice)">
-                    {{ getRatingText(formData.scorePractice) }}
-                  </span>
-                </div>
-              </div>
-              <div class="rating-col">
-                <div class="field-label mb-2">日常行为表现</div>
-                <div class="rating-wrapper">
-                  <el-rate v-model="formData.scoreBehavior" allow-half size="large"
-                    :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
-                  <span class="rating-badge" :class="getRatingClass(formData.scoreBehavior)">
-                    {{ getRatingText(formData.scoreBehavior) }}
-                  </span>
-                </div>
-              </div>
+          <div class="fields-grid">
+            <div class="field-item">
+              <div class="field-label">姓名</div>
+              <div class="field-value">{{ detail?.basic?.name }}</div>
             </div>
-
-            <div class="mt-6">
-              <div class="field-label mb-2 font-medium text-gray-700">
-                详细表现描述 <span class="text-red-500">*</span>
-              </div>
-              <el-input v-model="formData.scoreRemark" type="textarea" :rows="5" class="simple-textarea"
-                placeholder="请详细描述申请人在寺期间的表现，包括遵守寺规、参与共修、日常行为等方面，此为必填项" />
-              <div class="text-xs text-gray-400 mt-2">请客观评价，此内容将作为法师审核的重要参考</div>
+            <div class="field-item">
+              <div class="field-label">性别</div>
+              <div class="field-value">{{ detail?.basic?.gender == 1 ? '男' : '女' }}</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">年龄</div>
+              <div class="field-value">{{ detail?.basic?.age }}岁</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">民族</div>
+              <div class="field-value">{{ detail?.basic?.ethnic }}</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">联系电话</div>
+              <div class="field-value editable">{{ detail?.basic?.mobile }}</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">微信号</div>
+              <div class="field-value editable">{{ detail?.basic?.weChat }}</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">证件类型</div>
+              <div class="field-value">居民身份证</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">证件号码</div>
+              <div class="field-value">{{ detail?.basic?.idCard }}</div>
             </div>
           </div>
         </div>
-      </el-form>
+
+        <div class="info-card">
+          <div class="card-header">
+            <el-icon class="header-icon">
+              <Document />
+            </el-icon>
+            <span class="header-text">续单信息</span>
+          </div>
+          <div class="fields-grid">
+            <div class="field-item">
+              <div class="field-label">原挂单编号</div>
+              <div class="field-value">GS20230615001</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">原挂单日期</div>
+              <div class="field-value">{{ props.orderData?.checkinDate }}</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">续单申请日期</div>
+              <div class="field-value">2023-07-10</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">申请续住日期</div>
+              <div class="field-value editable highlight">{{ props.orderData?.requestedCheckoutDate }}</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">续住天数</div>
+              <div class="field-value">{{ props.orderData?.stayDays }}天</div>
+            </div>
+            <div class="field-item">
+              <div class="field-label">续住目的</div>
+              <div class="field-value editable">{{ detail?.purpose }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card mb-8">
+        <div class="card-header border-b">
+          <el-icon class="header-icon text-warning">
+            <StarFilled />
+          </el-icon>
+          <span class="header-text">在寺表现评价</span>
+        </div>
+        <div class="eval-body pt-4">
+          <div class="rating-grid">
+            <div class="rating-col">
+              <div class="field-label mb-2">遵守寺规情况</div>
+              <div class="rating-wrapper">
+                <el-rate v-model="formData.scoreRules" allow-half size="large"
+                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
+                <span class="rating-badge" :class="getRatingClass(formData.scoreRules)">
+                  {{ getRatingText(formData.scoreRules) }}
+                </span>
+              </div>
+            </div>
+            <div class="rating-col">
+              <div class="field-label mb-2">参与共修情况</div>
+              <div class="rating-wrapper">
+                <el-rate v-model="formData.scorePractice" allow-half size="large"
+                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
+                <span class="rating-badge" :class="getRatingClass(formData.scorePractice)">
+                  {{ getRatingText(formData.scorePractice) }}
+                </span>
+              </div>
+            </div>
+            <div class="rating-col">
+              <div class="field-label mb-2">日常行为表现</div>
+              <div class="rating-wrapper">
+                <el-rate v-model="formData.scoreBehavior" allow-half size="large"
+                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
+                <span class="rating-badge" :class="getRatingClass(formData.scoreBehavior)">
+                  {{ getRatingText(formData.scoreBehavior) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <div class="field-label mb-2 font-medium text-gray-700">
+              详细表现描述 <span class="text-red-500">*</span>
+            </div>
+            <el-input v-model="formData.scoreRemark" type="textarea" :rows="5" class="simple-textarea"
+              placeholder="请详细描述申请人在寺期间的表现，包括遵守寺规、参与共修、日常行为等方面，此为必填项" />
+            <div class="text-xs text-gray-400 mt-2">请客观评价，此内容将作为法师审核的重要参考</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="audit-section mt-10">
+        <div class="audit-header-title">
+          <el-icon class="mr-2">
+            <Stamp />
+          </el-icon> 客堂义工审核
+        </div>
+
+        <el-form ref="formRef" :model="formData" :rules="formRules" label-position="top">
+          <div class="mb-6">
+            <div class="field-label mb-2 font-medium text-gray-700">
+              审核意见 <span class="text-red-500">*</span>
+            </div>
+            <el-input v-model="formData.comment" type="textarea" :rows="4" class="simple-textarea"
+              placeholder="请输入审核意见，结合在寺表现评价给出是否同意续单的建议，此为必填项" />
+          </div>
+
+          <div class="mb-6" style="margin-top: 20px;">
+            <div class="field-label mb-2 font-medium text-gray-700">审核结果</div>
+            <el-radio-group v-model="formData.reviewResult" class="simple-radio-group">
+              <el-radio label="approve">
+                <span class="text-gray-700 font-normal">同意续单，提交给客堂法师审核</span>
+              </el-radio>
+              <el-radio label="reject">
+                <span class="text-gray-700 font-normal">不同意续单，驳回申请</span>
+              </el-radio>
+            </el-radio-group>
+          </div>
+
+          <div v-if="formData.reviewResult === 'reject'" class="reject-box mb-6">
+            <div class="field-label mb-2 font-medium text-red-700">驳回原因</div>
+            <el-checkbox-group v-model="formData.rejectReasons" class="reject-checkbox-group">
+              <el-checkbox label="在寺表现不佳" />
+              <el-checkbox label="违反寺规" />
+              <el-checkbox label="寺院床位紧张" />
+              <el-checkbox label="其他原因" />
+            </el-checkbox-group>
+            <div v-if="formData.rejectReasons.includes('其他原因')" class="mt-3">
+              <el-input v-model="formData.otherReason" placeholder="请说明其他驳回原因" />
+            </div>
+          </div>
+        </el-form>
+      </div>
+
     </div>
 
     <div class="dialog-footer-bar">
@@ -196,46 +240,13 @@ import { reviewExtension, type ExtensionReviewParams } from '@/api/extensions'
 import { getApplicationById } from "@/api/application"
 import type { ReviewListItemVO } from '@/types/review'
 import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types'
-import { applyRenew } from '@/api/application'
 
-
-
-interface FormData {
-  originalCheckoutDate: string
-  requestedCheckoutDate: string
-  reason: string
-  scoreRules: number
-  scorePractice: number
-  scoreBehavior: number
-  scoreRemark: string
-
-}
-
-const formData = reactive<FormData>({
-  originalCheckoutDate: '',
-  requestedCheckoutDate: '',
-  reason: '',
-  scoreRules: 0,
-  scorePractice: 0,
-  scoreBehavior: 0,
-  scoreRemark: '',
-})
-
-interface Props {
+const props = defineProps<{
   modelValue: boolean
-  orderData?: {
-    id?: number
-    applicantName?: string
-    checkoutDate?: string
-    [key: string]: any
-  }
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-  submit: [data: FormData & { orderId?: number }]
+  orderData: ReviewListItemVO | null
 }>()
+
+const emit = defineEmits(['update:modelValue', 'success'])
 
 const visible = computed({
   get: () => props.modelValue,
@@ -244,11 +255,33 @@ const visible = computed({
 
 const loading = ref(false)
 const submitting = ref(false)
+const currentUser = ref('客堂义工')
 const events = ref([])
 
 const detail = ref<ApplicationDetailVO>()
 const formRef = ref<FormInstance>()
 
+interface FormData {
+  scoreRules: number
+  scorePractice: number
+  scoreBehavior: number
+  scoreRemark: string
+  reviewResult: string
+  comment: string
+  rejectReasons: string[],
+  otherReason: ''
+}
+
+const formData = reactive<FormData>({
+  scoreRules: 0,
+  scorePractice: 0,
+  scoreBehavior: 0,
+  scoreRemark: '',
+  reviewResult: 'approve',
+  comment: '',
+  rejectReasons: [] as string[],
+  otherReason: ''
+})
 
 const getRatingText = (rating: number) => {
   if (rating >= 4.5) return '优秀'
@@ -266,8 +299,8 @@ const getRatingClass = (rating: number) => {
 }
 
 const formRules: FormRules = {
-  requestedCheckoutDate: [{ required: true, message: '请选择续住日期', trigger: 'change' }],
-  reason: [{ required: true, message: '请输入续住原因', trigger: 'blur' }],
+  reviewResult: [{ required: true, message: '请选择审核结果', trigger: 'change' }],
+  comment: [{ required: true, message: '请输入审核意见', trigger: 'blur' }]
 }
 
 watch(() => props.modelValue, (val) => {
@@ -279,20 +312,22 @@ watch(() => props.modelValue, (val) => {
   }
 })
 
+
 const initData = async () => {
   if (!props.orderData) return
   loading.value = true
   try {
     Object.assign(formData, {
-      originalCheckoutDate: props.orderData.checkoutDate,
-      requestedCheckoutDate: '',
-      reason: '',
       scoreRules: 0,
       scorePractice: 0,
       scoreBehavior: 0,
       scoreRemark: '',
+      reviewResult: 'approve',
+      comment: '',
+      rejectReasons: [],
+      otherReason: ''
     })
-    const res = await getApplicationById(props.orderData?.applicationId)
+    const res = await getApplicationById(props.orderData.applicationId)
     detail.value = res
     events.value = detail.value?.timeline.map((item: any, index: number) => {
       // 反转后，最后一个元素（原数组的第一个）是最新的
@@ -314,7 +349,7 @@ const initData = async () => {
 
   } catch (error) {
     console.error(error)
-    // ElMessage.error('获取详情失败')
+    ElMessage.error('获取详情失败')
   } finally {
     loading.value = false
   }
@@ -322,17 +357,6 @@ const initData = async () => {
   nextTick(() => {
     formRef.value?.clearValidate()
   })
-}
-
-// 禁用日期 - 只能选择原退住日期之后的日期
-const disabledDate = (time: Date) => {
-  if (!formData.originalCheckoutDate) return false
-
-  const originalDate = new Date(formData.originalCheckoutDate)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  return time.getTime() <= Math.max(originalDate.getTime(), today.getTime())
 }
 
 const getOperatorName = (operatorId) => {
@@ -343,13 +367,14 @@ const getOperatorName = (operatorId) => {
 }
 
 const resetForms = () => {
-  formData.originalCheckoutDate = ''
-  formData.requestedCheckoutDate = ''
-  formData.reason = ''
   formData.scoreRules = 0
   formData.scorePractice = 0
   formData.scoreBehavior = 0
   formData.scoreRemark = ''
+  formData.comment = ''
+  formData.reviewResult = 'approve'
+  formData.rejectReasons = []
+  formData.otherReason = ''
 }
 
 const handleSubmit = async () => {
@@ -358,29 +383,51 @@ const handleSubmit = async () => {
     return
   }
 
+  if (formData.reviewResult === 'reject' && formData.rejectReasons.length === 0) {
+    ElMessage.warning('请选择驳回原因')
+    return
+  }
+
+  if (formData.comment.trim() === '') {
+    ElMessage.warning('请填写审核意见')
+    return
+  }
+
   submitting.value = true
   try {
+    // 构造 comment
+    let finalComment = formData.comment
 
-    const applicationId = props.orderData?.applicationId
+    if (formData.reviewResult === 'reject') {
+      const reasonList = [...formData.rejectReasons]
+      if (formData.otherReason) {
+        reasonList.push(`其他：${formData.otherReason}`)
+      }
+
+      if (reasonList.length > 0) {
+        const reasonStr = reasonList.join('；')
+        finalComment = `[驳回原因：${reasonStr}] ${finalComment}`
+      }
+    }
+
     // 构造参数
     const params: ExtensionReviewParams = {
+      pass: formData.reviewResult === 'approve',
+      comment: finalComment,
       scoreRules: formData.scoreRules,
       scorePractice: formData.scorePractice,
       scoreBehavior: formData.scoreBehavior,
       scoreRemark: formData.scoreRemark,
     }
-    const submitData = {
-      ...formData,
-      applicationId
-    }
-    await applyRenew(submitData)
 
-    ElMessage.success('续住申请提交成功，请等待审核结果')
+    await reviewExtension(props.orderData.id, params)
+
+    ElMessage.success('操作成功')
     visible.value = false
     emit('success')
   } catch (error) {
     console.error(error)
-    // ElMessage.error('操作失败')
+    ElMessage.error('操作失败')
   } finally {
     submitting.value = false
   }
@@ -530,7 +577,7 @@ $shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 /* --- Grid 信息 --- */
 .grid-layout {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 32px;
   margin-bottom: 32px;
 }
@@ -575,10 +622,6 @@ $shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 .field-item {
   display: flex;
   flex-direction: column;
-}
-
-.fields-grid .field-item.full-width {
-  grid-column: span 2;
 }
 
 .field-label {

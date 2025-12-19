@@ -7,10 +7,10 @@
       
       <div class="welcome-section text-center mb-16 animate-fade-in-up">
         <h1 class="system-title text-5xl md:text-6xl font-bold mb-4 tracking-wider" style="font-family: 'Noto Serif SC', serif;">
-          云来集
+          挂单住宿管理系统
         </h1>
         <p class="system-subtitle text-xl md:text-2xl opacity-90 font-light tracking-widest mb-8">
-          挂单住宿管理系统
+          
         </p>
         <div class="date-info inline-flex items-center space-x-4 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full text-sm md:text-base font-medium border border-white/20">
           <span>{{ currentDate }}</span>
@@ -82,7 +82,7 @@ const bgImageUrl = 'https://images.unsplash.com/photo-1600696714003-228f79c9d935
 
 const allActions = [
   {
-    title: '挂单登记',
+    title: '挂单申请',
     desc: '新到人员信息录入',
     path: '/contact-application/pending-application', // 对应路由
     icon: EditPen,
@@ -91,12 +91,12 @@ const allActions = [
     rgb: '251, 249, 201' // 用于背景透明度计算
   },
   {
-    title: '挂单管理',
-    desc: '查看与管理申请列表',
-    path: '/contact-application/pending-management',
-    icon: List,
-    roles: ['LIAISON', 'VOLUNTEER', 'MASTER'], // 对接人专属
-    hex: '#E4FBE9', // 浅绿
+    title: '挂单审核',
+    desc: '审批挂单申请',
+    path: '/hall-management/pending-review',
+    icon: Check,
+    roles: ['VOLUNTEER', 'MASTER'], // 客堂管理专属
+    hex: '#E4FBE9', 
     rgb: '228, 251, 233'
   },
   {
@@ -109,12 +109,12 @@ const allActions = [
     rgb: '223, 234, 252'
   },
   // {
-  //   title: '挂单审核',
-  //   desc: '审批挂单申请',
-  //   path: '/hall-management/pending-review',
-  //   icon: Check,
-  //   roles: ['VOLUNTEER', 'MASTER'], // 客堂管理专属
-  //   hex: '#E4FBE9', 
+  //   title: '挂单管理',
+  //   desc: '查看与管理申请列表',
+  //   path: '/contact-application/pending-management',
+  //   icon: List,
+  //   roles: ['LIAISON', 'VOLUNTEER', 'MASTER'], // 对接人专属
+  //   hex: '#E4FBE9', // 浅绿
   //   rgb: '228, 251, 233'
   // },
   // {

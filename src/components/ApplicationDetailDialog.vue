@@ -344,7 +344,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { ApplicationDetailVO } from './types' // 假设接口定义在同级 types.ts
+import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types'
 import { getApplicationById } from '@/api/application'
 import { regionData } from 'element-china-area-data'
 

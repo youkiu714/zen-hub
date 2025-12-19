@@ -99,7 +99,7 @@ const handleScroll = () => {
 const formData = reactive<{
   basic: BasicInfo
   practice: PracticeInfo
-  lodging: LodgingInfo & { agreement: boolean; selfEvaluation?: string }
+  lodging: LodgingInfo & { agreement: boolean; }
 }>({
   basic: {
     name: '',
@@ -199,8 +199,8 @@ const _handleSubmit = async () => {
     return
   }
 
-  const { selfEvaluation, agreement, ...lodgingData } = formData.lodging
-
+  // const { selfEvaluation, agreement, ...lodgingData } = formData.lodging
+  const { agreement, ...lodgingData } = formData.lodging
   const payload: ApplicationSubmitRequest = {
     basic: { ...formData.basic },
     practice: { ...formData.practice },

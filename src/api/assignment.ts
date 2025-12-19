@@ -70,6 +70,7 @@ export const getBedsByRoom = (params: BedRequest): Promise<BedResponse> => {
   return request({
     url: `/beds/by-room/${params.roomId}`,
     method: 'GET',
+    params
   })
 };
 
