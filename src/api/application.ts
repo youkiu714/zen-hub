@@ -23,6 +23,10 @@ export function getApplicationById(id: number) {
   return request.get<Request<ApplicationDetailVO>>(`/apply/applications/${id}`)
 }
 
+export function getVolunteerPerformanceById(id: number) {
+  return request.get<Request<ApplicationDetailVO>>(`extensions/${id}/volunteer-performance`)
+}
+
 // 取消申请
 export function cancelApplication(id: number) {
   return request.post<Request<any>>(`/apply/${id}/cancel`)

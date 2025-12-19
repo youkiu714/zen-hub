@@ -4,7 +4,7 @@
     <template #header="{ close }">
       <div class="custom-dialog-header">
         <div class="header-left">
-          <span class="title-text">续单申请详情</span>
+          <span class="title-text">续单申请审核</span>
           <!-- <span class="sub-id">- XS20230615001</span> -->
         </div>
         <button class="close-btn" @click="close">
@@ -17,7 +17,7 @@
 
     <div class="dialog-body scrollbar-hide">
 
-      <div class="section-container">
+      <!-- <div class="section-container">
         <h4 class="section-title">审核流程</h4>
         <div class="timeline-box">
           <el-steps direction="vertical" :active="events.length - 1" finish-status="success">
@@ -27,24 +27,22 @@
               </template>
               <template #description>
                 <div class="step-content">
-                  <!-- operator 显示：如果是 'null' 或 null，显示“系统”或其他 -->
+                 
                   <div class="step-row">
                     操作人:
                     <span v-if="event.operator === 'null' || !event.operator">系统</span>
                     <span v-else>{{ getOperatorName(event.operator) }}</span>
                   </div>
 
-                  <!-- content 有值才显示 -->
                   <div v-if="event.comment" class="step-row">{{ event.comment }}</div>
 
-                  <!-- time 有值才显示 -->
                   <div v-if="event.timestamp" class="step-row time">{{ event.timestamp }}</div>
                 </div>
               </template>
             </el-step>
           </el-steps>
         </div>
-      </div>
+      </div> -->
 
       <div class="grid-layout mb-8">
         <div class="info-card">
@@ -139,7 +137,7 @@
               <div class="field-label mb-2">遵守寺规情况</div>
               <div class="rating-wrapper">
                 <el-rate v-model="formData.scoreRules" allow-half size="large"
-                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
+                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" disabled />
                 <span class="rating-badge" :class="getRatingClass(formData.scoreRules)">
                   {{ getRatingText(formData.scoreRules) }}
                 </span>
@@ -149,7 +147,7 @@
               <div class="field-label mb-2">参与共修情况</div>
               <div class="rating-wrapper">
                 <el-rate v-model="formData.scorePractice" allow-half size="large"
-                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
+                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" disabled/>
                 <span class="rating-badge" :class="getRatingClass(formData.scorePractice)">
                   {{ getRatingText(formData.scorePractice) }}
                 </span>
@@ -159,7 +157,7 @@
               <div class="field-label mb-2">日常行为表现</div>
               <div class="rating-wrapper">
                 <el-rate v-model="formData.scoreBehavior" allow-half size="large"
-                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" />
+                  :colors="['#99A9BF', '#F7BA2A', '#FF9F0A']" disabled/>
                 <span class="rating-badge" :class="getRatingClass(formData.scoreBehavior)">
                   {{ getRatingText(formData.scoreBehavior) }}
                 </span>
@@ -169,11 +167,12 @@
 
           <div class="mt-6">
             <div class="field-label mb-2 font-medium text-gray-700">
-              详细表现描述 <span class="text-red-500">*</span>
+              详细表现描述 <span class="text-red-500">：</span>
             </div>
-            <el-input v-model="formData.scoreRemark" type="textarea" :rows="5" class="simple-textarea"
+            <div >{{ formData.scoreRemark }}</div>
+            <!-- <el-input v-model="formData.scoreRemark" type="textarea" :rows="5" class="simple-textarea"
               placeholder="请详细描述申请人在寺期间的表现，包括遵守寺规、参与共修、日常行为等方面，此为必填项" />
-            <div class="text-xs text-gray-400 mt-2">请客观评价，此内容将作为法师审核的重要参考</div>
+            <div class="text-xs text-gray-400 mt-2">请客观评价，此内容将作为法师审核的重要参考</div> -->
           </div>
         </div>
       </div>
@@ -198,15 +197,15 @@
             <div class="field-label mb-2 font-medium text-gray-700">审核结果</div>
             <el-radio-group v-model="formData.reviewResult" class="simple-radio-group">
               <el-radio label="approve">
-                <span class="text-gray-700 font-normal">同意续单，提交给客堂法师审核</span>
+                <span class="text-gray-700 font-normal">同意</span>
               </el-radio>
               <el-radio label="reject">
-                <span class="text-gray-700 font-normal">不同意续单，驳回申请</span>
+                <span class="text-gray-700 font-normal">拒绝</span>
               </el-radio>
             </el-radio-group>
           </div>
 
-          <div v-if="formData.reviewResult === 'reject'" class="reject-box mb-6">
+          <!-- <div v-if="formData.reviewResult === 'reject'" class="reject-box mb-6">
             <div class="field-label mb-2 font-medium text-red-700">驳回原因</div>
             <el-checkbox-group v-model="formData.rejectReasons" class="reject-checkbox-group">
               <el-checkbox label="在寺表现不佳" />
@@ -217,7 +216,7 @@
             <div v-if="formData.rejectReasons.includes('其他原因')" class="mt-3">
               <el-input v-model="formData.otherReason" placeholder="请说明其他驳回原因" />
             </div>
-          </div>
+          </div> -->
         </el-form>
       </div>
 
@@ -237,7 +236,7 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { User, Document, StarFilled, Stamp, Download, Close } from '@element-plus/icons-vue'
 import { reviewExtension, type ExtensionReviewParams } from '@/api/extensions'
-import { getApplicationById } from "@/api/application"
+import { getApplicationById, getVolunteerPerformanceById } from "@/api/application"
 import type { ReviewListItemVO } from '@/types/review'
 import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types'
 
@@ -353,6 +352,27 @@ const initData = async () => {
   } finally {
     loading.value = false
   }
+
+
+  try {
+    const res = await getVolunteerPerformanceById(props.orderData.id)
+    console.log(res);
+    formData.scoreRules = res.scoreRules;
+    formData.scorePractice = res.scorePractice;
+    formData.scoreBehavior = res.scoreBehavior;
+    formData.scoreRemark = res.scoreRemark;
+    
+    
+    
+
+  } catch (error) {
+    console.error(error)
+    ElMessage.error('获取详情失败')
+  } finally {
+    loading.value = false
+  }
+
+  
 
   nextTick(() => {
     formRef.value?.clearValidate()

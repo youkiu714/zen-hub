@@ -28,7 +28,11 @@
             <el-col :span="12">
               <div class="info-item">
                 <label class="info-label">身份证号</label>
-                <div class="info-value">{{ checkInForm.idCard || '-' }}</div>
+                <div class="info-value">
+                  <el-tooltip v-if="checkInForm.idCard" :content="idCard" placement="top" effect="dark">
+                    <span>{{ checkInForm.idCard || '-' }}</span>
+                  </el-tooltip>
+                </div>
               </div>
             </el-col>
             <el-col :span="12">
@@ -147,7 +151,7 @@ import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { FormInstance, FormRules } from 'element-plus'
 import { User, OfficeBuilding, List, InfoFilled } from '@element-plus/icons-vue'
-import { confirmCheckin, getCheckinDetail } from '@/api/checkin'
+import { confirmCheckin, getCheckinDetail, getIdcard } from '@/api/checkin'
 import type { CheckinConfirmRequest, CheckinDetailResponse, PendingCheckinItemVO } from '@/types/checkin'
 import { useUserStore } from '@/store/modules/user'
 import { createCheckInForm } from '@/views/Order/CheckInManagement/utils'
@@ -171,6 +175,7 @@ const visible = ref(false)
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const checkInForm = reactive(createCheckInForm())
+const idCard = ref('')
 
 const rules: FormRules = {
   actualCheckinDate: [{ required: true, message: '请选择实际入住日期', trigger: 'change' }],
@@ -194,6 +199,10 @@ const loadCheckInData = async (row: PendingCheckinItemVO) => {
     resetForm()
 
     if (row.applicationId) {
+      idCard.value = await getIdcard(row.applicationId)
+      console.log(idCard);
+
+
       const detailData: CheckinDetailResponse = await getCheckinDetail(row.applicationId)
 
       checkInForm.applicationId =

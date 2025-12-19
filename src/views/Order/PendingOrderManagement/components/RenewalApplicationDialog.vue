@@ -5,7 +5,7 @@
       <div class="custom-dialog-header">
         <div class="header-left">
           <span class="title-text">续单申请详情</span>
-          <!-- <span class="sub-id">- XS20230615001</span> -->
+          <span class="sub-id">- {{ detail?.basic?.name }}</span>
         </div>
         <button class="close-btn" @click="close">
           <el-icon>
@@ -17,7 +17,7 @@
 
     <div class="dialog-body scrollbar-hide">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="120px" label-position="top">
-        <div class="section-container">
+        <!-- <div class="section-container">
           <h4 class="section-title">审核流程</h4>
           <div class="timeline-box">
             <el-steps direction="vertical" :active="events.length - 1" finish-status="success">
@@ -27,27 +27,22 @@
                 </template>
                 <template #description>
                   <div class="step-content">
-                    <!-- operator 显示：如果是 'null' 或 null，显示“系统”或其他 -->
                     <div class="step-row">
                       操作人:
                       <span v-if="event.operator === 'null' || !event.operator">系统</span>
                       <span v-else>{{ getOperatorName(event.operator) }}</span>
                     </div>
-
-                    <!-- content 有值才显示 -->
                     <div v-if="event.comment" class="step-row">{{ event.comment }}</div>
-
-                    <!-- time 有值才显示 -->
                     <div v-if="event.timestamp" class="step-row time">{{ event.timestamp }}</div>
                   </div>
                 </template>
               </el-step>
             </el-steps>
           </div>
-        </div>
+        </div> -->
 
         <div class="grid-layout mb-8">
-          <div class="info-card">
+          <!-- <div class="info-card">
             <div class="card-header">
               <el-icon class="header-icon">
                 <User />
@@ -88,7 +83,7 @@
                 <div class="field-value">{{ detail?.basic?.idCard }}</div>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <div class="info-card">
 
@@ -199,7 +194,6 @@ import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/c
 import { applyRenew } from '@/api/application'
 
 
-
 interface FormData {
   originalCheckoutDate: string
   requestedCheckoutDate: string
@@ -249,7 +243,6 @@ const events = ref([])
 const detail = ref<ApplicationDetailVO>()
 const formRef = ref<FormInstance>()
 
-
 const getRatingText = (rating: number) => {
   if (rating >= 4.5) return '优秀'
   if (rating >= 3.5) return '良好'
@@ -293,7 +286,7 @@ const initData = async () => {
       scoreRemark: '',
     })
     const res = await getApplicationById(props.orderData?.applicationId)
-    detail.value = res
+    detail.value = res  
     events.value = detail.value?.timeline.map((item: any, index: number) => {
       // 反转后，最后一个元素（原数组的第一个）是最新的
       // const isLatest = index === detail.value?.timeline.length - 1
@@ -311,13 +304,15 @@ const initData = async () => {
         // statusClass: getStageStatusClass(item.stage, item.result)
       }
     })
-
+     console.log('ssssssss');
   } catch (error) {
     console.error(error)
     // ElMessage.error('获取详情失败')
   } finally {
     loading.value = false
   }
+
+
 
   nextTick(() => {
     formRef.value?.clearValidate()
