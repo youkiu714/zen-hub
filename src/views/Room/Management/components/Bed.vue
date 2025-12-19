@@ -2,67 +2,33 @@
   <div class="split-layout">
     <div class="sidebar-panel">
       <div class="sidebar-header">
-        <div class="tab-switcher">
-          <div
-            class="tab-item"
-            :class="{ active: currentTab === 'unassigned' }"
-            @click="switchTab('unassigned')"
-          >
-            待分配
-            <span class="tab-count">{{
-              currentTab === 'unassigned'
-                ? allUnassignedMembers.length
-                : allUnassignedMembers.length
-            }}</span>
-          </div>
-          <div
-            class="tab-item"
-            :class="{ active: currentTab === 'assigned' }"
-            @click="switchTab('assigned')"
-          >
-            已分配
-            <span class="tab-count sub">{{
-              currentTab === 'assigned' ? allAssignedMembers.length : allAssignedMembers.length
-            }}</span>
-          </div>
-          <div class="tab-glider" :class="currentTab"></div>
-        </div>
 
         <div class="filter-container">
-          <div class="filter-row">
-            <el-date-picker
-              v-model="filters.dateRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD"
-              size="default"
-              style="width: 100%"
-            />
-          </div>
           <div class="filter-row mixed-controls">
             <div class="gender-toggle">
-              <button
-                v-for="g in genderOptions"
-                :key="g.value"
-                :class="{ active: filters.gender === g.value }"
-                @click="filters.gender = g.value"
-              >
-                {{ g.label }}
-              </button>
+              <el-radio-group v-model="filters.gender" size="small">
+                <el-radio-button v-for="g in genderOptions" :key="g.value" :label="g.value">
+                  {{ g.label }}
+                </el-radio-button>
+              </el-radio-group>
             </div>
-            <div class="mini-select-wrapper group-select">
-              <select v-model="filters.group" class="custom-select mini">
-                <option value="汇编">汇编</option>
-                <option value="短住">短住</option>
-              </select>
+
+            <div class="group-toggle">
+              <el-radio-group v-model="filters.group" size="small">
+                <el-radio-button label="">全</el-radio-button>
+                <el-radio-button
+                  v-for="dept in departmentOptions"
+                  :key="dept.value"
+                  :label="dept.value"
+                >
+                  {{ dept.label }}
+                </el-radio-button>
+              </el-radio-group>
             </div>
           </div>
         </div>
 
-        <div class="status-bar">
+        <!-- <div class="status-bar">
           <span class="status-text">
             已选 <span class="count-highlight">{{ selectedIds.length }}</span> 人
           </span>
@@ -82,7 +48,7 @@
           >
             取消选择
           </button>
-        </div>
+        </div> -->
       </div>
       <RecycleScroller
         ref="scrollerRef"
@@ -91,16 +57,16 @@
         :item-size="itemHeight"
         :min-item-size="itemHeight"
         :buffer="bufferSize"
-        key-field="applicationId"
+        key-field="__key"
         v-loading="loading"
         @scroll="handleRecycleScroll"
       >
         <template #default="{ item }">
           <MemberCard
             :member="item"
-            :is-selected="selectedIds.includes(item.applicationId)"
+            :is-selected="selectedIds.includes(getSelectId(item))"
             :show-room-info="currentTab === 'assigned'"
-            @toggle-selection="() => toggleSelection(item.applicationId, item)"
+            @toggle-selection="() => toggleSelection(getSelectId(item), item)"
           />
         </template>
       </RecycleScroller>
@@ -119,9 +85,13 @@ import { RecycleScroller } from 'vue-virtual-scroller'
 import MemberCard from '@/components/MemberCard.vue'
 import { getPendingAssignments, getAssignedList } from '@/api/assignment'
 import type { AssignmentListItemVO, AssignedLodgingVO } from '@/types/assignment'
+import { departmentOptions, DepartmentMap } from '@/utils/constants'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 const emits = defineEmits(['addMember'])
+
+type MemberKey = string | number
+type MemberWithKey<T> = T & { __key: MemberKey }
 
 // --- 数据状态 ---
 const allUnassignedMembers = ref<AssignmentListItemVO[]>([]) // 存储所有待分配数据
@@ -129,7 +99,8 @@ const allAssignedMembers = ref<AssignedLodgingVO[]>([]) // 存储所有已分配
 const loading = ref(false)
 const scrollerRef = ref<InstanceType<typeof RecycleScroller> | null>(null)
 const itemHeight = 80
-const bufferSize = 6
+// vue-virtual-scroller 的 buffer 单位是像素，太小会导致快速滚动时出现“空白/闪烁”
+const bufferSize = 300
 const reachEndThreshold = 100
 
 // --- 分页状态 ---
@@ -139,11 +110,11 @@ const assignedPage = ref(1)
 const hasMoreUnassigned = ref(true)
 const hasMoreAssigned = ref(true)
 
-const selectedMembers = ref([])
+const selectedMembers = ref<Array<AssignmentListItemVO | AssignedLodgingVO>>([])
 
 // --- 状态管理 ---
 const currentTab = ref('unassigned') // 'unassigned' | 'assigned'
-const selectedIds = ref<number[]>([])
+const selectedIds = ref<MemberKey[]>([])
 const filters = ref({ dateRange: null, gender: 'all', group: '' })
 
 const genderOptions = [
@@ -152,13 +123,49 @@ const genderOptions = [
   { label: '女', value: 'F' }
 ]
 
+const getMemberKey = (member: any, index: number): MemberKey => {
+  return (
+    member?.applicationId ??
+    member?.personId ??
+    member?.bedStayId ??
+    member?.id ??
+    `${member?.name ?? 'member'}-${member?.checkinDate ?? ''}-${member?.checkoutDate ?? ''}-${index}`
+  )
+}
+
+const normalizeMembers = <T extends Record<string, any>>(
+  records: Array<T | null | undefined>,
+  baseIndex: number
+): Array<MemberWithKey<T>> => {
+  return records
+    .filter(Boolean)
+    .map((member, i) => ({ ...(member as T), __key: getMemberKey(member, baseIndex + i) }))
+}
+
+const getSelectId = (member: any): MemberKey => {
+  return member?.applicationId ?? member?.__key
+}
+
+
 const filteredMembers = computed(() => {
   const source =
     currentTab.value === 'unassigned' ? allUnassignedMembers.value : allAssignedMembers.value
 
   return source.filter((m) => {
-    if (filters.value.gender !== 'all' && m.gender !== filters.value.gender) return false
-    if (filters.value.group && m.group !== filters.value.group) return false
+    if (filters.value.gender !== 'all') {
+      const memberGender = (m as any)?.gender
+      if (memberGender !== filters.value.gender) return false
+    }
+    if (filters.value.group) {
+      const memberDepartmentCode = (m as any)?.departmentCode
+      if (memberDepartmentCode) {
+        if (memberDepartmentCode !== filters.value.group) return false
+      } else {
+        const memberGroupName = (m as any)?.group
+        const selectedLabel = DepartmentMap[filters.value.group] ?? filters.value.group
+        if (memberGroupName && memberGroupName !== selectedLabel) return false
+      }
+    }
     return true
   })
 })
@@ -173,10 +180,13 @@ const fetchUnassigned = async (append = false) => {
       keyword: ''
     }
     const response = await getPendingAssignments(params)
-    const records = response?.records || []
+    const records = response?.records || response?.data?.records || []
+    const normalized = normalizeMembers(records, append ? allUnassignedMembers.value.length : 0)
 
-    allUnassignedMembers.value = append ? [...allUnassignedMembers.value, ...records] : records
-    hasMoreUnassigned.value = records.length === pageSize
+    allUnassignedMembers.value = append
+      ? [...(allUnassignedMembers.value as any), ...normalized]
+      : (normalized as any)
+    hasMoreUnassigned.value = normalized.length === pageSize
     if (hasMoreUnassigned.value) unassignedPage.value += 1
   } catch (error) {
     console.error('获取待分配人员列表失败:', error)
@@ -195,9 +205,12 @@ const fetchAssignedMembers = async (append = false) => {
       keyword: ''
     }
     const response = await getAssignedList(params)
-    const records = response?.data?.records || []
-    allAssignedMembers.value = append ? [...allAssignedMembers.value, ...records] : records
-    hasMoreAssigned.value = records.length === pageSize
+    const records = response?.records || response?.data?.records || []
+    const normalized = normalizeMembers(records, append ? allAssignedMembers.value.length : 0)
+    allAssignedMembers.value = append
+      ? [...(allAssignedMembers.value as any), ...normalized]
+      : (normalized as any)
+    hasMoreAssigned.value = normalized.length === pageSize
     if (hasMoreAssigned.value) assignedPage.value += 1
   } catch (error) {
     console.error('获取已分配人员列表失败:', error)
@@ -230,17 +243,11 @@ const handleReachEnd = async () => {
 const handleRecycleScroll = (event: Event | { target?: HTMLElement }) => {
   const target = (event as any)?.target as HTMLElement
   if (!target) return
+
   const distanceToBottom = target.scrollHeight - target.scrollTop - target.clientHeight
   if (!loading.value && distanceToBottom <= reachEndThreshold) {
     handleReachEnd()
   }
-}
-
-const switchTab = (tab: string) => {
-  currentTab.value = tab
-  selectedIds.value = []
-  fetchData()
-  resetScroll()
 }
 
 watch(selectedMembers.value, () => emits('addMember', selectedMembers.value))
@@ -288,7 +295,7 @@ onMounted(async () => {
 <style scoped>
 .split-layout {
   display: flex;
-  height: calc(100vh - 170px);
+  /* height: calc(100vh - 170px); */
   background: #f5f7fa;
   font-family: sans-serif;
   border-radius: 12px;
@@ -304,8 +311,6 @@ onMounted(async () => {
 /* === Header 区域 === */
 .sidebar-header {
   background: white;
-  border-bottom: 1px solid #f0f0f0;
-  padding: 12px 16px 10px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -380,6 +385,7 @@ onMounted(async () => {
 }
 .filter-row {
   display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
@@ -409,37 +415,79 @@ onMounted(async () => {
 }
 .gender-toggle {
   display: flex;
-  background: #f3f4f6;
   border-radius: 6px;
   padding: 2px;
+  height: 28px;
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--el-border-color-light);
 }
-.gender-toggle button {
-  border: none;
-  background: none;
-  font-size: 12px;
-  color: #6b7280;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.gender-toggle button.active {
-  background: white;
-  color: #1890ff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-.mini-select-wrapper {
-  background: #f9fafb;
+.group-toggle {
+  display: flex;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   height: 28px;
+  padding: 2px;
+  flex: 1;
+  overflow: hidden;
+}
+.gender-toggle :deep(.el-radio-group) {
   display: flex;
-  align-items: center;
-  padding: 0 4px;
+  width: 100%;
+}
+.group-toggle :deep(.el-radio-group) {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+.gender-toggle :deep(.el-radio-button__inner) {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: none;
+}
+.group-toggle :deep(.el-radio-button) {
   flex: 1;
 }
-.custom-select.mini {
+.group-toggle :deep(.el-radio-button__inner) {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #6b7280;
+  padding: 4px 6px;
+  border-radius: 4px;
+  box-shadow: none;
   text-align: center;
-  text-align-last: center;
+}
+.gender-toggle :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+  box-shadow: none;
+}
+.group-toggle :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  background: #fff;
+  color: #1890ff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.gender-toggle :deep(.el-radio-button:first-child .el-radio-button__inner) {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+.gender-toggle :deep(.el-radio-button:last-child .el-radio-button__inner) {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.group-toggle :deep(.el-radio-button:first-child .el-radio-button__inner) {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+.group-toggle :deep(.el-radio-button:last-child .el-radio-button__inner) {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 /* === 3. 状态栏 === */

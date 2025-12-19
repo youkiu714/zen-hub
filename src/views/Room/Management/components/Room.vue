@@ -1,6 +1,6 @@
 <template>
   <div class="room-panel">
-    <div class="content-header">
+    <!-- <div class="content-header">
       <h2>
         房间资源
         <span class="header-subtitle" v-if="selectedCount < 1 || !selectedCount"
@@ -8,39 +8,7 @@
         >
         <span class="header-subtitle highlight" v-else>已选择 {{ selectedCount }} 人</span>
       </h2>
-
-      <div class="filter-controls">
-        <div class="filter-item">
-          <span class="filter-label">房型：</span>
-          <el-select
-            v-model="selectedGenderFilter"
-            placeholder="选择房型"
-            size="small"
-            clearable
-            @change="handleFilterChange"
-          >
-            <el-option label="全部" value="" />
-            <el-option label="男众房" value="1" />
-            <el-option label="女众房" value="2" />
-          </el-select>
-        </div>
-        <div class="filter-item">
-          <span class="filter-label">入住时间：</span>
-          <el-date-picker
-            v-model="selectedDate"
-            type="daterange"
-            size="small"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            unlink-panels
-            @change="handleFilterChange"
-          />
-        </div>
-      </div>
-    </div>
+    </div> -->
 
     <div
       class="virtual-scroll-container"
@@ -48,13 +16,13 @@
       @scroll="handleScroll"
       v-loading="loading"
     >
-      <div v-for="room in displayRooms" :key="room.roomId">
+      <div v-for="room in allRooms" :key="room.id">
         <div class="room-card-wrapper" :style="gridItemStyle">
           <div class="room-card" :class="getRoomStateClass(room)">
             <div class="card-header">
               <div class="header-left">
-                <span class="room-number">{{ room.roomNo }}</span>
-                <span class="room-gender">{{ room.genderName }}</span>
+                <span class="room-number">{{ room.number }}</span>
+                <span class="room-gender">{{ room.gender === 'F' ? '女众' : '男众' }}</span>
               </div>
               <div class="room-availability">
                 余
@@ -68,22 +36,23 @@
             <div class="bed-grid-minimal">
               <div
                 v-for="bed in room.beds"
-                :key="bed.bedId"
+                :key="bed.id"
                 class="bed-tile"
-                :data-bed-id="bed.bedId"
                 :class="{
-                  'is-occupied': bed.occupied,
-                  'is-vacant': !bed.occupied
+                  'is-occupied': bed.assigned,
+                  'is-vacant': !bed.assigned
                 }"
               >
                 <div class="bed-info-row">
-                  <span class="bed-id">{{ bed.bedNo }}</span>
-                  <span class="bed-position"> · {{ bed.bedTypeName }}</span>
+                  <span class="bed-id">{{ bed.id }}号</span>
+                  <span class="bed-position"> · {{ bed.type === 'lower' ? '下铺' : '上铺' }}</span>
                 </div>
 
                 <div class="bed-status-row">
-                  <template v-if="bed.occupied">
-                    <span class="user-name">已占用</span>
+                  <template v-if="bed.assigned">
+                    <span class="user-name" :title="bed.assigned.name">{{
+                      bed.assigned.name
+                    }}</span>
                   </template>
                   <template v-else>
                     <span class="vacant-label">空闲</span>
@@ -96,21 +65,15 @@
               <button
                 v-if="selectedCount > 0"
                 class="action-btn assign"
-                :disabled="!canAssignTo(room)"
                 @click="() => openAssignModal(room)"
               >
-                分配 {{ selectedCount }} 人
+                <template v-if="canAssignTo(room)"> 分配 {{ selectedCount }} 人 </template>
+                <template v-else> {{ getDisabledReason(room) }} </template>
               </button>
 
-              <div v-else class="manage-toolbar">
-                <button class="tool-btn" @click.stop="$emit('view-room', room)">查看</button>
-                <div class="v-divider"></div>
-                <button class="tool-btn" @click.stop="$emit('edit-room', room)">编辑</button>
-                <div class="v-divider"></div>
-                <button class="tool-btn danger" @click.stop="$emit('remove-room', room)">
-                  移除
-                </button>
-              </div>
+              <button v-else class="action-btn view" @click="$emit('manage-room', room)">
+                管理
+              </button>
             </div>
           </div>
         </div>
@@ -122,7 +85,7 @@
         <div class="modal-content-minimal">
           <div class="modal-header">
             <h3>
-              {{ targetRoom.roomNo }}室 - 确认排布<span class="sub-text"
+              {{ targetRoom.number }}室 - 确认排布<span class="sub-text"
                 >(如需调整，请直接点击两个床位进行互换)</span
               >
             </h3>
@@ -131,19 +94,19 @@
           <div class="preview-grid-minimal">
             <div
               v-for="bed in previewBeds"
-              :key="bed.bedId"
+              :key="bed.id"
               class="preview-tile"
               :class="{
-                'is-lower': bed.bedType === 2,
-                'is-selected-swap': swapSourceId === bed.bedId,
+                'is-lower': bed.type === 'lower',
+                'is-selected-swap': swapSourceId === bed.id,
                 'is-locked': bed.isOriginalOccupied
               }"
               @click="handleBedSwapClick(bed)"
             >
               <div class="tile-header">
-                <span class="bed-idx">{{ bed.bedNo }}</span>
-                <span class="bed-pos" :class="bed.bedType === 2 ? 'lower' : 'upper'">{{
-                  bed.bedTypeName
+                <span class="bed-idx">{{ bed.id }}号</span>
+                <span class="bed-pos" :class="bed.type">{{
+                  bed.type === 'lower' ? '下铺' : '上铺'
                 }}</span>
               </div>
 
@@ -154,7 +117,10 @@
                     <span>{{ bed.assigned.age }}岁</span>
                     <span v-if="bed.assigned.age >= 60" class="elder-indicator">长者</span>
                   </div>
-                  <div v-if="bed.bedType === 1 && bed.assigned.age >= 60" class="warning-indicator">
+                  <div
+                    v-if="bed.type === 'upper' && bed.assigned.age >= 60"
+                    class="warning-indicator"
+                  >
                     建议调至下铺
                   </div>
                 </template>
@@ -177,8 +143,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { getRoomStatus } from '@/api/room'
-import type { RoomStatusDashboardVO, RoomWithBedsVO } from '@/types/room-bed-management'
+import { RecycleScroller } from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
+import { getRooms } from '@/api/room'
+import type { RoomSummaryVO } from '@/types/room'
 import { batchBeds } from '@/api/bed'
 
 // --- Props & Emits ---
@@ -189,43 +157,36 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['confirm-assign', 'manage-room', 'view-room', 'edit-room', 'remove-room'])
+const emit = defineEmits(['confirm-assign', 'manage-room'])
 
-// --- 响应式数据 ---
 const showModal = ref(false)
 const targetRoom = ref<any>(null)
 const previewBeds = ref<any[]>([])
 const swapSourceId = ref<number | null>(null)
-// 后端房态数据
-const roomInfo = ref<RoomStatusDashboardVO>({})
+const allRooms = ref<any[]>([])
 const loading = ref(false)
 const scrollerWrapper = ref<HTMLElement | null>(null)
 
-// --- 筛选器状态 ---
-const formatDate = (date: Date) => {
-  const year = date.getFullYear()
-  const month = `${date.getMonth() + 1}`.padStart(2, '0')
-  const day = `${date.getDate()}`.padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-const selectedGenderFilter = ref('')
-const today = formatDate(new Date())
-const yesterday = formatDate(new Date(Date.now() - 24 * 60 * 60 * 1000))
-const selectedDate = ref<[string, string] | null>([yesterday, today]) // 默认昨天至今天
-
 // --- 虚拟滚动配置 ---
-const itemHeight = 320
+const itemHeight = 320 // 每个房间卡片的高度
+const scrollerRef = ref<InstanceType<typeof RecycleScroller> | null>(null)
 const desiredColumns = 3
 const minCardWidth = 280
 const columnGap = 16
 const cardWidth = ref(320)
+const columnStride = ref(cardWidth.value + columnGap) // item-secondary-size
 let resizeObserver: ResizeObserver | null = null
 
 const gridItemStyle = computed(() => ({
   width: `${cardWidth.value}px`,
   height: `${itemHeight}px`
 }))
+
+// --- 分页加载状态 ---
+const pageSize = 10
+const currentPage = ref(1)
+const hasMore = ref(true)
+const isLoadingMore = ref(false)
 
 // --- 计算属性 ---
 const selectedCount = computed(() => props.selectedMembers.length)
@@ -235,95 +196,109 @@ const selectedGender = computed(() => {
   return props.selectedMembers?.length > 0 && props.selectedMembers[0].gender
 })
 
-// 根据筛选条件显示房间
-const displayRooms = computed(() => {
-  const allRooms: RoomWithBedsVO[] = []
-
-  // 合并男众和女众房间
-  if (roomInfo.value.male?.floors) {
-    roomInfo.value.male.floors.forEach((floor) => {
-      if (floor.rooms) {
-        allRooms.push(...floor.rooms)
-      }
-    })
-  }
-
-  if (roomInfo.value.female?.floors) {
-    roomInfo.value.female.floors.forEach((floor) => {
-      if (floor.rooms) {
-        allRooms.push(...floor.rooms)
-      }
-    })
-  }
-
-  // 根据性别筛选
-  if (selectedGenderFilter.value) {
-    return allRooms.filter((room) => room.gender?.toString() === selectedGenderFilter.value)
-  }
-
-  return allRooms
-})
-
 // --- API 调用 ---
-const fetchRoomStatus = async () => {
+const fetchRooms = async (page: number = 1, append: boolean = false) => {
   try {
-    loading.value = true
-    const [start, end] = selectedDate.value || []
-    const startDate = start || yesterday
-    const endDate = end || today
-    selectedDate.value = [startDate, endDate]
-    
-    const params = {
-      start: startDate,
-      end: endDate,
-      ...(selectedGenderFilter.value && { gender: parseInt(selectedGenderFilter.value) })
+    if (!append) {
+      loading.value = true
+    } else {
+      isLoadingMore.value = true
     }
-    
-    const response = await getRoomStatus(params)
-    roomInfo.value = response.data || {}
+
+    const params = { pageNo: page, pageSize: pageSize }
+    const response = await getRooms(params)
+
+    if (response.records && response.records.length > 0) {
+      const transformedData = response.records.map(transformRoomData)
+
+      if (append) {
+        allRooms.value = [...allRooms.value, ...transformedData]
+      } else {
+        allRooms.value = transformedData
+      }
+
+      // 检查是否还有更多数据
+      hasMore.value = response.records.length === pageSize
+    } else {
+      hasMore.value = false
+    }
   } catch (error) {
-    console.error('获取房间状态失败:', error)
+    console.error('获取房间列表失败:', error)
   } finally {
     loading.value = false
+    isLoadingMore.value = false
   }
 }
 
-// --- 辅助逻辑 ---
-const getFreeCount = (room: RoomWithBedsVO) => {
-  return room.beds?.filter((bed) => !bed.occupied).length || 0
+const loadMore = async () => {
+  if (!hasMore.value || isLoadingMore.value) return
+
+  currentPage.value++
+  await fetchRooms(currentPage.value, true)
 }
 
-const canAssignTo = (room: RoomWithBedsVO) => {
+const transformRoomData = (room: RoomSummaryVO) => ({
+  id: room.id,
+  number: room.roomNo,
+  gender: room?.gender === 1 ? 'M' : 'F',
+  beds: generateMockBeds(room.bedCount || 0, room.usedBedCount || 0),
+  capacity: room.bedCount || 0,
+  occupied: room.usedBedCount || 0
+})
+
+const generateMockBeds = (totalBeds: number, usedBeds: number) => {
+  const beds = []
+  for (let i = 1; i <= totalBeds; i++) {
+    beds.push({
+      id: i,
+      type: i % 2 === 1 ? 'lower' : 'upper',
+      assigned: i <= usedBeds ? { name: `住户${i}`, age: 30 + i } : null
+    })
+  }
+  return beds
+}
+
+// --- 辅助逻辑 (保持不变) ---
+const getFreeCount = (room: any) => room.beds.filter((b: any) => !b.assigned).length
+
+const canAssignTo = (room: any) => {
   if (selectedCount.value === 0) return false
   if (getFreeCount(room) < selectedCount.value) return false
   if (selectedGender.value && room.gender !== selectedGender.value) return false
   return true
 }
 
-const getRoomStateClass = (room: RoomWithBedsVO) => {
+const getDisabledReason = (room: any) => {
+  if (selectedGender.value && room.gender !== selectedGender.value) return '性别不符'
+  if (getFreeCount(room) < selectedCount.value) return '容量不足'
+  return '不可用'
+}
+
+const getRoomStateClass = (room: any) => {
   if (selectedCount.value === 0) return ''
+  // 移除过于显眼的绿色边框，改用更微妙的交互
   return canAssignTo(room) ? 'is-match' : 'is-disabled'
 }
 
-// --- 弹窗逻辑 ---
-const openAssignModal = (room: RoomWithBedsVO) => {
+// --- 弹窗逻辑 (保持不变) ---
+const openAssignModal = (room: any) => {
+  console.log('room:', room)
   targetRoom.value = room
   swapSourceId.value = null
 
-  const bedsClone = JSON.parse(JSON.stringify(room.beds || []))
+  const bedsClone = JSON.parse(JSON.stringify(room.beds))
   bedsClone.forEach((b: any) => {
-    if (b.occupied) b.isOriginalOccupied = true
+    if (b.assigned) b.isOriginalOccupied = true
   })
 
   const peopleToAssign = [...props.selectedMembers].sort((a: any, b: any) => b.age - a.age)
 
   const freeBeds = bedsClone
-    .filter((b: any) => !b.occupied)
+    .filter((b: any) => !b.assigned)
     .sort((a: any, b: any) => {
-      // 下铺优先 (bedType: 2=下铺, 1=上铺)
-      if (a.bedType === 2 && b.bedType !== 2) return -1
-      if (a.bedType !== 2 && b.bedType === 2) return 1
-      return a.bedId - b.bedId
+      if (a.type === 'lower' && b.type !== 'lower') return -1
+      if (a.type !== 'lower' && b.type === 'lower') return 1
+      return a.id - b.id
     })
 
   peopleToAssign.forEach((person: any, idx: number) => {
@@ -340,13 +315,13 @@ const openAssignModal = (room: RoomWithBedsVO) => {
 const handleBedSwapClick = (bed: any) => {
   if (bed.isOriginalOccupied) return
   if (swapSourceId.value === null) {
-    swapSourceId.value = bed.bedId
+    swapSourceId.value = bed.id
   } else {
-    if (swapSourceId.value === bed.bedId) {
+    if (swapSourceId.value === bed.id) {
       swapSourceId.value = null
       return
     }
-    const source = previewBeds.value.find((b: any) => b.bedId === swapSourceId.value)
+    const source = previewBeds.value.find((b: any) => b.id === swapSourceId.value)
     const target = bed
     const temp = source.assigned
     source.assigned = target.assigned
@@ -358,35 +333,37 @@ const handleBedSwapClick = (bed: any) => {
 const closeModal = () => (showModal.value = false)
 
 const confirmAssignment = async () => {
-  const beds: any[] = []
+  const beds = []
+
+  console.log('targetRoom.value.id:', targetRoom.value.id)
+  console.log('previewBeds.value:', previewBeds.value)
   emit('confirm-assign', {
-    roomId: targetRoom.value.roomId,
+    roomId: targetRoom.value.id,
     newBeds: previewBeds.value
   })
-
-  previewBeds.value.forEach((item) => {
-    if (item.assigned && !item.isOriginalOccupied) {
+//   todo 少一个床id
+  previewBeds.value.map((item) => {
+    if (item.assigned) {
       beds.push({
         applicationId: item.assigned.applicationId,
-        type: 1,
-        bedId: item.bedId
+        checkinAt: item.assigned.checkinDate,
+        checkoutAt: item.assigned.checkoutDate,
+        type: 1
       })
     }
   })
 
-  console.log('beds:', beds)
   const data = await batchBeds(beds)
   console.log('data:', data)
-  closeModal()
-}
-
-// --- 筛选器变化处理 ---
-const handleFilterChange = () => {
-  fetchRoomStatus()
+  //   closeModal()
 }
 
 const handleScroll = (event: Event) => {
-  // 滚动处理逻辑保持不变
+  const container = event.target as HTMLElement
+  const { scrollTop, scrollHeight, clientHeight } = container
+  if (scrollHeight - scrollTop - clientHeight <= 350 && !isLoadingMore.value) {
+    loadMore()
+  }
 }
 
 const updateGridMetrics = () => {
@@ -399,6 +376,8 @@ const updateGridMetrics = () => {
   const nextCardWidth = Math.max(minCardWidth, stride - columnGap)
 
   cardWidth.value = nextCardWidth
+  columnStride.value = stride
+  ;(scrollerRef.value as any)?.forceUpdate?.()
 }
 
 onMounted(async () => {
@@ -407,7 +386,7 @@ onMounted(async () => {
     resizeObserver = new ResizeObserver(() => updateGridMetrics())
     resizeObserver.observe(scrollerWrapper.value)
   }
-  await fetchRoomStatus()
+  await fetchRooms()
 })
 
 onBeforeUnmount(() => {
@@ -418,36 +397,11 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* ... existing styles ... */
-
-/* 新增筛选器样式 */
-.filter-controls {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.filter-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.filter-label {
-  font-size: 13px;
-  color: #666;
-}
-
-:deep(.filter-controls .el-select),
-:deep(.filter-controls .el-date-editor) {
-  width: 220px;
-}
-
 /* --- 全局容器与字体 --- */
 .room-panel {
   flex: 1;
-  background-color: #f8f9fa;
+  /* 使用更干净的背景色 */
+  /* background-color: #f8f9fa; */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -455,21 +409,16 @@ onBeforeUnmount(() => {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
 }
 
-/* --- 顶部标题栏 --- */
+/* --- 顶部标题栏 (极简) --- */
 .content-header {
   margin-bottom: 24px;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 .content-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
-  color: #1d1d1f;
+  color: #1d1d1f; /* Apple 深灰 */
   letter-spacing: -0.5px;
 }
 .header-subtitle {
@@ -479,27 +428,31 @@ onBeforeUnmount(() => {
   margin-left: 8px;
 }
 .header-subtitle.highlight {
-  color: #007aff;
+  color: #007aff; /* Apple Blue 用于强调提示 */
 }
 
 /* --- 虚拟滚动区域 --- */
+.virtual-scroll-wrapper {
+  flex: 1;
+  height: 100%;
+  width: 100%;
+}
 .virtual-scroll-container {
   flex: 1;
   height: 100%;
   padding: 10px 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr); /* 三列布局 */
+  gap: 16px; /* 添加列间距 */
   overflow: auto;
 }
 .room-card-wrapper {
   box-sizing: border-box;
   padding: 0 8px 16px;
   height: 100%;
-  width: 300px !important;
 }
 
-/* --- 房间卡片 --- */
+/* --- 房间卡片 (核心重构：扁平、无阴影) --- */
 .room-card {
   background: white;
   border-radius: 12px;
@@ -512,15 +465,16 @@ onBeforeUnmount(() => {
   transition: border-color 0.2s;
   overflow: hidden;
 }
+/* 匹配状态：仅改变边框颜色，不加阴影 */
 .room-card.is-match {
-  border-color: #34c759;
+  border-color: #34c759; /* Apple Green */
 }
 .room-card.is-disabled {
   opacity: 0.5;
   background-color: #fafafa;
 }
 
-/* --- 卡片头部 --- */
+/* --- 1. 卡片头部 (去装饰化) --- */
 .card-header {
   padding: 16px;
   display: flex;
@@ -536,7 +490,7 @@ onBeforeUnmount(() => {
   font-size: 20px;
   font-weight: 600;
   color: #1d1d1f;
-  font-feature-settings: 'tnum';
+  font-feature-settings: 'tnum'; /* 等宽数字 */
 }
 .room-gender {
   font-size: 13px;
@@ -555,7 +509,7 @@ onBeforeUnmount(() => {
   color: #86868b;
 }
 
-/* --- 床位 Grid --- */
+/* --- 2. 床位 Grid (核心重构：极简方块) --- */
 .bed-grid-minimal {
   padding: 0 16px 16px 16px;
   display: grid;
@@ -566,8 +520,10 @@ onBeforeUnmount(() => {
   overflow-y: auto;
 }
 
+/* 单个床位块 (Tile) */
 .bed-tile {
   border-radius: 8px;
+  /* 增加内边距让内容呼吸 */
   padding: 12px;
   display: flex;
   flex-direction: column;
@@ -576,31 +532,37 @@ onBeforeUnmount(() => {
   min-height: 70px;
 }
 
-/* 空闲状态 */
+/* ==== 状态A: 空闲 (重点：干净、邀请感) ==== */
 .bed-tile.is-vacant {
   background-color: #fff;
+  /* 极细的灰色边框，取代虚线 */
   border: 1px solid #e5e5e5;
-  align-items: center;
+  align-items: center; /* 空闲状态内容居中 */
   height: 44px;
 }
+/* Hover 时 subtle 的变化 */
 .bed-tile.is-vacant:hover {
   border-color: #34c759;
   background-color: #f2fff5;
 }
+
 .bed-tile.is-vacant .bed-info-row {
+  /* 空闲时，床号信息淡化 */
   color: #adadad;
   margin-bottom: 4px;
 }
 .vacant-label {
+  /* 核心信息：清晰、克制的绿色 */
   font-size: 14px;
   color: #34c759;
   font-weight: 500;
 }
 
-/* 已住状态 */
+/* ==== 状态B: 已住 (重点：后退、不抢戏) ==== */
 .bed-tile.is-occupied {
+  /* 极淡的灰色背景，让出视觉中心 */
   background-color: #f2f2f7;
-  border: 1px solid transparent;
+  border: 1px solid transparent; /* 占位 */
   align-items: flex-start;
 }
 .bed-tile.is-occupied .user-name {
@@ -617,6 +579,7 @@ onBeforeUnmount(() => {
   margin-bottom: 6px;
 }
 
+/* 床位辅助信息 (统一风格) */
 .bed-info-row {
   font-size: 12px;
   display: flex;
@@ -630,17 +593,14 @@ onBeforeUnmount(() => {
   margin-left: 4px;
 }
 
-/* --- 底部按钮区 --- */
+/* --- 3. 底部按钮 (扁平化) --- */
 .card-footer {
   padding: 16px;
   padding-top: 0;
   background: #fff;
   margin-top: 12px;
-  min-height: 48px;
 }
-
-/* 分配按钮 */
-.action-btn.assign {
+.action-btn {
   width: 100%;
   padding: 10px;
   border-radius: 8px;
@@ -649,6 +609,9 @@ onBeforeUnmount(() => {
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s;
+}
+/* 分配按钮：克制的深绿色，无渐变，无阴影 */
+.action-btn.assign {
   background-color: #34c759;
   color: white;
 }
@@ -660,46 +623,43 @@ onBeforeUnmount(() => {
   color: #adadad;
   cursor: not-allowed;
 }
+/* 管理按钮：极简灰 */
+.action-btn.view {
+  background: #f2f2f7;
+  color: #1d1d1f;
+}
+.action-btn.view:hover {
+  background: #e5e5e5;
+}
 
-/* --- 底部工具栏 --- */
-.manage-toolbar {
+/* --- 加载状态 --- */
+.loading-state {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 4px;
+  height: 300px;
+  color: #86868b;
+}
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid #e5e5e5;
+  border-top: 2.5px solid #86868b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.tool-btn {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 8px 0;
-  font-size: 13px;
-  color: #666;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-.tool-btn:hover {
-  background-color: #fff;
-  color: #333;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-.tool-btn.danger:hover {
-  color: #ff3b30;
-  background-color: #fff0f0;
-}
-
-.v-divider {
-  width: 1px;
-  height: 14px;
-  background-color: #e5e5e5;
-}
-
-/* --- 弹窗样式 --- */
+/* ================= 弹窗样式 (极简重构) ================= */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -716,8 +676,6 @@ onBeforeUnmount(() => {
   padding: 32px;
   border-radius: 16px;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.1);
-  height: 600px;
-  overflow: auto;
 }
 .modal-header {
   margin-bottom: 24px;
@@ -741,6 +699,7 @@ onBeforeUnmount(() => {
   margin-bottom: 32px;
 }
 
+/* 弹窗内的床位块 */
 .preview-tile {
   border: 1px solid #e5e5e5;
   border-radius: 10px;
@@ -754,6 +713,7 @@ onBeforeUnmount(() => {
 .preview-tile:hover {
   border-color: #adadad;
 }
+/* 选中交换状态：清晰的蓝色轮廓 */
 .preview-tile.is-selected-swap {
   border: 2px solid #007aff;
   background: #f5fafe;
@@ -838,7 +798,7 @@ onBeforeUnmount(() => {
 .btn-minimal.confirm {
   background: #1d1d1f;
   color: white;
-}
+} /* 确认用黑色，极致强调 */
 .btn-minimal.confirm:hover {
   background: #333;
 }
