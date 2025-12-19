@@ -50,26 +50,25 @@
           </button>
         </div> -->
       </div>
-      <RecycleScroller
-        ref="scrollerRef"
+      <div
+        ref="scrollRef"
         class="member-list-scroll"
-        :items="filteredMembers"
-        :item-size="itemHeight"
-        :min-item-size="itemHeight"
-        :buffer="bufferSize"
-        key-field="__key"
         v-loading="loading"
-        @scroll="handleRecycleScroll"
+        @scroll="handleScroll"
       >
-        <template #default="{ item }">
-          <MemberCard
-            :member="item"
-            :is-selected="selectedIds.includes(getSelectId(item))"
-            :show-room-info="currentTab === 'assigned'"
-            @toggle-selection="() => toggleSelection(getSelectId(item), item)"
-          />
-        </template>
-      </RecycleScroller>
+        <div class="virtual-spacer" :style="{ height: topPadding + 'px' }"></div>
+
+        <MemberCard
+          v-for="item in visibleMembers"
+          :key="(item as any).__key"
+          :member="item"
+          :is-selected="selectedIds.includes(getSelectId(item))"
+          :show-room-info="currentTab === 'assigned'"
+          @toggle-selection="() => toggleSelection(getSelectId(item), item)"
+        />
+
+        <div class="virtual-spacer" :style="{ height: bottomPadding + 'px' }"></div>
+      </div>
       <div v-if="!loading && filteredMembers.length === 0" class="empty-state">暂无数据</div>
     </div>
 
@@ -80,13 +79,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import { RecycleScroller } from 'vue-virtual-scroller'
+import { ref, computed, watch, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import MemberCard from '@/components/MemberCard.vue'
 import { getPendingAssignments, getAssignedList } from '@/api/assignment'
 import type { AssignmentListItemVO, AssignedLodgingVO } from '@/types/assignment'
 import { departmentOptions, DepartmentMap } from '@/utils/constants'
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 const emits = defineEmits(['addMember'])
 
@@ -97,11 +94,14 @@ type MemberWithKey<T> = T & { __key: MemberKey }
 const allUnassignedMembers = ref<AssignmentListItemVO[]>([]) // 存储所有待分配数据
 const allAssignedMembers = ref<AssignedLodgingVO[]>([]) // 存储所有已分配数据
 const loading = ref(false)
-const scrollerRef = ref<InstanceType<typeof RecycleScroller> | null>(null)
-const itemHeight = 80
-// vue-virtual-scroller 的 buffer 单位是像素，太小会导致快速滚动时出现“空白/闪烁”
-const bufferSize = 300
+const scrollRef = ref<HTMLElement | null>(null)
+const itemHeight = 88 // 80px 卡片 + 8px 间距
+const overscanCount = 6
 const reachEndThreshold = 100
+
+const scrollTop = ref(0)
+const viewportHeight = ref(0)
+let resizeObserver: ResizeObserver | null = null
 
 // --- 分页状态 ---
 const pageSize = 10
@@ -109,6 +109,9 @@ const unassignedPage = ref(1)
 const assignedPage = ref(1)
 const hasMoreUnassigned = ref(true)
 const hasMoreAssigned = ref(true)
+
+const inflightUnassignedPage = ref<number | null>(null)
+const inflightAssignedPage = ref<number | null>(null)
 
 const selectedMembers = ref<Array<AssignmentListItemVO | AssignedLodgingVO>>([])
 
@@ -123,27 +126,54 @@ const genderOptions = [
   { label: '女', value: 'F' }
 ]
 
-const getMemberKey = (member: any, index: number): MemberKey => {
+const getMemberKey = (member: any): MemberKey => {
   return (
     member?.applicationId ??
     member?.personId ??
     member?.bedStayId ??
     member?.id ??
-    `${member?.name ?? 'member'}-${member?.checkinDate ?? ''}-${member?.checkoutDate ?? ''}-${index}`
+    `${member?.idCardMasked ?? ''}-${member?.name ?? 'member'}-${member?.checkinDate ?? ''}-${member?.checkoutDate ?? ''}`
   )
 }
 
 const normalizeMembers = <T extends Record<string, any>>(
   records: Array<T | null | undefined>,
-  baseIndex: number
+  _baseIndex: number
 ): Array<MemberWithKey<T>> => {
+  const used = new Map<MemberKey, number>()
   return records
     .filter(Boolean)
-    .map((member, i) => ({ ...(member as T), __key: getMemberKey(member, baseIndex + i) }))
+    .map((member) => {
+      const baseKey = getMemberKey(member)
+      const count = used.get(baseKey) ?? 0
+      used.set(baseKey, count + 1)
+      const uniqueKey = count === 0 ? baseKey : `${baseKey}-${count}`
+      return { ...(member as T), __key: uniqueKey }
+    })
 }
 
 const getSelectId = (member: any): MemberKey => {
   return member?.applicationId ?? member?.__key
+}
+
+const mergeUnique = <T extends { __key?: MemberKey }>(
+  existing: T[],
+  incoming: T[]
+): T[] => {
+  const seen = new Set<MemberKey>()
+  for (const item of existing) {
+    const key = (item as any)?.applicationId ?? (item as any)?.__key
+    if (key != null) seen.add(key)
+  }
+
+  const merged = [...existing]
+  for (const item of incoming) {
+    const key = (item as any)?.applicationId ?? (item as any)?.__key
+    if (key == null || seen.has(key)) continue
+    seen.add(key)
+    merged.push(item)
+  }
+  return merged
 }
 
 
@@ -170,12 +200,33 @@ const filteredMembers = computed(() => {
   })
 })
 
+const startIndex = computed(() => {
+  const raw = Math.floor(scrollTop.value / itemHeight) - overscanCount
+  return Math.max(0, raw)
+})
+
+const endIndex = computed(() => {
+  const raw = Math.ceil((scrollTop.value + viewportHeight.value) / itemHeight) + overscanCount
+  return Math.min(filteredMembers.value.length, raw)
+})
+
+const visibleMembers = computed(() => {
+  return filteredMembers.value.slice(startIndex.value, endIndex.value)
+})
+
+const topPadding = computed(() => startIndex.value * itemHeight)
+const bottomPadding = computed(() => (filteredMembers.value.length - endIndex.value) * itemHeight)
+
 const fetchUnassigned = async (append = false) => {
   try {
+    const pageNo = append ? unassignedPage.value : 1
     if (loading.value) return
+    if (inflightUnassignedPage.value === pageNo) return
+
+    inflightUnassignedPage.value = pageNo
     loading.value = true
     const params = {
-      pageNo: append ? unassignedPage.value : 1,
+      pageNo,
       pageSize,
       keyword: ''
     }
@@ -184,23 +235,28 @@ const fetchUnassigned = async (append = false) => {
     const normalized = normalizeMembers(records, append ? allUnassignedMembers.value.length : 0)
 
     allUnassignedMembers.value = append
-      ? [...(allUnassignedMembers.value as any), ...normalized]
+      ? (mergeUnique(allUnassignedMembers.value as any, normalized as any) as any)
       : (normalized as any)
     hasMoreUnassigned.value = normalized.length === pageSize
     if (hasMoreUnassigned.value) unassignedPage.value += 1
   } catch (error) {
     console.error('获取待分配人员列表失败:', error)
   } finally {
+    inflightUnassignedPage.value = null
     loading.value = false
   }
 }
 
 const fetchAssignedMembers = async (append = false) => {
   try {
+    const pageNo = append ? assignedPage.value : 1
     if (loading.value) return
+    if (inflightAssignedPage.value === pageNo) return
+
+    inflightAssignedPage.value = pageNo
     loading.value = true
     const params = {
-      pageNo: append ? assignedPage.value : 1,
+      pageNo,
       pageSize,
       keyword: ''
     }
@@ -208,13 +264,14 @@ const fetchAssignedMembers = async (append = false) => {
     const records = response?.records || response?.data?.records || []
     const normalized = normalizeMembers(records, append ? allAssignedMembers.value.length : 0)
     allAssignedMembers.value = append
-      ? [...(allAssignedMembers.value as any), ...normalized]
+      ? (mergeUnique(allAssignedMembers.value as any, normalized as any) as any)
       : (normalized as any)
     hasMoreAssigned.value = normalized.length === pageSize
     if (hasMoreAssigned.value) assignedPage.value += 1
   } catch (error) {
     console.error('获取已分配人员列表失败:', error)
   } finally {
+    inflightAssignedPage.value = null
     loading.value = false
   }
 }
@@ -240,9 +297,15 @@ const handleReachEnd = async () => {
   }
 }
 
-const handleRecycleScroll = (event: Event | { target?: HTMLElement }) => {
-  const target = (event as any)?.target as HTMLElement
+const updateViewport = () => {
+  if (!scrollRef.value) return
+  viewportHeight.value = scrollRef.value.clientHeight
+}
+
+const handleScroll = (event: Event) => {
+  const target = event.target as HTMLElement
   if (!target) return
+  scrollTop.value = target.scrollTop
 
   const distanceToBottom = target.scrollHeight - target.scrollTop - target.clientHeight
   if (!loading.value && distanceToBottom <= reachEndThreshold) {
@@ -250,10 +313,10 @@ const handleRecycleScroll = (event: Event | { target?: HTMLElement }) => {
   }
 }
 
-watch(selectedMembers.value, () => emits('addMember', selectedMembers.value))
+watch(selectedMembers, () => emits('addMember', selectedMembers.value), { deep: true })
 
 // 切换选中状态的函数
-const toggleSelection = (id: number, item: any) => {
+const toggleSelection = (id: MemberKey, item: any) => {
   const idx = selectedIds.value.indexOf(id);
   
   if (idx > -1) {
@@ -282,13 +345,24 @@ watch(
 )
 
 const resetScroll = () => {
-  scrollerRef.value?.scrollToPosition(0)
+  if (scrollRef.value) scrollRef.value.scrollTop = 0
+  scrollTop.value = 0
 }
 
 // 组件挂载时获取数据
 onMounted(async () => {
   await fetchData()
   await nextTick()
+  updateViewport()
+  if (scrollRef.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(() => updateViewport())
+    resizeObserver.observe(scrollRef.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+  resizeObserver = null
 })
 </script>
 
@@ -306,6 +380,7 @@ onMounted(async () => {
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 /* === Header 区域 === */
@@ -530,6 +605,14 @@ onMounted(async () => {
   overflow-x: hidden;
   padding: 12px;
   position: relative;
+}
+
+.member-list-scroll :deep(.member-card) {
+  margin-bottom: 8px;
+}
+
+.virtual-spacer {
+  width: 100%;
 }
 
 /* 虚拟滚动容器 */
