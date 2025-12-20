@@ -14,7 +14,7 @@
             size="default"
           />
         </div>
-        <el-select v-model="roomInfo.type" style="width: 240px" clearable>
+        <el-select v-model="roomInfo.type" style="width: 240px" :clearable="false">
           <template #label="{ value }">
             <span>房间类型: </span>
             <span style="font-weight: bold">{{ value }}</span>
@@ -119,32 +119,15 @@ watch(
       return
     }
 
+    // 等待 Bed/Room 渲染完成，确保 bedRef 已就绪，避免初次进入触发两次请求
+    await nextTick()
     await reloadAll()
   },
   {
-    immediate: true
+    immediate: true,
+    flush: 'post'
   }
 )
-
-// 确保初次进入时也走统一的 loading/错误重试逻辑
-onMounted(async () => {
-  await nextTick()
-  if (isTimeSelected.value) {
-    await reloadAll()
-  }
-})
-
-// 加载房间状态数据
-const loadRoomStatusData = async () => {
-  const params = {
-    start: dateRange.value[0] || '',
-    end: dateRange.value[1] || '',
-    floor: selectedFloor.value ? Number(selectedFloor.value) : undefined,
-    gender: selectedGender.value ? Number(selectedGender.value) : undefined
-  }
-  const res = await getRoomStatus(params)
-  roomStatusData.value = res || {}
-}
 
 const addMember = (value) => {
   console.log('value:', value)
@@ -157,7 +140,8 @@ const handleAssignmentSuccess = async () => {
   selectedMembers.value = []
 }
 
-const reloadAll = async () => {
+async function reloadAll() {
+    console.log("reloadAll")
   if (!isTimeSelected.value) return
   sharedLoading.value = true
   sharedError.value = null
@@ -191,11 +175,6 @@ const reloadAll = async () => {
   }
 }
 
-// 初始化加载数据
-onMounted(async () => {
-  await loadDashboardData()
-  await loadRoomStatusData()
-})
 </script>
 
 <style scoped>

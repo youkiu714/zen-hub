@@ -68,7 +68,8 @@
 
         <div class="virtual-spacer" :style="{ height: bottomPadding + 'px' }"></div>
       </div>
-      <!-- <div v-if="!loading && filteredMembers.length === 0" class="empty-state">暂无数据</div> -->
+
+      <div v-if="!loading && filteredMembers.length === 0" class="empty-state">暂无数据</div>
     </div>
 
     <div class="main-content">
@@ -731,13 +732,9 @@ onBeforeUnmount(() => {
 }
 
 .empty-state {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  padding: 10px 12px 14px;
   text-align: center;
   color: #999;
   font-size: 13px;
-  width: 100%;
 }
 </style>
