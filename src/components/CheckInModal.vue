@@ -227,10 +227,8 @@ const loadCheckInData = async (row: PendingCheckinItemVO) => {
         ? (detailData.expectedCheckoutAt).substring(0, 10)  // new Date(detailData.expectedCheckoutAt).toISOString().split('T')[0]
         : new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-      checkInForm.registrationTime = now.toISOString().replace('T', ' ').slice(0, 19)
+      checkInForm.registrationTime = now.toLocaleString('sv-SE')
       checkInForm.registeredBy = userStore.user.username || checkInForm.registeredBy
-
-      ElMessage.success('获取入住详情成功')
     } else {
       fillDefaultData(row)
     }
@@ -257,7 +255,7 @@ const fillDefaultData = (row: PendingCheckinItemVO) => {
     expectedCheckoutDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split('T')[0],
-    registrationTime: now.toISOString().replace('T', ' ').slice(0, 19),
+    registrationTime: now.toLocaleString('sv-SE'),
     registeredBy: userStore.user.username || '客堂义工'
   })
 }

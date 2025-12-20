@@ -7,6 +7,7 @@ export function getApplications(params: {
   pageSize: number
   keyword?: string
   applicationType?: number
+  departmentCode?: string
   status?: number
   checkinFrom?: string
   checkinTo?: string

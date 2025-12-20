@@ -1,5 +1,5 @@
 <template>
-  <el-drawer v-model="visible" title="挂单详情" width="40%" class="application-detail-dialog" @close="handleClose"
+  <el-drawer v-model="visible" title="挂单详情" size="600px" class="application-detail-dialog" @close="handleClose"
     close-on-click-modal>
     <template #header>
       <div class="dialog-header">

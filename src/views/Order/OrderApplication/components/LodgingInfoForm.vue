@@ -74,7 +74,7 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="所属部组" prop="departmentCode">
-            <el-select v-model="form.departmentCode" placeholder="请选择所属部组" clearable>
+            <el-select v-model="form.departmentCode" placeholder="请选择所属部组" clearable :disabled="userStore.roles == 'LIAISON'">
               <el-option
                 v-for="item in departmentOptions"
                 :key="item.value"
@@ -211,8 +211,13 @@ import { House } from '@element-plus/icons-vue'
 import type { LodgingInfo } from '@/types'
 import { useFormValidationRules } from '@/views/Order/OrderApplication/CheckHook'
 import { departmentOptions, mealOptions, applicationTypeOptions} from "@/utils/constants"
+import { useUserStore } from '@/store/modules/user'
 
 type LocalLodging = LodgingInfo & { agreement: boolean; selfEvaluation?: string }
+
+
+const userStore = useUserStore()
+
 
 const props = defineProps<{ modelValue: LocalLodging }>()
 const emit = defineEmits<{ 'update:modelValue': [LocalLodging] }>()

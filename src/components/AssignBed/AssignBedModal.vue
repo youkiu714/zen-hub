@@ -30,6 +30,35 @@
         </div>
       </div>
 
+      <!-- 换床申请信息 -->
+      <div class="person-info-section" v-if="changeBedVisible">
+        <div class="info-header">
+          <el-icon class="info-icon">
+            <Connection />
+          </el-icon>
+          <span class="info-title">换床申请信息</span>
+        </div>
+        <div class="info-content">
+          <div class="info-item">
+            <span class="label">当前房间：</span>
+            <span class="value">{{ selectedPerson?.changeInfo.currentRoomNo + '室 - ' +
+              selectedPerson?.changeInfo.currentBedNo }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">期望床位：</span>
+            <span class="value">{{ getDesiredBedText(selectedPerson?.changeInfo.desiredBedTypeName) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">换床原因：</span>
+            <span class="value">{{ selectedPerson?.changeInfo.reasonName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">补充说明：</span>
+            <span class="value">{{ selectedPerson?.changeInfo.reasonRemark }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 分配区域 -->
       <div class="assignment-section">
         <div class="section-header">
@@ -198,6 +227,8 @@ const loadingFloors = ref(false)
 const loadingRooms = ref(false)
 const loadingBeds = ref(false)
 
+const changeBedVisible = ref(false)
+
 // 选择的数据
 const selectedFloor = ref<number>()
 const selectedRoom = ref<number>()
@@ -228,6 +259,14 @@ watch(() => props.modelValue, (newVal) => {
 //   emit('update:modelValue', newVal)
 // })
 
+const getDesiredBedText = (desiredBedTypeName?: string) => {
+  switch (desiredBedTypeName) {
+    case 'Upper bunk': return '上铺'
+    case 'Lower bunk': return '下铺'
+    default: return '上铺'
+  }
+}
+
 // 初始化数据
 const initializeData = async () => {
   // 重置数据
@@ -239,6 +278,10 @@ const initializeData = async () => {
   checkinTime.value = props.selectedPerson?.checkinDate || ''
   checkoutTime.value = props.selectedPerson?.checkoutDate || ''
   remark.value = ''
+
+  if (props.selectedPerson?.recordType == "CHANGE") {
+    changeBedVisible.value = true
+  }
 
   // 加载楼层列表
   await loadFloors()
@@ -486,6 +529,12 @@ const getBedStatusType = (status?: number) => {
 }
 
 .assignment-section {
+
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+
   .section-header {
     display: flex;
     align-items: center;

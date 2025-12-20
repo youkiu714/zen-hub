@@ -1,4 +1,15 @@
 // types/assignment.ts
+
+export interface ChangeInfo {
+    changeId?:           number;
+    currentBedNo?:       string;
+    currentBedTypeName?: string;
+    currentRoomNo?:      string;
+    reasonName?:         string;
+    reasonRemark?:       string;
+    [property: string]: any;
+}
+
 export interface AssignmentListItemVO {
   age?: number;
   applicationId?: number;
@@ -11,6 +22,7 @@ export interface AssignmentListItemVO {
    * 分组（如果暂未有字段，可置空或预留）
    */
   groupName?: string;
+
   idCardMasked?: string;
   name?: string;
   personId?: number;
@@ -24,6 +36,7 @@ export interface AssignmentListItemVO {
    * 新住/换床
    */
   typeName?: string;
+  changeInfo?: ChangeInfo;
   [property: string]: any;
 }
 

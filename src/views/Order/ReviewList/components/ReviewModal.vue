@@ -81,7 +81,7 @@ const emit = defineEmits(['update:modelValue', 'submitSuccess'])
 
 const resetForm = () => {
   formData.pass = true
-  formData.comment = ''
+  formData.comment = '通过'
   formData.returnReasons = []
   formData.otherReason = ''
 }
@@ -103,7 +103,7 @@ watch(
 // 表单数据
 const formData = reactive({
   pass: true, // 默认通过
-  comment: '',
+  comment: '通过',
   returnReasons: [] as string[],
   otherReason: ''
 })

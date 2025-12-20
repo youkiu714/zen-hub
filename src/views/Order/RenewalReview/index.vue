@@ -75,6 +75,8 @@
         <el-table-column label="操作" min-width="160">
           <template #default="{ row }">
             <div class="action-buttons">
+              <el-button link @click="handleView(row)">查看</el-button>
+              <el-button link @click="handleWorkflow(row)">流程</el-button>
               <el-button v-if="canReview(row.status)" type="success" size="small" link @click="handleReview(row)">
                 审核
               </el-button>
@@ -96,12 +98,14 @@
     </div>
     <!-- 查看详情对话框 -->
     <ReviewDialog v-model="reviewDialogVisible" :order-data="selectedOrder" @submit="handleReviewSuccess" />
-    <RenewalAuditDialog 
-      v-model="auditVisible" 
-      :order-data="currentAuditRow"
-      @success="handleAuditSuccess"
-    />
-    
+    <RenewalAuditDialog v-model="auditVisible" :order-data="currentAuditRow" @success="handleAuditSuccess" />
+
+    <!-- 查看详情 -->
+    <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
+
+    <!-- 审核流程 -->
+    <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
+
   </div>
 </template>
 
@@ -117,9 +121,13 @@ import { throttle } from 'lodash-es'
 import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
 import { ApplicationTypeMap, applicationTypeOptions, DepartmentMap } from '@/utils/constants'
 import { getGenderText } from '@/utils/index.ts'
+import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
+import ReviewPage from '@/components/ReviewPage.vue'
 import ReviewDialog from './components/RenewalDetailDialog.vue'
 import RenewalAuditDialog from './components/RenewalAuditDialog.vue'
 import { useUserStore } from '@/store/modules/user'
+import type { ReviewListItemVO, ReviewListResponse } from '@/types/review';
+
 const userStore = useUserStore()
 
 // 响应式数据
@@ -145,9 +153,26 @@ const currentFilters = ref({
 })
 
 const tableData = ref<ExtensionReviewItem[]>([])
+const currentItem = ref<ReviewListItemVO | null>(null);
 
 const auditVisible = ref(false)
 const currentAuditRow = ref({})
+
+const detailVisible = ref(false);
+const currentAppId = ref(0)
+
+const reviewVisible = ref(false);
+const currentReviewId = ref(0)
+
+const isViewOnly = ref(true);
+
+const onDetailClosed = () => {
+  console.log('详情窗口已关闭')
+}
+
+const onReviewClosed = () => {
+  console.log('审核流程窗口已关闭')
+}
 
 const fetchData = async () => {
   console.log('1')
@@ -215,6 +240,20 @@ const handleFilterChange = () => {
   //   fetchData()
 }
 
+const handleView = (row: ReviewListItemVO) => {
+  currentItem.value = row;
+  currentAppId.value = row.applicationId;
+  isViewOnly.value = true;
+  detailVisible.value = true;
+};
+
+const handleWorkflow = (row: ReviewListItemVO) => {
+  currentItem.value = row;
+  console.log('审核流程:', row.id);
+  currentReviewId.value = row.applicationId;
+  reviewVisible.value = true;
+};
+
 const throttledKeywordSearch = throttle(
   () => {
     pagination.currentPage = 1
@@ -275,8 +314,8 @@ const getDepartmentLabel = (departmentCode?: string) => {
 
 const canReview = (status?: number) => {
   // return status === 10  || status === 20 // 待审核或待法师审核
-  return (status === 10 && ( userStore.roles == 'MASTER' || userStore.roles == 'VOLUNTEER' ))
-      || (status === 20 &&  userStore.roles == 'MASTER' )
+  return (status === 10 && (userStore.roles == 'MASTER' || userStore.roles == 'VOLUNTEER'))
+    || (status === 20 && userStore.roles == 'MASTER')
 }
 
 // 新增：处理审核提交成功的回调
@@ -301,7 +340,6 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-
 .renewal-table {
   max-height: calc(100vh - 350px);
   overflow-y: scroll;
@@ -316,6 +354,7 @@ onMounted(() => {
 .renewal-table::-webkit-scrollbar {
   display: none;
 }
+
 /* 固定表头 */
 :deep(.el-table__header-wrapper) {
   position: sticky;
