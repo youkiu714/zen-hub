@@ -14,7 +14,10 @@ export default defineConfig({
     css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@use "@/styles/element/index.scss" as *;`,
+        additionalData: `
+@use "@/styles/element/index.scss" as element;
+@use "@/styles/variables.scss" as *;
+`,
         api: 'modern', // 👈 关键：启用 modern Sass API
       },
     },

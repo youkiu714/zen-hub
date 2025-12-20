@@ -54,6 +54,7 @@
         ref="scrollRef"
         class="member-list-scroll"
         @scroll="handleScroll"
+        v-if="visibleMembers.length > 0"
       >
         <div class="virtual-spacer" :style="{ height: topPadding + 'px' }"></div>
 
@@ -69,7 +70,7 @@
         <div class="virtual-spacer" :style="{ height: bottomPadding + 'px' }"></div>
       </div>
 
-      <div v-if="!loading && filteredMembers.length === 0" class="empty-state">暂无数据</div>
+      <div v-if="!loading && visibleMembers.length === 0" class="empty-state">暂无数据</div>
     </div>
 
     <div class="main-content">

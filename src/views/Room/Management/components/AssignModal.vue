@@ -13,7 +13,7 @@
             <span class="summary-item">可调整: {{ adjustableCount }}床</span>
           </div>
           <div class="sub-hint">
-            已分配/不可用的床位无法点击；本次分配的床位可点击互换。
+            已分配/不可用的床位无法点击；先点选本次分配的床位，再点击空闲床位/本次分配床位可进行调整。
           </div>
         </div>
 
@@ -52,7 +52,7 @@
               <template v-if="bed.assigned">
                 <div class="p-name">{{ bed.assigned.name }}</div>
                 <div class="p-meta">
-                  <span>{{ bed.assigned.age }}岁</span>
+                  <span v-if="bed.assigned.age && bed.assigned.age > 0 ">{{ bed.assigned.age }}岁</span>
                   <span v-if="bed.assigned.age >= 60" class="elder-indicator">长者</span>
                 </div>
                 <div
@@ -122,7 +122,9 @@ const adjustableCount = computed(() =>
 
 const handleTileClick = (bed: any) => {
   if (bed?.isOriginalOccupied || bed?.isBlocked) return
-  if (!bed?.isNew) return
+  // 未选择源床位时，只允许从“本次分配”的床位开始。
+  // 已选择源床位后，允许点击空闲床位作为目标，或点击另一张“本次分配”的床位进行互换。
+  if (props.swapSourceId == null && !bed?.isNew) return
   emit('bed-swap', bed)
 }
 </script>

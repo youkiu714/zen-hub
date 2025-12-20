@@ -365,7 +365,13 @@ const handleBedSwapClick = (bed: any) => {
     }
     const target = bed
     const source = previewBeds.value.find((b: any) => b.bedId === swapSourceId.value)
-    if (!source || !source.isNew || !target.isNew) {
+    // 目标床位允许：
+    // 1) 另一张“本次分配”的床位（互换两个人）
+    // 2) 空闲床位（将人挪过去，源床位变空）
+    // 不允许点“原本已占用”或“不可用”，上面已拦截
+    const targetIsVacant = !target?.assigned
+
+    if (!source || !source.isNew || (!target.isNew && !targetIsVacant)) {
       swapSourceId.value = null
       return
     }

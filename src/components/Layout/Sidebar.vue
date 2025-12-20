@@ -208,19 +208,11 @@ const menuList = ref([
         path: '/accommodation-management/room-bed-management',
         name: 'RoomBedManagement',
         meta: {
-          title: '房间及床位管理',
+          title: '批量分床',
           icon: 'List',
           roles: ['CHECKIN_VOLUNTEER','CHECKIN_MASTER']
         }
       },
-      // {
-      //   path: '/accommodation-management/room-bed-management-two',
-      //   name: 'RoomBedManagement2',
-      //   meta: {
-      //     title: '房间及床位管理2',
-      //     icon: 'List'
-      //   }
-      // },
       {
         path: '/accommodation-management/room-bed-edit',
         name: 'RoomBedEdit',
