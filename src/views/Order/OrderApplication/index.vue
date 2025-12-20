@@ -5,7 +5,13 @@
       <el-card class="form-container">
         <!-- 基本信息 -->
         <section id="basic-info" class="section">
-          <BaseInfo v-model="formData.basic" ref="basicFormRef" />
+          <BaseInfo v-model="formData.basic" ref="basicFormRef">
+            <template #headerRight>
+              <el-button v-if="hasDraft" size="small" type="primary" @click="applyCachedDraft">
+                使用缓存数据
+              </el-button>
+            </template>
+          </BaseInfo>
         </section>
 
         <!-- 学修情况 -->
@@ -38,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, computed, nextTick, watch } from 'vue'
 import { ElMessage, FormInstance } from 'element-plus'
 import throttle from 'lodash-es/throttle'
 import type { BasicInfo, PracticeInfo, LodgingInfo, ApplicationSubmitRequest } from '@/types'
@@ -48,12 +54,152 @@ import PracticeInfoForm from '@/views/Order/OrderApplication/components/Practice
 import LodgingInfoForm from '@/views/Order/OrderApplication/components/LodgingInfoForm.vue'
 import { applications } from '@/api/pendingOrder'
 import { useUserStore } from '@/store/modules/user'
+import avatarImg from '@/assets/avatar.png'
 
 const userStore = useUserStore()
 const user = computed(() => userStore.user)
 
-console.log(user);
-console.log(user.value.department);
+type OrderApplicationDraft = {
+  version: 1
+  savedAt: number
+  data: {
+    basic: BasicInfo
+    practice: PracticeInfo
+    lodging: LodgingInfo & { agreement?: boolean }
+  }
+}
+
+const DRAFT_VERSION = 1
+const AUTO_SAVE_MS = 5000
+const hasDraft = ref(false)
+let autoSaveTimer: number | undefined
+
+const getDraftCacheKey = () => {
+  const userId = user.value?.userId || 'anonymous'
+  return `orderApplication:draft:${userId}`
+}
+
+const isDefaultAvatar = (photoUrl?: string) => {
+  if (!photoUrl) return true
+  return photoUrl === avatarImg
+}
+
+const shouldCacheDraft = (draft: OrderApplicationDraft['data']) => {
+  const ignoreKeys = new Set([
+    'applicationType',
+    'departmentCode',
+    'gender',
+    'age',
+    'birthDate',
+    'hasTakenPrecepts'
+  ])
+
+  const hasMeaningfulValue = (value: unknown, key?: string): boolean => {
+    if (key && ignoreKeys.has(key)) return false
+
+    if (typeof value === 'string') {
+      if (key === 'photoUrl') return !isDefaultAvatar(value)
+      return value.trim().length > 0
+    }
+
+    if (typeof value === 'number') return value !== 0
+    if (typeof value === 'boolean') return value === true
+    if (value == null) return false
+
+    if (Array.isArray(value)) {
+      return value.some((item) => hasMeaningfulValue(item))
+    }
+
+    if (typeof value === 'object') {
+      return Object.entries(value as Record<string, unknown>).some(([k, v]) =>
+        hasMeaningfulValue(v, k)
+      )
+    }
+
+    return false
+  }
+
+  return hasMeaningfulValue(draft)
+}
+
+const saveDraftToCache = () => {
+  const key = getDraftCacheKey()
+
+  const data = JSON.parse(
+    JSON.stringify({
+      basic: formData.basic,
+      practice: formData.practice,
+      lodging: formData.lodging
+    })
+  ) as OrderApplicationDraft['data']
+
+  if (!shouldCacheDraft(data)) return
+
+  const draft: OrderApplicationDraft = {
+    version: DRAFT_VERSION,
+    savedAt: Date.now(),
+    data
+  }
+
+  try {
+    localStorage.setItem(key, JSON.stringify(draft))
+    hasDraft.value = true
+  } catch {
+    // ignore quota/security errors
+  }
+}
+
+const loadDraftFromCache = (): OrderApplicationDraft | null => {
+  const key = getDraftCacheKey()
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return null
+
+    const parsed = JSON.parse(raw) as OrderApplicationDraft
+    if (parsed?.version !== DRAFT_VERSION) return null
+    if (!parsed?.data?.basic || !parsed?.data?.practice || !parsed?.data?.lodging) return null
+
+    return parsed
+  } catch {
+    localStorage.removeItem(key)
+    return null
+  }
+}
+
+const syncHasDraft = () => {
+  hasDraft.value = Boolean(loadDraftFromCache())
+}
+
+const applyCachedDraft = async () => {
+  const draft = loadDraftFromCache()
+  if (!draft) {
+    hasDraft.value = false
+    ElMessage.warning('未找到可用的缓存数据')
+    return
+  }
+
+  const photoUrl =
+    draft.data.basic.photoUrl && draft.data.basic.photoUrl !== ''
+      ? draft.data.basic.photoUrl
+      : avatarImg
+  Object.assign(formData.basic, draft.data.basic, {
+    photoUrl,
+    departmentCode: user.value?.department
+  })
+  Object.assign(formData.practice, draft.data.practice)
+  Object.assign(formData.lodging, draft.data.lodging, { departmentCode: user.value?.department })
+
+  await nextTick()
+  basicFormRef.value?.formRef?.clearValidate?.()
+  practiceFormRef.value?.formRef?.clearValidate?.()
+  lodgingFormRef.value?.formRef?.clearValidate?.()
+  ElMessage.success('已使用缓存数据')
+}
+
+watch(
+  () => user.value?.userId,
+  () => syncHasDraft()
+)
 const basicFormRef = ref<FormInstance>()
 const practiceFormRef = ref<FormInstance>()
 const lodgingFormRef = ref<FormInstance>()
@@ -99,13 +245,13 @@ const handleScroll = () => {
 const formData = reactive<{
   basic: BasicInfo
   practice: PracticeInfo
-  lodging: LodgingInfo & { agreement: boolean; }
+  lodging: LodgingInfo & { agreement: boolean }
 }>({
   basic: {
     name: '',
     idCard: '',
     ethnic: '',
-    gender: "1",
+    gender: '1',
     mobile: '',
     weChat: '',
     marital: '',
@@ -127,7 +273,7 @@ const formData = reactive<{
     ],
     age: undefined,
     birthDate: '',
-    departmentCode: user.value.department
+    departmentCode: user.value?.department
   },
   practice: {
     refugeTakenDate: '',
@@ -152,9 +298,18 @@ const formData = reactive<{
     mealPreference: undefined,
     returnDate: '',
     shortStayReason: '',
-    departmentCode: user.value.department
+    departmentCode: user.value?.department
   }
 })
+
+watch(
+  () => user.value?.department,
+  (dept) => {
+    formData.basic.departmentCode = dept
+    formData.lodging.departmentCode = dept
+  },
+  { immediate: true }
+)
 
 const handleTabClick = (tab: any) => {
   const targetId = tab.props.name
@@ -218,11 +373,14 @@ const _handleSubmit = async () => {
 }
 
 const handleSubmit = throttle(_handleSubmit, 1000, {
-  leading: true,  
-  trailing: false 
+  leading: true,
+  trailing: false
 })
 
 onMounted(() => {
+  syncHasDraft()
+  autoSaveTimer = window.setInterval(saveDraftToCache, AUTO_SAVE_MS)
+
   const main = document.querySelector('.main') as HTMLElement | null
   scrollContainer.value = main
 
@@ -232,6 +390,11 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  saveDraftToCache()
+  if (autoSaveTimer) {
+    window.clearInterval(autoSaveTimer)
+  }
+
   if (scrollContainer.value) {
     scrollContainer.value.removeEventListener('scroll', handleScroll as any)
   }

@@ -1,19 +1,35 @@
 <template>
   <div class="section">
     <div class="section-header">
-      <el-icon>
-        <User />
-      </el-icon>
-      <span>基本信息</span>
+      <div class="section-header__left">
+        <el-icon>
+          <User />
+        </el-icon>
+        <span>基本信息</span>
+      </div>
+      <div class="section-header__right">
+        <slot name="headerRight" />
+      </div>
     </div>
     <!-- 头像上传 -->
     <div class="photo-upload">
-      <div class="avatar-wrapper" @mouseenter="isHovering = true" @mouseleave="isHovering = false"
-        v-loading="isUploading">
+      <div
+        class="avatar-wrapper"
+        @mouseenter="isHovering = true"
+        @mouseleave="isHovering = false"
+        v-loading="isUploading"
+      >
         <img :src="form.photoUrl" class="avatar" />
         <div v-if="isHovering" class="upload-overlay">
-          <el-upload action="#" :show-file-list="false" :auto-upload="false" :on-change="handleAvatarChange"
-            accept=".jpg,.jpeg,.png" :limit="1" :disabled="isUploading">
+          <el-upload
+            action="#"
+            :show-file-list="false"
+            :auto-upload="false"
+            :on-change="handleAvatarChange"
+            accept=".jpg,.jpeg,.png"
+            :limit="1"
+            :disabled="isUploading"
+          >
             <div class="camera-icon">
               <el-icon v-if="isHovering">
                 <Camera />
@@ -28,7 +44,14 @@
       </div>
     </div>
 
-    <el-form ref="formRef" class="form-content" label-position="top" :model="form" :rules="rules" label-width="120px">
+    <el-form
+      ref="formRef"
+      class="form-content"
+      label-position="top"
+      :model="form"
+      :rules="rules"
+      label-width="120px"
+    >
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="姓名" prop="name" required>
@@ -37,13 +60,24 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="身份证号" prop="idCard">
-            <el-input v-model="form.idCard" placeholder="请输入18位身份证号" clearable max="18" @change="handleIdCardChange" />
+            <el-input
+              v-model="form.idCard"
+              placeholder="请输入18位身份证号"
+              clearable
+              max="18"
+              @change="handleIdCardChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="性别" prop="gender" required>
             <el-select v-model="form.gender" placeholder="请选择性别" clearable disabled>
-              <el-option v-for="item in genderOptions" :key="item.value" :label="item.label" :value="item.value" />
+              <el-option
+                v-for="item in genderOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
         </el-col>
@@ -51,13 +85,21 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="年龄" prop="age">
-            <el-input v-model="form.age" placeholder="请输入年龄" clearable  disabled/>
+            <el-input v-model="form.age" placeholder="请输入年龄" clearable disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="出生年月" prop="birthDate">
-            <el-date-picker v-model="form.birthDate" type="date" placeholder="yyyy/mm/dd" format="YYYY/MM/DD"
-              value-format="YYYY-MM-DD" :disabled-date="disabledBirthDate" clearable disabled />
+            <el-date-picker
+              v-model="form.birthDate"
+              type="date"
+              placeholder="yyyy/mm/dd"
+              format="YYYY/MM/DD"
+              value-format="YYYY-MM-DD"
+              :disabled-date="disabledBirthDate"
+              clearable
+              disabled
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -93,14 +135,23 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="常住地省市" prop="provinceCity">
-            <el-cascader v-model="provinceCity" :options="regionData as CascaderOption[]"
-              :props="{ checkStrictly: true, emitPath: true }" placeholder="请选择省份/城市" clearable
-              @change="handleProvinceCityChange" />
+            <el-cascader
+              v-model="provinceCity"
+              :options="regionData as CascaderOption[]"
+              :props="{ checkStrictly: true, emitPath: true }"
+              placeholder="请选择省份/城市"
+              clearable
+              @change="handleProvinceCityChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="详细地址" prop="address">
-            <el-input v-model="form.address" placeholder="请输入详细地址，包括街道、门牌号等" clearable />
+            <el-input
+              v-model="form.address"
+              placeholder="请输入详细地址，包括街道、门牌号等"
+              clearable
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -136,7 +187,11 @@
       <el-row :gutter="20">
         <el-col :span="24">
           <el-form-item label="技能特长" prop="skills">
-            <el-input v-model="form.skills" placeholder="请输入技能特长，多个技能用逗号分隔" clearable />
+            <el-input
+              v-model="form.skills"
+              placeholder="请输入技能特长，多个技能用逗号分隔"
+              clearable
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -145,13 +200,21 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="紧急联系人1" prop="emergencyContacts.0.contactName">
-            <el-input v-model="form.emergencyContacts[0].contactName" placeholder="请输入紧急联系人姓名" clearable
-              maxlength="20" />
+            <el-input
+              v-model="form.emergencyContacts[0].contactName"
+              placeholder="请输入紧急联系人姓名"
+              clearable
+              maxlength="20"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="电话" prop="emergencyContacts.0.contactPhone">
-            <el-input v-model="form.emergencyContacts[0].contactPhone" placeholder="请输入紧急联系人电话号码" clearable />
+            <el-input
+              v-model="form.emergencyContacts[0].contactPhone"
+              placeholder="请输入紧急联系人电话号码"
+              clearable
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -159,13 +222,21 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="紧急联系人2" prop="emergencyContacts.1.contactName">
-            <el-input v-model="form.emergencyContacts[1].contactName" placeholder="请输入紧急联系人姓名" clearable
-              maxlength="20" />
+            <el-input
+              v-model="form.emergencyContacts[1].contactName"
+              placeholder="请输入紧急联系人姓名"
+              clearable
+              maxlength="20"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="电话" prop="emergencyContacts.1.contactPhone">
-            <el-input v-model="form.emergencyContacts[1].contactPhone" placeholder="请输入紧急联系人电话号码" clearable />
+            <el-input
+              v-model="form.emergencyContacts[1].contactPhone"
+              placeholder="请输入紧急联系人电话号码"
+              clearable
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -199,7 +270,7 @@ import { regionData } from 'element-china-area-data'
 import { uploadAvatar } from '@/api/upload'
 import { useFormValidationRules } from '@/views/Order/OrderApplication/CheckHook'
 import avatarImg from '@/assets/avatar.png'
-import { disabledBirthDate } from "@/utils/format-date"
+import { disabledBirthDate } from '@/utils/format-date'
 
 import type { BasicInfo } from '@/types'
 import type { CascaderOption, CascaderValue } from 'element-plus'
@@ -222,7 +293,7 @@ watch(provinceCity, (val) => {
 })
 
 const handleProvinceCityChange = (val: CascaderValue | null | undefined) => {
-  console.log("val:", val)
+  console.log('val:', val)
   if (!val || (Array.isArray(val) && val.length === 0)) {
     form.value.provinceCity = val as string[]
   } else if (Array.isArray(val)) {
@@ -234,13 +305,16 @@ const handleProvinceCityChange = (val: CascaderValue | null | undefined) => {
 const ethnicOptions = ['汉族', '满族', '回族', '藏族', '维吾尔族', '苗族', '彝族', '壮族']
 const maritalOptions = ['未婚', '已婚', '离异', '丧偶']
 const educationOptions = ['高中及以下', '大专', '本科', '硕士', '博士及以上']
-const genderOptions = [{
-  label: '男',
-  value: '1'
-}, {
-  label: '女',
-  value: '2'
-}]
+const genderOptions = [
+  {
+    label: '男',
+    value: '1'
+  },
+  {
+    label: '女',
+    value: '2'
+  }
+]
 
 /** 校验规则 */
 const validateContactName1 = (rule, value, callback) => {
@@ -327,30 +401,22 @@ const rules = reactive<FormRules>({
     { min: 3, max: 200, message: '详细地址长度应在3-200个字符之间', trigger: 'blur' }
   ],
   education: [{ required: true, message: '请选择最高学历', trigger: 'change' }],
-  school: [
-    { required: true, message: '请输入毕业院校', trigger: 'blur' },
-  ],
-  major: [
-    { required: true, message: '请输入专业', trigger: 'blur' },
-  ],
-  occupation: [
-    { required: true, message: '请输入职业', trigger: 'blur' },
-  ],
-  skills: [
-    { required: true, max: 500, message: '技能特长描述不能超过500个字符', trigger: 'blur' }
-  ],
+  school: [{ required: true, message: '请输入毕业院校', trigger: 'blur' }],
+  major: [{ required: true, message: '请输入专业', trigger: 'blur' }],
+  occupation: [{ required: true, message: '请输入职业', trigger: 'blur' }],
+  skills: [{ required: true, max: 500, message: '技能特长描述不能超过500个字符', trigger: 'blur' }],
   'emergencyContacts.0.contactName': [
-    { required: true, validator: validateContactName1, trigger: 'blur' },
+    { required: true, validator: validateContactName1, trigger: 'blur' }
   ],
   // 紧急联系人电话校验
   'emergencyContacts.0.contactPhone': [
-    { validator: validatePhone1, trigger: 'blur', required: true },
+    { validator: validatePhone1, trigger: 'blur', required: true }
   ],
   'emergencyContacts.1.contactName': [
-    { required: true, validator: validateContactName2, trigger: 'blur' },
+    { required: true, validator: validateContactName2, trigger: 'blur' }
   ],
   'emergencyContacts.1.contactPhone': [
-    { validator: validatePhone2, trigger: 'blur', required: true },
+    { validator: validatePhone2, trigger: 'blur', required: true }
   ],
   diseaseHistory: [
     { required: true, max: 200, message: '疾病史描述不能超过200个字符', trigger: 'blur' }
@@ -362,8 +428,6 @@ const rules = reactive<FormRules>({
     { required: true, max: 200, message: '传染病史描述不能超过200个字符', trigger: 'blur' }
   ]
 })
-
-
 
 /** 头像上传 */
 const isHovering = ref(false)
@@ -379,7 +443,7 @@ const handleAvatarChange = async (file: any) => {
     isUploading.value = true
     const res = await uploadAvatar(file.raw)
 
-    console.log("res:", res)
+    console.log('res:', res)
 
     const url = String(res.url).substring('/uploads'.length)
 
@@ -398,45 +462,44 @@ const handleAvatarChange = async (file: any) => {
 const handleIdCardChange = (val: string) => {
   // 1. 基础校验：必须是18位
   if (!val || val.length !== 18) {
-    return;
+    return
   }
 
   // 2. 提取出生年月日字符串
-  const birthStr = val.substring(6, 14);
-  const year = birthStr.substring(0, 4);
-  const month = birthStr.substring(4, 6);
-  const day = birthStr.substring(6, 8);
+  const birthStr = val.substring(6, 14)
+  const year = birthStr.substring(0, 4)
+  const month = birthStr.substring(4, 6)
+  const day = birthStr.substring(6, 8)
 
   // 3. 校验日期合法性 (防止例如 20201332 这种非法日期)
-  const birthDateObj = new Date(`${year}-${month}-${day}`);
+  const birthDateObj = new Date(`${year}-${month}-${day}`)
   if (isNaN(birthDateObj.getTime())) {
-    return; // 日期格式不正确
+    return // 日期格式不正确
   }
 
   // 4. 赋值给表单的出生日期 (格式: YYYY-MM-DD)
-  form.value.birthDate = `${year}-${month}-${day}`;
+  form.value.birthDate = `${year}-${month}-${day}`
 
   // 5. 计算周岁年龄
-  const today = new Date();
-  let age = today.getFullYear() - birthDateObj.getFullYear();
+  const today = new Date()
+  let age = today.getFullYear() - birthDateObj.getFullYear()
 
   // 还要比较月份和日期，如果还没过生日，年龄减 1
-  const m = today.getMonth() - birthDateObj.getMonth();
+  const m = today.getMonth() - birthDateObj.getMonth()
   if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
-    age--;
+    age--
   }
 
-  form.value.age = age;
+  form.value.age = age
 
   // 获取第17位字符 (索引是16)
-  const genderChar = val.substring(16, 17);
-  const genderNum = parseInt(genderChar);
+  const genderChar = val.substring(16, 17)
+  const genderNum = parseInt(genderChar)
 
   if (!isNaN(genderNum)) {
-    form.value.gender = (genderNum % 2 === 1) ? '1' : '2';
+    form.value.gender = genderNum % 2 === 1 ? '1' : '2'
   }
-
-};
+}
 
 const formRef = ref<FormInstance>()
 const validate = () => formRef.value?.validate()
@@ -468,6 +531,16 @@ defineExpose({ validate, formRef })
   color: #5a3e2b;
   font-weight: bold;
   font-size: 18px;
+}
+
+.section-header__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-header__right {
+  margin-left: auto;
 }
 
 .upload-tips p {
