@@ -187,6 +187,15 @@ export const sendLostItemNotification = (
  * @param applicationId 申请ID
  * @returns Promise<CheckinDetailResponse>
  */
+export const getIdcard = (
+  applicationId: number
+): Promise<string> => {
+  return request({
+    url: `/sensitive/idcard?applicationId=${applicationId}`,
+    method: 'GET',
+  });
+};
+
 export const getCheckinDetail = (
   applicationId: number
 ): Promise<CheckinDetailResponse> => {

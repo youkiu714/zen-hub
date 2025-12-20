@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" title="提交审核" width="800px" @close="handleClose">
+  <el-dialog v-model="visible" :title="`提交审核（${props.reviewListItem?.applicantName}）`" width="800px" @close="handleClose">
     <div class="review-container">
       <!-- <div class="section-header">
         <el-icon>
@@ -20,27 +20,27 @@
         <label class="form-label">审核结果</label>
         <div class="radio-group">
           <el-radio v-model="formData.pass" :label="true">
-            信息完整{{ props.status==10?'，提交给客堂法师审核':''}}
+            同意
+            <!-- 信息完整{{ props.status==10?'，提交给客堂法师审核':''}} -->
           </el-radio>
           <el-radio v-model="formData.pass" :label="false">
-            信息不完整，退回申请人
+            拒绝
+            <!-- 信息不完整，退回申请人 -->
           </el-radio>
         </div>
       </div>
 
       <!-- 退回原因（仅当不通过时显示） -->
-      <div v-if="!formData.pass" class="return-reasons-section">
+      <!-- <div v-if="!formData.pass" class="return-reasons-section">
         <div class="reasons-header">退回原因</div>
         <el-checkbox-group v-model="formData.returnReasons">
           <el-checkbox v-for="item in returnReasonOptions" :key="item.value" :label="item.value">
             {{ item.label }}
           </el-checkbox>
         </el-checkbox-group>
-
-        <!-- 其他原因输入框 -->
         <el-input v-if="formData.returnReasons.includes('other')" v-model="formData.otherReason" type="textarea"
           placeholder="请说明其他退回原因" rows="2" class="mt-2" />
-      </div>
+      </div> -->
 
       <!-- 操作按钮 -->
       <div class="dialog-footer">
@@ -73,6 +73,7 @@ const props = defineProps<{
   modelValue: boolean // 控制弹窗显隐
   applicationId: number // 申请ID
   status: number
+  reviewListItem: any
 }>()
 
 // 定义 emits
@@ -80,16 +81,19 @@ const emit = defineEmits(['update:modelValue', 'submitSuccess'])
 
 const resetForm = () => {
   formData.pass = true
-  formData.comment = ''
+  formData.comment = '通过'
   formData.returnReasons = []
   formData.otherReason = ''
 }
+
+
 
 // 弹窗显隐控制
 const visible = ref(props.modelValue)
 watch(
   () => props.modelValue,
   (val) => {
+    console.log(props.reviewListItem)
     visible.value = val
     if (val) {
       resetForm()
@@ -99,7 +103,7 @@ watch(
 // 表单数据
 const formData = reactive({
   pass: true, // 默认通过
-  comment: '',
+  comment: '通过',
   returnReasons: [] as string[],
   otherReason: ''
 })

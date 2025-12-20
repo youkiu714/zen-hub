@@ -173,6 +173,8 @@ const handleTabChange = (key: CheckinTabKey) => {
 }
 
 const handleCheckIn = (row: PendingCheckinItemVO) => {
+  console.log(row);
+  
   currentCheckInData.value = row
   checkInModalVisible.value = true
 }

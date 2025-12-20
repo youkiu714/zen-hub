@@ -1,5 +1,5 @@
 <template>
-  <el-drawer v-model="visible" title="挂单详情" width="40%" class="application-detail-dialog" @close="handleClose"
+  <el-drawer v-model="visible" title="挂单详情" size="600px" class="application-detail-dialog" @close="handleClose"
     close-on-click-modal>
     <template #header>
       <div class="dialog-header">
@@ -344,7 +344,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { ApplicationDetailVO } from './types' // 假设接口定义在同级 types.ts
+import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types'
 import { getApplicationById } from '@/api/application'
 import { regionData } from 'element-china-area-data'
 

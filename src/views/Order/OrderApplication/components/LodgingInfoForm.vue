@@ -74,7 +74,7 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="所属部组" prop="departmentCode">
-            <el-select v-model="form.departmentCode" placeholder="请选择所属部组" clearable>
+            <el-select v-model="form.departmentCode" placeholder="请选择所属部组" clearable :disabled="userStore.roles == 'LIAISON'">
               <el-option
                 v-for="item in departmentOptions"
                 :key="item.value"
@@ -97,9 +97,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="挂单申请类型" prop="applicationTypeOptions">
+          <el-form-item label="挂单申请类型" prop="applicationType">
             <el-select
-              v-model="form.applicationTypeOptions"
+              v-model="form.applicationType"
               placeholder="请选择挂单申请类型"
               clearable
             >
@@ -211,8 +211,13 @@ import { House } from '@element-plus/icons-vue'
 import type { LodgingInfo } from '@/types'
 import { useFormValidationRules } from '@/views/Order/OrderApplication/CheckHook'
 import { departmentOptions, mealOptions, applicationTypeOptions} from "@/utils/constants"
+import { useUserStore } from '@/store/modules/user'
 
 type LocalLodging = LodgingInfo & { agreement: boolean; selfEvaluation?: string }
+
+
+const userStore = useUserStore()
+
 
 const props = defineProps<{ modelValue: LocalLodging }>()
 const emit = defineEmits<{ 'update:modelValue': [LocalLodging] }>()
@@ -258,7 +263,7 @@ const rules = reactive<FormRules>({
   recommenderName: [{ required: true, message: '请输入推荐人姓名', trigger: 'blur' }],
   departmentCode: [{ required: true, message: '请选择所属部组', trigger: 'change' }],
   mealPreference: [{ required: true, message: '请选择用斋类型', trigger: 'change' }],
-  applicationTypeOptions: [{ required: true, message: '请申请挂单类型', trigger: 'change' }]
+  applicationType: [{ required: true, message: '请申请挂单类型', trigger: 'change' }]
 })
 
 const formRef = ref<FormInstance>()

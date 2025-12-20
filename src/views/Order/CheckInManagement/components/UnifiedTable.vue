@@ -55,7 +55,13 @@
     <el-table-column v-if="status === 'pending'" label="预计入住日期" min-width="140">
       <template #default="{ row }">
         <div class="date-info">
-          <div class="date">{{ row.expectedCheckinDate }}</div>
+          <div class="date" :class="{ 'overdue-text': isOverdue(row.expectedCheckinDate) }">{{ row.expectedCheckinDate }}
+            <el-tag v-if="isOverdue(row.expectedCheckinDate)" type="danger" size="small" effect="plain"
+              style="margin-left: 5px;">
+              超时
+            </el-tag>
+
+          </div>
         </div>
       </template>
     </el-table-column>
@@ -113,13 +119,13 @@
       </template>
     </el-table-column>
 
-    <el-table-column v-if="status === 'checked-in'" label="住宿ID" min-width="100">
+    <!-- <el-table-column v-if="status === 'checked-in'" label="住宿ID" min-width="100">
       <template #default="{ row }">
         <el-tag type="info" size="small">
           {{ row.bedStayId }}
         </el-tag>
       </template>
-    </el-table-column>
+    </el-table-column> -->
 
     <el-table-column v-if="status === 'checked-out'" label="住宿天数" min-width="100">
       <template #default="{ row }">
@@ -165,11 +171,12 @@
                 查看详情
               </el-button>
             </el-tooltip>
-            <el-tooltip content="退房处理" placement="top">
+            <!-- 暂时隐藏退房操作 -->
+            <!-- <el-tooltip content="退房处理" placement="top">
               <el-button type="danger" size="small" @click="emit('checkout', row)">
                 退房
               </el-button>
-            </el-tooltip>
+            </el-tooltip> -->
             <!-- <el-tooltip content="续单确认" placement="top">
               <el-button type="primary" size="small" circle @click="emit('renewal', row)">
                 <el-icon><Calendar /></el-icon>
@@ -214,6 +221,10 @@
         </div>
       </template>
     </el-table-column>
+
+
+
+
 
     <template #empty>
       <el-empty description="暂无申请数据" />
@@ -289,6 +300,24 @@ const getActionColumnWidth = (): number => {
       return 180
   }
 }
+
+
+const isOverdue = (dateString: string) => {
+  if (!dateString) return false;
+
+  const targetDate = new Date(dateString);
+  const today = new Date();
+
+  // 将时间归零，只比较日期部分 (即比较 00:00:00)
+  today.setHours(0, 0, 0, 0);
+  targetDate.setHours(0, 0, 0, 0);
+
+  // 如果目标日期 小于 今天，返回 true
+  return targetDate < today;
+}
+
+
+
 </script>
 
 <style scoped lang="scss">
@@ -306,6 +335,7 @@ const getActionColumnWidth = (): number => {
 .checkin-table::-webkit-scrollbar {
   display: none;
 }
+
 /* 固定表头 */
 :deep(.el-table__header-wrapper) {
   position: sticky;
@@ -356,7 +386,7 @@ const getActionColumnWidth = (): number => {
 .action-buttons {
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: center; // flex-end
 }
 
 .room-info,
@@ -365,5 +395,11 @@ const getActionColumnWidth = (): number => {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.overdue-text {
+  /* 过期样式：红色 */
+  color: #f56c6c !important;
+  font-weight: bold;
 }
 </style>

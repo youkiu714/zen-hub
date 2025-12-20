@@ -48,18 +48,18 @@ export const asyncRoutes: RouteRecordRaw[] = [
     path: '/',
     name: 'Layout',
     component: () => import('@/components/Layout/index.vue'),
-    redirect: '/statistics',  // /dashboard
+    redirect: '/dashboard',  // /dashboard  statistics
     children: [
-      // {
-      //   path: '/dashboard',
-      //   name: 'Dashboard',
-      //   component: () => import('@/views/dashboard/index.vue'),
-      //   meta: {
-      //     title: '首页',
-      //     icon: 'House',
-      //     affix: true
-      //   }
-      // },
+      {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: () => import('@/views/dashboard/index.vue'),
+        meta: {
+          title: '首页',
+          icon: 'House',
+          affix: true
+        }
+      },
       {
         path: '/statistics',
         name: 'Statistics',

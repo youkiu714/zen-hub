@@ -16,19 +16,23 @@
           @keyup.enter="handleKeywordSearch" style="width: 240px" />
         <el-input v-model="mobileKeyword" placeholder="输入手机号进行筛选" :suffix-icon="Search" @clear="handleKeywordSearch"
           @keyup.enter="handleKeywordSearch" style="width: 240px" />
-
+        <el-select v-model="departmentFilter" placeholder="全部部组" clearable style="width: 120px" @change="handleKeywordSearch" v-if="userStore.roles == 'MASTER' || userStore.roles == 'VOLUNTEER'">
+          <el-option label="全部部组" value="" />
+          <el-option v-for="dept in departmentOptions" :key="dept.value" :label="dept.label" :value="dept.value" />
+        </el-select>
         <!-- <el-button size="medium" plain class="search-btn" @click="handleKeywordSearch">
           <el-icon class="icon"><Search /></el-icon> 查询
         </el-button> -->
       </div>
 
       <el-table :data="applications" style="width: 100%" size="large"
-        :header-cell-style="{ position: 'sticky', top: 0, backgroundColor: '#f5f7fa' }"
-        class="application-table" v-loading="loading">
+        :header-cell-style="{ position: 'sticky', top: 0, backgroundColor: '#f5f7fa' }" class="application-table"
+        v-loading="loading">
 
-        <el-table-column fixed prop="applicantName" label="申请人" width="120"  />  <!-- fixed="left" -->
-        
-        <!-- <el-table-column label="挂单人" min-width="150">
+        <el-table-column fixed prop="applicantName" label="申请人" width="120" /> <!-- fixed="left" -->
+
+        <!-- 
+        <el-table-column label="挂单人" min-width="150">
           <template #default="{ row }">
             <div class="applicant-info">
               <el-avatar :size="40" class="applicant-avatar">
@@ -42,7 +46,8 @@
               </div>
             </div>
           </template>
-        </el-table-column> -->
+          </el-table-column> 
+          -->
         <el-table-column label="性别/年龄" width="100">
           <template #default="{ row }">
             <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
@@ -77,7 +82,7 @@
         <el-table-column prop="days" label="挂单时长（天）" min-width="130" />
         <el-table-column prop="bedInfo" label="分配床位" width="120">
           <template #default="{ row }">
-            {{ row.assignedRoomNo ? row.assignedRoomNo+" ("+ row.assignedBedNo+")" : '暂未分配' }}
+            {{ row.assignedRoomNo ? row.assignedRoomNo + " (" + row.assignedBedNo + ")" : '暂未分配' }}
           </template>
         </el-table-column>
         <!-- <el-table-column label="操作" min-width="480" fixed="right">
@@ -126,15 +131,10 @@
         <el-table-column label="操作" width="180" fixed="right" align="left">
           <template #default="{ row }">
             <div class="operation-wrapper">
-              <el-button
-                v-if="
-                  row.status === ApplicationStatus.PENDING_REVIEW ||
-                  row.status === ApplicationStatus.WAITING_CHECKIN
-                "
-                link
-                class="action-link main-action"
-                @click="() => handleReview(row.id)"
-              >
+              <el-button v-if="
+                row.status === ApplicationStatus.PENDING_REVIEW ||
+                row.status === ApplicationStatus.WAITING_CHECKIN
+              " link class="action-link main-action" @click="() => handleReview(row.id)">
                 流程
               </el-button>
 
@@ -146,51 +146,37 @@
 
               <el-dropdown trigger="click" @command="(cmd) => handleMoreCommand(cmd, row)">
                 <span class="el-dropdown-link">
-                  更多 <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                  更多 <el-icon class="el-icon--right">
+                    <ArrowDown />
+                  </el-icon>
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item
-                      v-if="
-                        row.status === ApplicationStatus.PENDING_REVIEW ||
-                        row.status === ApplicationStatus.WAITING_CHECKIN
-                      "
-                      command="view"
-                    >
+                    <el-dropdown-item v-if="
+                      row.status === ApplicationStatus.PENDING_REVIEW ||
+                      row.status === ApplicationStatus.WAITING_CHECKIN
+                    " command="view">
                       查看详情
                     </el-dropdown-item>
 
                     <el-dropdown-item
-                      v-if="row.status !== ApplicationStatus.CANCELED"
-                      command="edit"
-                      :icon="EditPen"
-                    >
+                      v-if="row.status !== ApplicationStatus.CANCELED && row.status !== ApplicationStatus.REJECTED"
+                      command="edit" :icon="EditPen">
                       修改信息
                     </el-dropdown-item>
 
-                    <el-dropdown-item
-                      v-if="row.status === ApplicationStatus.CHECKED_IN"
-                      command="renew"
-                    >
+                    <el-dropdown-item v-if="row.status === ApplicationStatus.CHECKED_IN" command="renew">
                       续单申请
                     </el-dropdown-item>
 
-                    <el-dropdown-item
-                      v-if="row.status === ApplicationStatus.CHECKED_IN"
-                      command="checkout"
-                    >
+                    <el-dropdown-item v-if="row.status === ApplicationStatus.CHECKED_IN" command="checkout">
                       退单办理
                     </el-dropdown-item>
 
-                    <el-dropdown-item
-                      v-if="
-                        row.status === ApplicationStatus.PENDING_REVIEW ||
-                        row.status === ApplicationStatus.WAITING_CHECKIN
-                      "
-                      command="cancel"
-                      divided
-                      class="danger-item"
-                    >
+                    <el-dropdown-item v-if="
+                      row.status === ApplicationStatus.PENDING_REVIEW ||
+                      row.status === ApplicationStatus.WAITING_CHECKIN
+                    " command="cancel" divided class="danger-item">
                       取消申请
                     </el-dropdown-item>
                   </el-dropdown-menu>
@@ -255,6 +241,8 @@ import {
 } from '@/utils/constants'
 import { formatDate } from '@/utils/format-date'
 import { throttle } from 'lodash-es'
+import { useUserStore } from '@/store/modules/user'
+const userStore = useUserStore()
 
 const router = useRouter()
 
@@ -267,6 +255,7 @@ const pageSize = ref(10)
 const filterStatus = ref(ApplicationStatus.DRAFT)
 const nameKeyword = ref('')
 const mobileKeyword = ref('')
+const departmentFilter = ref<string | undefined>(undefined)
 
 const detailVisible = ref(false)
 const currentAppId = ref(0)
@@ -284,6 +273,13 @@ const currentEditData = ref({
   shortStayReason: '',
   selfEvaluation: ''
 })
+
+const departmentOptions = ref([
+  { label: '项目组', value: 'PROJECT' },
+  { label: '学修组', value: 'READING' },
+  { label: '编译组', value: 'COMPILATION' },
+  { label: '其他', value: 'OTHER' }
+])
 
 // 续单申请相关状态
 const renewalVisible = ref(false)
@@ -313,6 +309,7 @@ const loadApplications = async () => {
     const response = await getApplications({
       pageNo: currentPage.value,
       pageSize: pageSize.value,
+      departmentCode: departmentFilter.value,
       status: filterStatus.value !== ApplicationStatus.DRAFT ? filterStatus.value : undefined,
       keyword: getKeywordParam()
     })
@@ -740,6 +737,7 @@ const handleEditSubmit = async (data: any, id: number) => {
 .status-tag {
   font-weight: 600;
 }
+
 .operation-wrapper {
   display: flex;
   align-items: center;
@@ -787,6 +785,7 @@ const handleEditSubmit = async (data: any, id: number) => {
 // 下拉菜单中的危险选项样式
 :global(.danger-item) {
   color: #f56c6c !important;
+
   &:hover {
     background-color: #fef0f0 !important;
   }

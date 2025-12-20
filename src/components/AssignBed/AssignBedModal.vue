@@ -30,6 +30,35 @@
         </div>
       </div>
 
+      <!-- 换床申请信息 -->
+      <div class="person-info-section" v-if="changeBedVisible">
+        <div class="info-header">
+          <el-icon class="info-icon">
+            <Connection />
+          </el-icon>
+          <span class="info-title">换床申请信息</span>
+        </div>
+        <div class="info-content">
+          <div class="info-item">
+            <span class="label">当前房间：</span>
+            <span class="value">{{ selectedPerson?.changeInfo.currentRoomNo + '室 - ' +
+              selectedPerson?.changeInfo.currentBedNo }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">期望床位：</span>
+            <span class="value">{{ getDesiredBedText(selectedPerson?.changeInfo.desiredBedTypeName) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">换床原因：</span>
+            <span class="value">{{ selectedPerson?.changeInfo.reasonName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">补充说明：</span>
+            <span class="value">{{ selectedPerson?.changeInfo.reasonRemark }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 分配区域 -->
       <div class="assignment-section">
         <div class="section-header">
@@ -37,6 +66,30 @@
             <House />
           </el-icon>
           <span class="section-title">床位选择</span>
+        </div>
+
+        <!-- 时间设置 -->
+        <div class="time-section">
+          <div class="time-item">
+            <label class="form-label">
+              <el-icon>
+                <Clock />
+              </el-icon>
+              入住时间
+            </label>
+            <el-date-picker v-model="checkinTime" type="datetime" placeholder="选择入住时间" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" style="width: 100%" @change="handleFloorChange" readonly />
+          </div>
+          <div class="time-item">
+            <label class="form-label">
+              <el-icon>
+                <Clock />
+              </el-icon>
+              退住时间
+            </label>
+            <el-date-picker v-model="checkoutTime" type="datetime" placeholder="选择退住时间" format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD" style="width: 100%" @change="handleFloorChange" readonly />
+          </div>
         </div>
 
         <!-- 楼层选择 -->
@@ -86,17 +139,15 @@
           </label>
           <div v-loading="loadingBeds" class="beds-grid">
             <div v-for="bed in beds" :key="bed.id" class="bed-item" :class="{
-              'bed-available': bed.status === 0,
-              'bed-occupied': bed.status === 1,
-              'bed-locked': bed.status === 2,
-              'bed-cleaning': bed.status === 3,
+              'bed-available': !bed.occupied,  /* false 为空闲 */
+              'bed-occupied': bed.occupied,    /* true 为占用 */
               'bed-selected': selectedBed === bed.id
             }" @click="handleBedClick(bed)">
               <div class="bed-number">{{ bed.bedNo }}</div>
               <div class="bed-type">{{ getBedTypeText(bed.bedType) }}</div>
               <div class="bed-status">
-                <el-tag :type="getBedStatusType(bed.status)" size="small" effect="light">
-                  {{ getBedStatusText(bed.status) }}
+                <el-tag :type="bed.occupied ? 'danger' : 'success'" size="small" effect="light">
+                  {{ bed.occupied ? '占用' : '空闲' }}
                 </el-tag>
               </div>
             </div>
@@ -106,29 +157,7 @@
           </div>
         </div>
 
-        <!-- 时间设置 -->
-        <div class="time-section">
-          <div class="time-item">
-            <label class="form-label">
-              <el-icon>
-                <Clock />
-              </el-icon>
-              入住时间
-            </label>
-            <el-date-picker v-model="checkinTime" type="datetime" placeholder="选择入住时间" format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD" style="width: 100%" />
-          </div>
-          <div class="time-item">
-            <label class="form-label">
-              <el-icon>
-                <Clock />
-              </el-icon>
-              退住时间
-            </label>
-            <el-date-picker v-model="checkoutTime" type="datetime" placeholder="选择退住时间" format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD" style="width: 100%" />
-          </div>
-        </div>
+
 
         <!-- 备注 -->
         <div class="form-item">
@@ -157,7 +186,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   User, House, Grid,
@@ -198,6 +227,8 @@ const loadingFloors = ref(false)
 const loadingRooms = ref(false)
 const loadingBeds = ref(false)
 
+const changeBedVisible = ref(false)
+
 // 选择的数据
 const selectedFloor = ref<number>()
 const selectedRoom = ref<number>()
@@ -213,6 +244,7 @@ const checkinTime = ref('')
 const checkoutTime = ref('')
 const remark = ref('')
 
+
 // 监听弹窗显示状态
 watch(() => props.modelValue, (newVal) => {
   dialogVisible.value = newVal
@@ -227,6 +259,14 @@ watch(() => props.modelValue, (newVal) => {
 //   emit('update:modelValue', newVal)
 // })
 
+const getDesiredBedText = (desiredBedTypeName?: string) => {
+  switch (desiredBedTypeName) {
+    case 'Upper bunk': return '上铺'
+    case 'Lower bunk': return '下铺'
+    default: return '上铺'
+  }
+}
+
 // 初始化数据
 const initializeData = async () => {
   // 重置数据
@@ -238,6 +278,10 @@ const initializeData = async () => {
   checkinTime.value = props.selectedPerson?.checkinDate || ''
   checkoutTime.value = props.selectedPerson?.checkoutDate || ''
   remark.value = ''
+
+  if (props.selectedPerson?.recordType == "CHANGE") {
+    changeBedVisible.value = true
+  }
 
   // 加载楼层列表
   await loadFloors()
@@ -276,7 +320,9 @@ const handleFloorChange = async () => {
   try {
     const params: RoomRequest = {
       floor: selectedFloor.value,
-      gender: props.selectedPerson.gender
+      gender: props.selectedPerson.gender,
+      start: checkinTime.value,
+      end: checkoutTime.value
     }
     const response = await getRoomsByFloor(params)
     rooms.value = response.data || response || []
@@ -298,7 +344,9 @@ const handleRoomChange = async () => {
   loadingBeds.value = true
   try {
     const params: BedRequest = {
-      roomId: selectedRoom.value
+      roomId: selectedRoom.value,
+      start: checkinTime.value,
+      end: checkoutTime.value
     }
     const response = await getBedsByRoom(params)
     console.log(response);
@@ -316,9 +364,9 @@ const handleRoomChange = async () => {
 }
 
 // 处理床位点击
-const handleBedClick = (bed: Bed) => {
-  if (bed.status !== 0) {
-    ElMessage.warning('该床位不可用')
+const handleBedClick = (bed: any) => {
+  // 修改判断：只有 occupied 为 false (空闲) 时才允许选择
+  if (bed.occupied) {
     return
   }
   selectedBed.value = bed.id
@@ -326,6 +374,9 @@ const handleBedClick = (bed: Bed) => {
 
 // 提交分配
 const handleSubmit = async () => {
+  // 【新增】第一道防线：如果正在提交中，直接阻断后续逻辑
+  if (submitting.value) return
+
   if (!props.selectedPerson || !selectedBed.value) {
     ElMessage.warning('请选择床位')
     return
@@ -343,7 +394,6 @@ const handleSubmit = async () => {
     }
 
     const response = await allocateBed(params)
-    ElMessage.success('床位分配成功')
     emit('success')
     handleClose()
   } catch (error: any) {
@@ -479,6 +529,12 @@ const getBedStatusType = (status?: number) => {
 }
 
 .assignment-section {
+
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+
   .section-header {
     display: flex;
     align-items: center;
