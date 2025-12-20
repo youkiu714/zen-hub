@@ -257,7 +257,7 @@ const fetchRooms = async () => {
     currentPage.value = res.current || 1
     console.log(res)
   } catch (err) {
-    ElMessage.error('网络错误')
+    // ElMessage.error('网络错误')
   }
 }
 
@@ -275,7 +275,7 @@ const fetchAssigned = async () => {
     currentPage.value = res.data?.current || 1
     console.log(res)
   } catch (err) {
-    ElMessage.error('网络错误')
+    // ElMessage.error('网络错误')
   }
 }
 

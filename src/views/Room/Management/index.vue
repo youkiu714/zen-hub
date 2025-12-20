@@ -6,7 +6,7 @@
       <div class="filter">
         <div class="filter-time">
           <el-date-picker
-            v-model="time"
+            v-model="roomInfo.time"
             type="daterange"
             range-separator="至"
             start-placeholder="入住时间"
@@ -14,7 +14,7 @@
             size="default"
           />
         </div>
-        <el-select v-model="value1" style="width: 240px" clearable>
+        <el-select v-model="roomInfo.type" style="width: 240px" clearable>
           <template #label="{ value }">
             <span>房间类型: </span>
             <span style="font-weight: bold">{{ value }}</span>
@@ -27,26 +27,51 @@
           />
         </el-select>
       </div>
-      <div class="room-data">
-        <Bed class="bed" @add-member="addMember" />
-        <Room :selectedMembers="selectedMembers" :roomStatusData="roomStatusData" />
+      <div class="room-data" v-loading="sharedLoading">
+        <div v-if="!isTimeSelected" class="empty-tip">请选择入住时间段</div>
+
+        <div v-else-if="sharedError" class="error-tip">
+          <div class="error-text">请求失败，请重试</div>
+          <el-button type="primary" @click="reloadAll">重新请求数据</el-button>
+        </div>
+
+        <template v-else>
+          <Bed ref="bedRef" class="bed" @add-member="addMember" :roomInfo="roomInfo" />
+          <Room
+            :selectedMembers="selectedMembers"
+            :roomStatusData="roomStatusData"
+            :rooms="rooms"
+            @assignment-success="handleAssignmentSuccess"
+          />
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, computed, nextTick } from 'vue'
+import dayjs from 'dayjs'
 import type { DashboardOverviewVO, RoomStatusDashboardVO } from '@/types/room-bed-management'
 import { getRoomOverview, getRoomStatus } from '@/api/room'
 import PageHeader from '@/components/PageHeader.vue'
 import Bed from './components/Bed.vue'
 import Room from './components/Room.vue'
+import { getRoomsByFloor } from '@/api/assignment'
 
-const time = ref('')
-const value1 = ref<string>('全')
+const roomInfo = ref({
+    time: [dayjs().subtract(7, 'day').startOf('day').toDate(), dayjs().startOf('day').toDate()] as [
+      Date,
+      Date
+    ],
+    type: '全部类型'
+})
+const rooms = ref([])
+const sharedLoading = ref(false)
+const sharedError = ref<string | null>(null)
+
 const genderOptions = [
-  { label: 'all', value: '全' },
+  { label: 'all', value: '全部类型' },
   { label: 'M', value: '男众房' },
   { label: 'F', value: '女众房' }
 ]
@@ -69,13 +94,45 @@ const selectedFloor = ref<string>('')
 const selectedGender = ref<string>('')
 const dateRange = ref<[string, string]>(['', ''])
 
-const selectedMembers = ref(0)
+const selectedMembers = ref<any[]>([])
+const bedRef = ref<any>(null)
+
+const isTimeSelected = computed(() => {
+  const time = roomInfo.value.time
+  return Array.isArray(time) && time.length === 2 && time[0] && time[1]
+})
 
 // 加载统计概览数据
 const loadDashboardData = async () => {
   const res = await getRoomOverview()
   dashboardData.value = res || {}
 }
+
+watch(
+  [() => roomInfo.value.type, () => roomInfo.value.time],
+  async () => {
+    if (!isTimeSelected.value) {
+      rooms.value = []
+      bedRef.value?.clearData?.()
+      sharedError.value = null
+      sharedLoading.value = false
+      return
+    }
+
+    await reloadAll()
+  },
+  {
+    immediate: true
+  }
+)
+
+// 确保初次进入时也走统一的 loading/错误重试逻辑
+onMounted(async () => {
+  await nextTick()
+  if (isTimeSelected.value) {
+    await reloadAll()
+  }
+})
 
 // 加载房间状态数据
 const loadRoomStatusData = async () => {
@@ -91,7 +148,47 @@ const loadRoomStatusData = async () => {
 
 const addMember = (value) => {
   console.log('value:', value)
-  selectedMembers.value = value
+  selectedMembers.value = Array.isArray(value) ? value : []
+}
+
+const handleAssignmentSuccess = async () => {
+  await reloadAll()
+  bedRef.value?.clearSelection?.()
+  selectedMembers.value = []
+}
+
+const reloadAll = async () => {
+  if (!isTimeSelected.value) return
+  sharedLoading.value = true
+  sharedError.value = null
+
+  const [rawStart, rawEnd] = Array.isArray(roomInfo.value.time) ? roomInfo.value.time : []
+  const start = rawStart && dayjs(rawStart).isValid() ? dayjs(rawStart).format('YYYY-MM-DD') : undefined
+  const end = rawEnd && dayjs(rawEnd).isValid() ? dayjs(rawEnd).format('YYYY-MM-DD') : undefined
+
+  try {
+    const [_, roomRes] = await Promise.all([
+      bedRef.value?.reloadUnassignedForRoomInfo?.(),
+      getRoomsByFloor({
+        gender:
+          roomInfo.value.type === '全部类型'
+            ? undefined
+            : roomInfo.value.type === '男众房'
+              ? '1'
+              : '2',
+        start,
+        end
+      })
+    ])
+
+    rooms.value = roomRes
+  } catch (error) {
+    console.log('reloadAll error:', error)
+    sharedError.value = '请求失败'
+    rooms.value = []
+  } finally {
+    sharedLoading.value = false
+  }
 }
 
 // 初始化加载数据
@@ -131,6 +228,22 @@ onMounted(async () => {
   overflow-y: auto;
   overflow-x: hidden;
   gap: 16px;
+}
+
+.empty-tip,
+.error-tip {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #86868b;
+  gap: 12px;
+}
+
+.error-text {
+  color: #ff3b30;
 }
 
 .action-buttons .el-button {

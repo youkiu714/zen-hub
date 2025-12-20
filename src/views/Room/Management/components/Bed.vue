@@ -5,19 +5,19 @@
 
         <div class="filter-container">
           <div class="filter-row mixed-controls">
-            <div class="gender-toggle">
+            <!-- <div class="gender-toggle">
               <el-radio-group v-model="filters.gender" size="small">
                 <el-radio-button v-for="g in genderOptions" :key="g.value" :label="g.value">
                   {{ g.label }}
                 </el-radio-button>
               </el-radio-group>
-            </div>
+            </div> -->
 
             <div class="group-toggle">
               <el-radio-group v-model="filters.group" size="small">
                 <el-radio-button label="">全</el-radio-button>
                 <el-radio-button
-                  v-for="dept in departmentOptions"
+                  v-for="dept in departmentOptions.filter(item => item.value !== DEPARTMENT.OTHER)"
                   :key="dept.value"
                   :label="dept.value"
                 >
@@ -53,7 +53,6 @@
       <div
         ref="scrollRef"
         class="member-list-scroll"
-        v-loading="loading"
         @scroll="handleScroll"
       >
         <div class="virtual-spacer" :style="{ height: topPadding + 'px' }"></div>
@@ -69,7 +68,7 @@
 
         <div class="virtual-spacer" :style="{ height: bottomPadding + 'px' }"></div>
       </div>
-      <div v-if="!loading && filteredMembers.length === 0" class="empty-state">暂无数据</div>
+      <!-- <div v-if="!loading && filteredMembers.length === 0" class="empty-state">暂无数据</div> -->
     </div>
 
     <div class="main-content">
@@ -80,12 +79,17 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick, onBeforeUnmount } from 'vue'
+import dayjs from 'dayjs'
 import MemberCard from '@/components/MemberCard.vue'
 import { getPendingAssignments, getAssignedList } from '@/api/assignment'
 import type { AssignmentListItemVO, AssignedLodgingVO } from '@/types/assignment'
-import { departmentOptions, DepartmentMap } from '@/utils/constants'
+import { departmentOptions, DepartmentMap, DEPARTMENT } from '@/utils/constants'
 
 const emits = defineEmits(['addMember'])
+
+const props = defineProps<{
+  roomInfo: any
+}>()
 
 type MemberKey = string | number
 type MemberWithKey<T> = T & { __key: MemberKey }
@@ -94,10 +98,11 @@ type MemberWithKey<T> = T & { __key: MemberKey }
 const allUnassignedMembers = ref<AssignmentListItemVO[]>([]) // 存储所有待分配数据
 const allAssignedMembers = ref<AssignedLodgingVO[]>([]) // 存储所有已分配数据
 const loading = ref(false)
+const unassignedLoadError = ref<string | null>(null)
 const scrollRef = ref<HTMLElement | null>(null)
 const itemHeight = 88 // 80px 卡片 + 8px 间距
 const overscanCount = 6
-const reachEndThreshold = 100
+const reachEndThreshold = 100 
 
 const scrollTop = ref(0)
 const viewportHeight = ref(0)
@@ -112,6 +117,8 @@ const hasMoreAssigned = ref(true)
 
 const inflightUnassignedPage = ref<number | null>(null)
 const inflightAssignedPage = ref<number | null>(null)
+const inflightUnassignedKey = ref<string | null>(null)
+const roomInfoVersion = ref(0)
 
 const selectedMembers = ref<Array<AssignmentListItemVO | AssignedLodgingVO>>([])
 
@@ -120,11 +127,51 @@ const currentTab = ref('unassigned') // 'unassigned' | 'assigned'
 const selectedIds = ref<MemberKey[]>([])
 const filters = ref({ dateRange: null, gender: 'all', group: '' })
 
-const genderOptions = [
-  { label: '全', value: 'all' },
-  { label: '男', value: 'M' },
-  { label: '女', value: 'F' }
-]
+
+const getRoomFilterParams = () => {
+  const info = props.roomInfo ?? {}
+  const rawTime = (info as any)?.time
+  const [rawStart, rawEnd] = Array.isArray(rawTime) ? rawTime : []
+
+  const startDate =
+    rawStart && dayjs(rawStart).isValid() ? dayjs(rawStart).format('YYYY-MM-DD') : undefined
+  const endDate = rawEnd && dayjs(rawEnd).isValid() ? dayjs(rawEnd).format('YYYY-MM-DD') : undefined
+
+  const type = (info as any)?.type
+  const gender =
+    typeof (info as any)?.gender === 'number'
+      ? (info as any).gender
+      : type === '男众房'
+        ? 1
+        : type === '女众房'
+          ? 2
+          : undefined
+
+  return { startDate, endDate, gender }
+}
+
+const resetUnassignedState = () => {
+  unassignedPage.value = 1
+  hasMoreUnassigned.value = true
+  allUnassignedMembers.value = []
+  inflightUnassignedPage.value = null
+  inflightUnassignedKey.value = null
+  unassignedLoadError.value = null
+}
+
+watch(
+  () => props.roomInfo,
+  () => {
+    roomInfoVersion.value += 1
+
+    // roomInfo(入住/离店/类型)变化时，刷新“待分配”列表
+    resetUnassignedState()
+
+    resetScroll()
+    clearSelection()
+  },
+  { deep: true }
+)
 
 const getMemberKey = (member: any): MemberKey => {
   return (
@@ -217,20 +264,29 @@ const visibleMembers = computed(() => {
 const topPadding = computed(() => startIndex.value * itemHeight)
 const bottomPadding = computed(() => (filteredMembers.value.length - endIndex.value) * itemHeight)
 
-const fetchUnassigned = async (append = false) => {
+const fetchUnassigned = async (append = false, options?: { throwOnError?: boolean }) => {
   try {
+    const requestVersion = roomInfoVersion.value
     const pageNo = append ? unassignedPage.value : 1
-    if (loading.value) return
-    if (inflightUnassignedPage.value === pageNo) return
+    if (append && loading.value) return
+    const inflightKey = `${requestVersion}-${pageNo}`
+    if (inflightUnassignedKey.value === inflightKey) return
 
     inflightUnassignedPage.value = pageNo
+    inflightUnassignedKey.value = inflightKey
     loading.value = true
+    if (!append) unassignedLoadError.value = null
+    const { startDate, endDate, gender } = getRoomFilterParams()
     const params = {
       pageNo,
       pageSize,
-      keyword: ''
+      keyword: '',
+      startDate,
+      endDate,
+      gender
     }
     const response = await getPendingAssignments(params)
+    if (requestVersion !== roomInfoVersion.value) return
     const records = response?.records || response?.data?.records || []
     const normalized = normalizeMembers(records, append ? allUnassignedMembers.value.length : 0)
 
@@ -241,8 +297,14 @@ const fetchUnassigned = async (append = false) => {
     if (hasMoreUnassigned.value) unassignedPage.value += 1
   } catch (error) {
     console.error('获取待分配人员列表失败:', error)
+    if (!append) unassignedLoadError.value = '获取待分配人员列表失败'
+    if (options?.throwOnError) throw error
   } finally {
-    inflightUnassignedPage.value = null
+    if (inflightUnassignedKey.value) {
+      inflightUnassignedKey.value = null
+      inflightUnassignedPage.value = null
+    }
+    // 仅在未发生 roomInfo 切换时关闭 loading，避免旧请求覆盖新状态
     loading.value = false
   }
 }
@@ -328,7 +390,29 @@ const toggleSelection = (id: MemberKey, item: any) => {
   }
 };
 
-const clearSelection = () => (selectedIds.value = [])
+const clearSelection = () => {
+  selectedIds.value = []
+  selectedMembers.value = []
+}
+
+defineExpose({
+  refresh: fetchData,
+  reloadUnassignedForRoomInfo: async () => {
+    roomInfoVersion.value += 1
+    resetUnassignedState()
+    resetScroll()
+    clearSelection()
+    await fetchUnassigned(false, { throwOnError: true })
+  },
+  clearData: () => {
+    resetUnassignedState()
+    allAssignedMembers.value = []
+    hasMoreAssigned.value = true
+    assignedPage.value = 1
+  },
+  getLoadError: () => unassignedLoadError.value,
+  clearSelection
+})
 
 const handleUnassign = () => {
   alert(`将 ${selectedIds.value.length} 人移出房间，变为待分配状态`)
@@ -349,9 +433,8 @@ const resetScroll = () => {
   scrollTop.value = 0
 }
 
-// 组件挂载时获取数据
+// 组件挂载：仅做滚动容器测量，数据由父组件统一控制 loading/重试
 onMounted(async () => {
-  await fetchData()
   await nextTick()
   updateViewport()
   if (scrollRef.value && typeof ResizeObserver !== 'undefined') {
@@ -377,7 +460,6 @@ onBeforeUnmount(() => {
 .sidebar-panel {
   width: 290px;
   background: white;
-  border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -603,8 +685,17 @@ onBeforeUnmount(() => {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px;
+  padding: 12px 0;
   position: relative;
+
+  /* 隐藏滚动条但保留滚动能力 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+.member-list-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .member-list-scroll :deep(.member-card) {

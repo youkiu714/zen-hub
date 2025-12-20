@@ -24,7 +24,6 @@
       <div class="row-primary">
         <span class="member-name">{{ member.name }}</span>
         <span class="tag-group" :class="getGroupClass(member.departmentCode)">{{ DepartmentMap[member.departmentCode] }}</span>
-
         <span v-if="showRoomInfo && member.roomNo" class="tag-room">
           🏠 {{ member.roomNo }}室
         </span>
@@ -33,8 +32,8 @@
       </div>
       <div class="row-secondary">
         <div class="gender-box" :class="member.gender">
-          <span class="symbol">{{ member.gender === 'M' ? '♂' : '♀' }}</span>
-          <span>{{ member.gender === 'M' ? '男众' : '女众' }}</span>
+          <span class="symbol">{{ member.gender === 1 ? '♂' : '♀' }}</span>
+          <span>{{ member.gender === 1 ? '男众' : '女众' }}</span>
         </div>
         <div class="divider">|</div>
         <div class="date-text">{{ member.checkinDate }} - {{ member.checkoutDate }}</div>

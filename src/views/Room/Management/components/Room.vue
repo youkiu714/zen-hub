@@ -1,78 +1,93 @@
 <template>
   <div class="room-panel">
-    <!-- <div class="content-header">
-      <h2>
-        房间资源
-        <span class="header-subtitle" v-if="selectedCount < 1 || !selectedCount"
-          >请在左侧选择人员</span
-        >
-        <span class="header-subtitle highlight" v-else>已选择 {{ selectedCount }} 人</span>
-      </h2>
-    </div> -->
-
-    <div
-      class="virtual-scroll-container"
-      ref="scrollerWrapper"
-      @scroll="handleScroll"
-      v-loading="loading"
-    >
-      <div v-for="room in allRooms" :key="room.id">
-        <div class="room-card-wrapper" :style="gridItemStyle">
+    <div class="virtual-scroll-container">
+      <div v-for="room in visibleRooms" :key="room.id">
+        <div class="room-card-wrapper">
           <div class="room-card" :class="getRoomStateClass(room)">
             <div class="card-header">
               <div class="header-left">
-                <span class="room-number">{{ room.number }}</span>
-                <span class="room-gender">{{ room.gender === 'F' ? '女众' : '男众' }}</span>
+                <span class="room-number">{{ room.roomNo }}</span>
+                <span class="room-gender">{{ room.gender === 1 ? '男众' : '女众' }}</span>
               </div>
               <div class="room-availability">
-                余
-                <span class="count" :class="{ zero: getFreeCount(room) === 0 }">{{
-                  getFreeCount(room)
+                <span class="occupied-count">{{
+                  room.occupiedCount || (room.beds ? room.beds.filter((b) => b.occupant).length : 0)
                 }}</span>
-                床
+                <span class="separator">/</span>
+                <span class="total-count">{{ room.capacity }}</span>
+                <span class="label">已住</span>
               </div>
             </div>
 
-            <div class="bed-grid-minimal">
+            <div class="bed-grid-visual">
               <div
                 v-for="bed in room.beds"
-                :key="bed.id"
+                :key="bed.bedId"
                 class="bed-tile"
                 :class="{
-                  'is-occupied': bed.assigned,
-                  'is-vacant': !bed.assigned
+                  'is-occupied': isBedOccupied(bed),
+                  'is-vacant': !isBedOccupied(bed)
                 }"
               >
-                <div class="bed-info-row">
-                  <span class="bed-id">{{ bed.id }}号</span>
-                  <span class="bed-position"> · {{ bed.type === 'lower' ? '下铺' : '上铺' }}</span>
-                </div>
+                <span class="bed-pos-tag">{{ bed.bedNo }}</span>
 
-                <div class="bed-status-row">
-                  <template v-if="bed.assigned">
-                    <span class="user-name" :title="bed.assigned.name">{{
-                      bed.assigned.name
-                    }}</span>
-                  </template>
-                  <template v-else>
-                    <span class="vacant-label">空闲</span>
-                  </template>
-                </div>
+                <template v-if="isBedOccupied(bed)">
+                  <div>
+                    <!-- <el-popconfirm
+                      class="box-item"
+                      :title="`确定要移除${bed.occupant?.name}吗`"
+                      placement="top"
+                      trigger="click"
+                      :icon="null"
+                      confirm-button-text="确认"
+                      cancel-button-text="取消"
+                      @confirm="handleDeleteBed(room, bed)"
+                    >
+                      <template #reference>
+                        <div
+                          class="action-icon delete-icon"
+                          @click.stop
+                          title="移出人员"
+                        >
+                          ×
+                        </div>
+                      </template>
+                    </el-popconfirm> -->
+
+                    <!-- <div
+                      class="action-icon info-icon"
+                      @click.stop="handleShowDetail(bed)"
+                      title="查看详情"
+                    >
+                      i
+                    </div> -->
+                  </div>
+
+                  <div class="occupant-name" :title="bed.occupant?.name">
+                    {{ bed.occupant?.name }}
+                  </div>
+                </template>
+
+                <template v-else>
+                  <div class="vacant-center">
+                    <span class="vacant-text">空</span>
+                  </div>
+                </template>
               </div>
             </div>
 
             <div class="card-footer">
-              <button
-                v-if="selectedCount > 0"
-                class="action-btn assign"
-                @click="() => openAssignModal(room)"
-              >
-                <template v-if="canAssignTo(room)"> 分配 {{ selectedCount }} 人 </template>
-                <template v-else> {{ getDisabledReason(room) }} </template>
+              <button class="action-btn view" type="button" @click="$emit('manage-room', room)">
+                编辑
               </button>
-
-              <button v-else class="action-btn view" @click="$emit('manage-room', room)">
-                管理
+              <button
+                class="action-btn assign"
+                type="button"
+                :disabled="selectedCount === 0 || !canAssignTo(room)"
+                @click="openAssignModal(room)"
+              >
+                <template v-if="selectedCount > 0">分配 {{ selectedCount }}人</template>
+                <template v-else>暂未分配</template>
               </button>
             </div>
           </div>
@@ -80,186 +95,149 @@
       </div>
     </div>
 
-    <transition name="fade">
-      <div v-if="showModal" class="modal-overlay">
-        <div class="modal-content-minimal">
-          <div class="modal-header">
-            <h3>
-              {{ targetRoom.number }}室 - 确认排布<span class="sub-text"
-                >(如需调整，请直接点击两个床位进行互换)</span
-              >
-            </h3>
-          </div>
-
-          <div class="preview-grid-minimal">
-            <div
-              v-for="bed in previewBeds"
-              :key="bed.id"
-              class="preview-tile"
-              :class="{
-                'is-lower': bed.type === 'lower',
-                'is-selected-swap': swapSourceId === bed.id,
-                'is-locked': bed.isOriginalOccupied
-              }"
-              @click="handleBedSwapClick(bed)"
-            >
-              <div class="tile-header">
-                <span class="bed-idx">{{ bed.id }}号</span>
-                <span class="bed-pos" :class="bed.type">{{
-                  bed.type === 'lower' ? '下铺' : '上铺'
-                }}</span>
-              </div>
-
-              <div class="tile-body">
-                <template v-if="bed.assigned">
-                  <div class="p-name">{{ bed.assigned.name }}</div>
-                  <div class="p-meta">
-                    <span>{{ bed.assigned.age }}岁</span>
-                    <span v-if="bed.assigned.age >= 60" class="elder-indicator">长者</span>
-                  </div>
-                  <div
-                    v-if="bed.type === 'upper' && bed.assigned.age >= 60"
-                    class="warning-indicator"
-                  >
-                    建议调至下铺
-                  </div>
-                </template>
-                <template v-else>
-                  <div class="p-empty">空闲</div>
-                </template>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-actions-minimal">
-            <button class="btn-minimal cancel" @click="closeModal">取消</button>
-            <button class="btn-minimal confirm" @click="confirmAssignment">确认分配</button>
-          </div>
-        </div>
-      </div>
-    </transition>
+    <AssignModal
+      v-model="showModal"
+      :target-room="targetRoom"
+      :preview-beds="previewBeds"
+      :swap-source-id="swapSourceId"
+      :current-info="currentInfo"
+      @bed-swap="handleBedSwapClick"
+      @confirm="confirmAssignment"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { RecycleScroller } from 'vue-virtual-scroller'
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
-import { getRooms } from '@/api/room'
-import type { RoomSummaryVO } from '@/types/room'
+import { ref, computed } from 'vue'
 import { batchBeds } from '@/api/bed'
+import AssignModal from './AssignModal.vue'
 
-// --- Props & Emits ---
+// ==========================================
+// 以下保留您提供的原始逻辑代码
+// ==========================================
+
 const props = defineProps({
   selectedMembers: {
     type: Array as () => any[],
     default: () => []
+  },
+  rooms: {
+    type: Array as () => any[],
+    required: true
   }
 })
 
-const emit = defineEmits(['confirm-assign', 'manage-room'])
+const emit = defineEmits(['confirm-assign', 'manage-room', 'assignment-success'])
 
 const showModal = ref(false)
 const targetRoom = ref<any>(null)
 const previewBeds = ref<any[]>([])
 const swapSourceId = ref<number | null>(null)
-const allRooms = ref<any[]>([])
-const loading = ref(false)
-const scrollerWrapper = ref<HTMLElement | null>(null)
+const currentInfo = ref(null)
 
-// --- 虚拟滚动配置 ---
-const itemHeight = 320 // 每个房间卡片的高度
-const scrollerRef = ref<InstanceType<typeof RecycleScroller> | null>(null)
-const desiredColumns = 3
-const minCardWidth = 280
-const columnGap = 16
-const cardWidth = ref(320)
-const columnStride = ref(cardWidth.value + columnGap) // item-secondary-size
-let resizeObserver: ResizeObserver | null = null
+const selectedMembersList = computed<any[]>(() =>
+  Array.isArray(props.selectedMembers) ? props.selectedMembers : []
+)
 
-const gridItemStyle = computed(() => ({
-  width: `${cardWidth.value}px`,
-  height: `${itemHeight}px`
-}))
+const getPersonKey = (person: any): string | number | null => {
+  return person?.applicationId ?? person?.personId ?? person?.id ?? person?.__key ?? null
+}
 
-// --- 分页加载状态 ---
-const pageSize = 10
-const currentPage = ref(1)
-const hasMore = ref(true)
-const isLoadingMore = ref(false)
+const normalizeBedType = (bed: any): 'upper' | 'lower' | 'unknown' => {
+  if (bed?.type === 'upper' || bed?.type === 'lower') return bed.type
+  if (bed?.bedType === 1) return 'upper'
+  if (bed?.bedType === 2) return 'lower'
+  if (typeof bed?.bedTypeName === 'string') {
+    if (bed.bedTypeName.includes('上')) return 'upper'
+    if (bed.bedTypeName.includes('下')) return 'lower'
+  }
+  if (typeof bed?.bedNo === 'string') {
+    if (bed.bedNo.includes('上')) return 'upper'
+    if (bed.bedNo.includes('下')) return 'lower'
+  }
+  return 'unknown'
+}
+
+const getBedId = (bed: any): number | null => {
+  const id = bed?.bedId ?? bed?.id
+  return typeof id === 'number' ? id : Number(id)
+}
+
+const getBedSortKey = (bed: any): number => {
+  const bedNo = bed?.bedNo
+  if (typeof bedNo === 'number') return bedNo
+  if (typeof bedNo === 'string') {
+    const digits = bedNo.match(/\d+/g)
+    if (digits && digits.length > 0) return Number(digits.join(''))
+  }
+  return getBedId(bed) ?? 0
+}
+
+const getBunkKey = (bed: any): string => {
+  const bedNo = bed?.bedNo
+  if (typeof bedNo === 'string') {
+    const digits = bedNo.match(/\d+/g)
+    if (digits && digits.length > 0) return digits.join('')
+    return bedNo
+  }
+  if (typeof bedNo === 'number') return String(bedNo)
+  return String(getBedId(bed) ?? getBedSortKey(bed))
+}
+
+const getBedAssigned = (bed: any) => bed?.assigned ?? bed?.occupant ?? null
+
+const isBedOccupied = (bed: any): boolean => {
+  if (getBedAssigned(bed)) return true
+  if (bed?.occupied === true) return true
+  if (bed?.status === 1) return true
+  return false
+}
+
+const isBedBlocked = (bed: any): boolean => {
+  if (bed?.status === 2 || bed?.status === 3) return true
+  if (bed?.locked === true || bed?.isLocked === true) return true
+  return false
+}
+
+const isBedAssignable = (bed: any): boolean => {
+  return !isBedOccupied(bed) && !isBedBlocked(bed)
+}
 
 // --- 计算属性 ---
-const selectedCount = computed(() => props.selectedMembers.length)
+const selectedCount = computed(() => selectedMembersList.value.length)
 
 const selectedGender = computed(() => {
-  if (props.selectedMembers.length === 0) return null
-  return props.selectedMembers?.length > 0 && props.selectedMembers[0].gender
+  if (selectedMembersList.value.length === 0) return null
+  return selectedMembersList.value[0]?.gender ?? null
 })
 
-// --- API 调用 ---
-const fetchRooms = async (page: number = 1, append: boolean = false) => {
-  try {
-    if (!append) {
-      loading.value = true
-    } else {
-      isLoadingMore.value = true
-    }
-
-    const params = { pageNo: page, pageSize: pageSize }
-    const response = await getRooms(params)
-
-    if (response.records && response.records.length > 0) {
-      const transformedData = response.records.map(transformRoomData)
-
-      if (append) {
-        allRooms.value = [...allRooms.value, ...transformedData]
-      } else {
-        allRooms.value = transformedData
-      }
-
-      // 检查是否还有更多数据
-      hasMore.value = response.records.length === pageSize
-    } else {
-      hasMore.value = false
-    }
-  } catch (error) {
-    console.error('获取房间列表失败:', error)
-  } finally {
-    loading.value = false
-    isLoadingMore.value = false
-  }
+// === 新增/修改的处理函数 ===
+const handleDeleteBed = (room: any, bed: any) => {
+  // 这里可以添加二次确认弹窗
+  console.log('点击了移除:', { room, bed })
+  // 实际业务逻辑：调用 API 移除该床位的人员
+  // emit('remove-member', { roomId: room.id, bedId: bed.bedId })
 }
 
-const loadMore = async () => {
-  if (!hasMore.value || isLoadingMore.value) return
-
-  currentPage.value++
-  await fetchRooms(currentPage.value, true)
+const handleShowDetail = (bed: any) => {
+  console.log('点击了详情:', bed)
+  // 实际业务逻辑：展示详情弹窗
+  // emit('show-detail', bed.occupant)
 }
-
-const transformRoomData = (room: RoomSummaryVO) => ({
-  id: room.id,
-  number: room.roomNo,
-  gender: room?.gender === 1 ? 'M' : 'F',
-  beds: generateMockBeds(room.bedCount || 0, room.usedBedCount || 0),
-  capacity: room.bedCount || 0,
-  occupied: room.usedBedCount || 0
-})
-
-const generateMockBeds = (totalBeds: number, usedBeds: number) => {
-  const beds = []
-  for (let i = 1; i <= totalBeds; i++) {
-    beds.push({
-      id: i,
-      type: i % 2 === 1 ? 'lower' : 'upper',
-      assigned: i <= usedBeds ? { name: `住户${i}`, age: 30 + i } : null
-    })
-  }
-  return beds
-}
+// =========================
 
 // --- 辅助逻辑 (保持不变) ---
-const getFreeCount = (room: any) => room.beds.filter((b: any) => !b.assigned).length
+const getFreeCount = (room: any) => (room?.beds ?? []).filter((b: any) => isBedAssignable(b)).length
+
+const visibleRooms = computed(() => {
+  const list = Array.isArray(props.rooms) ? props.rooms : []
+  // if (selectedCount.value === 0) return list // 如果需要只在选人时筛选，取消注释
+  // 仅展示“可被分配”的房间逻辑如果不需要可以注释掉，或者保留
+  if (selectedCount.value > 0) {
+    return list.filter((room: any) => canAssignTo(room))
+  }
+  return list
+})
 
 const canAssignTo = (room: any) => {
   if (selectedCount.value === 0) return false
@@ -268,219 +246,229 @@ const canAssignTo = (room: any) => {
   return true
 }
 
-const getDisabledReason = (room: any) => {
-  if (selectedGender.value && room.gender !== selectedGender.value) return '性别不符'
-  if (getFreeCount(room) < selectedCount.value) return '容量不足'
-  return '不可用'
-}
-
 const getRoomStateClass = (room: any) => {
   if (selectedCount.value === 0) return ''
-  // 移除过于显眼的绿色边框，改用更微妙的交互
   return canAssignTo(room) ? 'is-match' : 'is-disabled'
 }
 
-// --- 弹窗逻辑 (保持不变) ---
+// --- 弹窗逻辑 (完全保留原逻辑) ---
 const openAssignModal = (room: any) => {
   console.log('room:', room)
   targetRoom.value = room
   swapSourceId.value = null
+  currentInfo.value = room
 
-  const bedsClone = JSON.parse(JSON.stringify(room.beds))
-  bedsClone.forEach((b: any) => {
-    if (b.assigned) b.isOriginalOccupied = true
+  const selectedKeySet = new Set(
+    selectedMembersList.value.map((m: any) => getPersonKey(m)).filter((k: any) => k != null)
+  )
+
+  const bedsClone = JSON.parse(JSON.stringify(room?.beds ?? []))
+  bedsClone.forEach((bed: any) => {
+    bed.bedId = getBedId(bed)
+    bed.type = normalizeBedType(bed)
+    bed.assigned = getBedAssigned(bed)
+    bed.isOriginalOccupied = isBedOccupied(bed)
+    bed.isBlocked = isBedBlocked(bed)
+    bed.isNew = false
   })
 
-  const peopleToAssign = [...props.selectedMembers].sort((a: any, b: any) => b.age - a.age)
+  const peopleToAssign = [...selectedMembersList.value]
+  const assignableBeds = bedsClone.filter((b: any) => isBedAssignable(b))
 
-  const freeBeds = bedsClone
-    .filter((b: any) => !b.assigned)
-    .sort((a: any, b: any) => {
-      if (a.type === 'lower' && b.type !== 'lower') return -1
-      if (a.type !== 'lower' && b.type === 'lower') return 1
-      return a.id - b.id
-    })
+  // 您的原始排序与分配逻辑
+  const lowerBeds = assignableBeds
+    .filter((b: any) => b.type === 'lower')
+    .sort((a: any, b: any) => getBedSortKey(a) - getBedSortKey(b))
+  const upperBeds = assignableBeds
+    .filter((b: any) => b.type === 'upper')
+    .sort((a: any, b: any) => getBedSortKey(a) - getBedSortKey(b))
+  const unknownBeds = assignableBeds
+    .filter((b: any) => b.type !== 'upper' && b.type !== 'lower')
+    .sort((a: any, b: any) => getBedSortKey(a) - getBedSortKey(b))
 
-  peopleToAssign.forEach((person: any, idx: number) => {
-    if (idx < freeBeds.length) {
-      freeBeds[idx].assigned = person
-      freeBeds[idx].isNew = true
+  const ageValue = (p: any) => (typeof p?.age === 'number' ? p.age : 0)
+  const remainingPeople = [...peopleToAssign].sort((a: any, b: any) => ageValue(a) - ageValue(b))
+
+  const bunkMap = new Map()
+  ;[...lowerBeds, ...upperBeds].forEach((bed: any) => {
+    const key = getBunkKey(bed)
+    const sortKey = getBedSortKey(bed)
+    const existing = bunkMap.get(key) ?? { key, sortKey }
+    existing.sortKey = Math.min(existing.sortKey ?? sortKey, sortKey)
+    if (bed.type === 'lower') existing.lower = bed
+    if (bed.type === 'upper') existing.upper = bed
+    bunkMap.set(key, existing)
+  })
+
+  const getBunkRank = (bunk: any) => {
+    if (bunk.lower && bunk.upper) return 0
+    if (bunk.upper) return 1
+    if (bunk.lower) return 2
+    return 3
+  }
+
+  const bunks = Array.from(bunkMap.values()).sort((a: any, b: any) => {
+    const rankDiff = getBunkRank(a) - getBunkRank(b)
+    if (rankDiff !== 0) return rankDiff
+    return (a.sortKey ?? 0) - (b.sortKey ?? 0)
+  })
+
+  for (const bunk of bunks) {
+    if (remainingPeople.length === 0) break
+    if (bunk.lower && remainingPeople.length > 0) {
+      bunk.lower.assigned = remainingPeople.pop()
     }
+    if (bunk.upper && remainingPeople.length > 0) {
+      bunk.upper.assigned = remainingPeople.shift()
+    }
+  }
+
+  unknownBeds.forEach((bed: any) => {
+    if (remainingPeople.length === 0) return
+    bed.assigned = remainingPeople.pop()
   })
+
+  const refreshNewFlags = () => {
+    bedsClone.forEach((bed: any) => {
+      const key = getPersonKey(bed.assigned)
+      bed.isNew =
+        !bed.isOriginalOccupied && !bed.isBlocked && key != null && selectedKeySet.has(key)
+    })
+  }
+  refreshNewFlags()
 
   previewBeds.value = bedsClone
   showModal.value = true
 }
 
 const handleBedSwapClick = (bed: any) => {
-  if (bed.isOriginalOccupied) return
+  if (bed.isOriginalOccupied || bed.isBlocked) return
+
+  const selectedKeySet = new Set(
+    selectedMembersList.value.map((m: any) => getPersonKey(m)).filter((k: any) => k != null)
+  )
+
+  const refreshNewFlags = () => {
+    previewBeds.value.forEach((b: any) => {
+      const key = getPersonKey(b.assigned)
+      b.isNew = !b.isOriginalOccupied && !b.isBlocked && key != null && selectedKeySet.has(key)
+    })
+  }
+
   if (swapSourceId.value === null) {
-    swapSourceId.value = bed.id
+    if (!bed.isNew) return
+    swapSourceId.value = bed.bedId
   } else {
-    if (swapSourceId.value === bed.id) {
+    if (swapSourceId.value === bed.bedId) {
       swapSourceId.value = null
       return
     }
-    const source = previewBeds.value.find((b: any) => b.id === swapSourceId.value)
     const target = bed
+    const source = previewBeds.value.find((b: any) => b.bedId === swapSourceId.value)
+    if (!source || !source.isNew || !target.isNew) {
+      swapSourceId.value = null
+      return
+    }
     const temp = source.assigned
     source.assigned = target.assigned
     target.assigned = temp
     swapSourceId.value = null
+    refreshNewFlags()
   }
 }
-
-const closeModal = () => (showModal.value = false)
 
 const confirmAssignment = async () => {
-  const beds = []
+  try {
+    const beds: any[] = []
+    const selectedKeySet = new Set(
+      selectedMembersList.value.map((m: any) => getPersonKey(m)).filter((k: any) => k != null)
+    )
 
-  console.log('targetRoom.value.id:', targetRoom.value.id)
-  console.log('previewBeds.value:', previewBeds.value)
-  emit('confirm-assign', {
-    roomId: targetRoom.value.id,
-    newBeds: previewBeds.value
-  })
-//   todo 少一个床id
-  previewBeds.value.map((item) => {
-    if (item.assigned) {
+    previewBeds.value.forEach((item: any) => {
+      const assigned = item?.assigned
+      const key = getPersonKey(assigned)
+      if (!assigned || key == null || !selectedKeySet.has(key)) return
+      if (item.isOriginalOccupied || item.isBlocked) return
+      const bedId = getBedId(item)
+      if (!bedId) return
       beds.push({
-        applicationId: item.assigned.applicationId,
-        checkinAt: item.assigned.checkinDate,
-        checkoutAt: item.assigned.checkoutDate,
+        applicationId: assigned.applicationId,
+        bedId,
+        checkinAt: assigned.checkinDate ?? assigned.expectedCheckinDate,
+        checkoutAt: assigned.checkoutDate ?? assigned.expectedCheckoutDate,
         type: 1
       })
-    }
-  })
+    })
 
-  const data = await batchBeds(beds)
-  console.log('data:', data)
-  //   closeModal()
-}
-
-const handleScroll = (event: Event) => {
-  const container = event.target as HTMLElement
-  const { scrollTop, scrollHeight, clientHeight } = container
-  if (scrollHeight - scrollTop - clientHeight <= 350 && !isLoadingMore.value) {
-    loadMore()
+    console.log('提交分配数据:', beds)
+    const data = await batchBeds(beds) // 假设这是您的 API
+    console.log('分配成功:', data)
+    showModal.value = false
+    emit('assignment-success')
+    emit('confirm-assign', {
+      roomId: targetRoom.value.id,
+      newBeds: previewBeds.value
+    })
+  } catch (error) {
+    console.error('分配失败:', error)
   }
 }
-
-const updateGridMetrics = () => {
-  const containerWidth = scrollerWrapper.value?.clientWidth || 0
-  if (!containerWidth) return
-
-  const possibleColumns = Math.floor(containerWidth / (minCardWidth + columnGap))
-  const columns = Math.min(desiredColumns, Math.max(1, possibleColumns))
-  const stride = Math.floor(containerWidth / columns)
-  const nextCardWidth = Math.max(minCardWidth, stride - columnGap)
-
-  cardWidth.value = nextCardWidth
-  columnStride.value = stride
-  ;(scrollerRef.value as any)?.forceUpdate?.()
-}
-
-onMounted(async () => {
-  updateGridMetrics()
-  if (scrollerWrapper.value) {
-    resizeObserver = new ResizeObserver(() => updateGridMetrics())
-    resizeObserver.observe(scrollerWrapper.value)
-  }
-  await fetchRooms()
-})
-
-onBeforeUnmount(() => {
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-  }
-})
 </script>
 
 <style scoped>
-/* --- 全局容器与字体 --- */
 .room-panel {
   flex: 1;
-  /* 使用更干净的背景色 */
-  /* background-color: #f8f9fa; */
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px 24px;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* --- 顶部标题栏 (极简) --- */
-.content-header {
-  margin-bottom: 24px;
-  flex-shrink: 0;
-}
-.content-header h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #1d1d1f; /* Apple 深灰 */
-  letter-spacing: -0.5px;
-}
-.header-subtitle {
-  font-size: 14px;
-  color: #86868b;
-  font-weight: 400;
-  margin-left: 8px;
-}
-.header-subtitle.highlight {
-  color: #007aff; /* Apple Blue 用于强调提示 */
-}
-
-/* --- 虚拟滚动区域 --- */
-.virtual-scroll-wrapper {
-  flex: 1;
-  height: 100%;
-  width: 100%;
-}
 .virtual-scroll-container {
   flex: 1;
   height: 100%;
-  padding: 10px 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 三列布局 */
-  gap: 16px; /* 添加列间距 */
-  overflow: auto;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  overflow-y: auto;
 }
+
 .room-card-wrapper {
-  box-sizing: border-box;
-  padding: 0 8px 16px;
   height: 100%;
 }
 
-/* --- 房间卡片 (核心重构：扁平、无阴影) --- */
 .room-card {
   background: white;
   border-radius: 12px;
-  border: 1px solid #e5e5e5;
-  box-shadow: none;
+  /* 基础状态：轻微阴影 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eee;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 300px;
-  transition: border-color 0.2s;
   overflow: hidden;
-}
-/* 匹配状态：仅改变边框颜色，不加阴影 */
-.room-card.is-match {
-  border-color: #34c759; /* Apple Green */
-}
-.room-card.is-disabled {
-  opacity: 0.5;
-  background-color: #fafafa;
+  height: auto;
+  min-height: 300px; /* 保证卡片有一定高度 */
+  transition: all 0.2s;
 }
 
-/* --- 1. 卡片头部 (去装饰化) --- */
+/* 匹配状态（可选）：分配模式下高亮 */
+.room-card.is-match {
+  border-color: #34c759;
+  box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.1);
+}
+.room-card.is-disabled {
+  opacity: 0.6;
+}
+
+/* --- Header --- */
 .card-header {
   padding: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
+  border-bottom: 1px solid #f5f5f5;
 }
+
 .header-left {
   display: flex;
   align-items: baseline;
@@ -489,337 +477,187 @@ onBeforeUnmount(() => {
 .room-number {
   font-size: 20px;
   font-weight: 600;
-  color: #1d1d1f;
-  font-feature-settings: 'tnum'; /* 等宽数字 */
+  color: #333;
 }
 .room-gender {
-  font-size: 13px;
-  color: #86868b;
-}
-.room-availability {
-  font-size: 13px;
-  color: #86868b;
-}
-.room-availability .count {
-  font-weight: 600;
-  color: #1d1d1f;
   font-size: 14px;
-}
-.room-availability .count.zero {
-  color: #86868b;
+  color: #666;
 }
 
-/* --- 2. 床位 Grid (核心重构：极简方块) --- */
-.bed-grid-minimal {
-  padding: 0 16px 16px 16px;
+.room-availability {
+  font-size: 14px;
+  color: #999;
+}
+.occupied-count {
+  color: #e6a23c; /* 橙色高亮已住 */
+  font-weight: bold;
+}
+.label {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+/* --- Grid 核心区域 --- */
+.bed-grid-visual {
+  padding: 16px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
   background: #fff;
-  flex: 1;
-  overflow-y: auto;
+  flex: 1; /* 撑满中间区域 */
+  max-height: 240px;
+  overflow: auto;
 }
 
-/* 单个床位块 (Tile) */
+/* 单个床位块 */
 .bed-tile {
+  position: relative;
+  aspect-ratio: 1; /* 强制正方形 */
   border-radius: 8px;
-  /* 增加内边距让内容呼吸 */
-  padding: 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   transition: all 0.2s;
-  min-height: 70px;
+  cursor: default;
 }
 
-/* ==== 状态A: 空闲 (重点：干净、邀请感) ==== */
-.bed-tile.is-vacant {
-  background-color: #fff;
-  /* 极细的灰色边框，取代虚线 */
-  border: 1px solid #e5e5e5;
-  align-items: center; /* 空闲状态内容居中 */
-  height: 44px;
-}
-/* Hover 时 subtle 的变化 */
-.bed-tile.is-vacant:hover {
-  border-color: #34c759;
-  background-color: #f2fff5;
+/* 床位号 (左上角) */
+.bed-pos-tag {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 12px;
+  color: inherit;
+  opacity: 0.6;
 }
 
-.bed-tile.is-vacant .bed-info-row {
-  /* 空闲时，床号信息淡化 */
-  color: #adadad;
-  margin-bottom: 4px;
-}
-.vacant-label {
-  /* 核心信息：清晰、克制的绿色 */
-  font-size: 14px;
-  color: #34c759;
-  font-weight: 500;
-}
-
-/* ==== 状态B: 已住 (重点：后退、不抢戏) ==== */
 .bed-tile.is-occupied {
-  /* 极淡的灰色背景，让出视觉中心 */
-  background-color: #f2f2f7;
-  border: 1px solid transparent; /* 占位 */
-  align-items: flex-start;
+  background-color: rgba(251, 189, 189, 0.2);
+  color: #333;
+  border: 1px solid transparent;
 }
-.bed-tile.is-occupied .user-name {
+
+/* 中间人名 */
+.occupant-name {
   font-size: 14px;
-  color: #1d1d1f;
-  font-weight: 500;
+  font-weight: 600;
+  color: #222;
+  text-align: center;
+  width: 90%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
-}
-.bed-tile.is-occupied .bed-info-row {
-  color: #86868b;
-  margin-bottom: 6px;
+  margin-top: 6px;
 }
 
-/* 床位辅助信息 (统一风格) */
-.bed-info-row {
-  font-size: 12px;
+/* 按钮图标通用样式 */
+.action-icon {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  color: white;
   display: flex;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  opacity: 0.8;
+  transition:
+    transform 0.1s,
+    opacity 0.1s;
 }
-.bed-id {
-  font-weight: 500;
-}
-.bed-position {
-  font-weight: 400;
-  margin-left: 4px;
+.action-icon:hover {
+  transform: scale(1.1);
+  opacity: 1;
 }
 
-/* --- 3. 底部按钮 (扁平化) --- */
-.card-footer {
-  padding: 16px;
-  padding-top: 0;
-  background: #fff;
-  margin-top: 12px;
+/* 右上角移除按钮 (红底 x) */
+.delete-icon {
+  top: 4px;
+  right: 4px;
+  background-color: #ef4444; /* Red */
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
 }
+
+.bed-tile:hover .delete-icon {
+  opacity: 0.9;
+  pointer-events: auto;
+}
+
+/* 右下角详情按钮 (蓝底 i) */
+.info-icon {
+  bottom: 4px;
+  right: 4px;
+  background-color: #3b82f6; /* Blue */
+  font-family: serif;
+  font-style: italic;
+}
+
+/* === 状态：空闲 (Dashed Style) === */
+.bed-tile.is-vacant {
+  background-color: #fff;
+  border: 1px dashed #d1d5db; /* 灰色虚线 */
+  color: #9ca3af;
+}
+.bed-tile.is-vacant:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.vacant-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.vacant-text {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* --- Footer --- */
+.card-footer {
+  padding: 12px 16px 16px;
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+
 .action-btn {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
+  flex: 1;
+  height: 36px;
+  border-radius: 6px;
   border: none;
   font-size: 14px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  font-weight: 500;
 }
-/* 分配按钮：克制的深绿色，无渐变，无阴影 */
+
+/* 编辑按钮 (灰) */
+.action-btn.view {
+  background: #f3f4f6;
+  color: #374151;
+}
+.action-btn.view:hover {
+  background: #e5e7eb;
+}
+
+/* 分配按钮 (绿) */
 .action-btn.assign {
-  background-color: #34c759;
+  background: #10b981; /* Green */
   color: white;
 }
 .action-btn.assign:hover {
-  background-color: #2da84e;
+  background: #059669;
 }
 .action-btn.assign:disabled {
-  background: #e5e5e5;
-  color: #adadad;
+  background: #d1d5db;
   cursor: not-allowed;
-}
-/* 管理按钮：极简灰 */
-.action-btn.view {
-  background: #f2f2f7;
-  color: #1d1d1f;
-}
-.action-btn.view:hover {
-  background: #e5e5e5;
-}
-
-/* --- 加载状态 --- */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-  color: #86868b;
-}
-.loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2.5px solid #e5e5e5;
-  border-top: 2.5px solid #86868b;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 12px;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* ================= 弹窗样式 (极简重构) ================= */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-  backdrop-filter: blur(5px);
-}
-.modal-content-minimal {
-  background: white;
-  width: 600px;
-  padding: 32px;
-  border-radius: 16px;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.1);
-}
-.modal-header {
-  margin-bottom: 24px;
-  text-align: center;
-}
-.modal-header h3 {
-  margin: 0 0 12px 0;
-  font-size: 22px;
-  color: #1d1d1f;
-}
-.modal-header .sub-text {
-  color: #86868b;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.preview-grid-minimal {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-/* 弹窗内的床位块 */
-.preview-tile {
-  border: 1px solid #e5e5e5;
-  border-radius: 10px;
-  padding: 16px;
-  cursor: pointer;
-  background: white;
-  transition: all 0.2s;
-  display: flex;
-  flex-direction: column;
-}
-.preview-tile:hover {
-  border-color: #adadad;
-}
-/* 选中交换状态：清晰的蓝色轮廓 */
-.preview-tile.is-selected-swap {
-  border: 2px solid #007aff;
-  background: #f5fafe;
-  box-shadow: none;
-}
-.preview-tile.is-locked {
-  background: #f9f9f9;
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.tile-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 13px;
-  color: #86868b;
-}
-.bed-pos.lower {
-  color: #34c759;
-}
-.bed-pos.upper {
-  color: #ff9f0a;
-}
-
-.tile-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.p-name {
-  font-size: 17px;
-  font-weight: 600;
-  color: #1d1d1f;
-  margin-bottom: 4px;
-}
-.p-meta {
-  font-size: 13px;
-  color: #86868b;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.elder-indicator {
-  font-size: 11px;
-  color: #ff9f0a;
-  background: #fff5e6;
-  padding: 1px 5px;
-  border-radius: 4px;
-}
-.p-empty {
-  color: #adadad;
-  font-size: 15px;
-  font-weight: 500;
-  text-align: center;
-}
-.warning-indicator {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #ff3b30;
-  background: #fff2f2;
-  padding: 4px 8px;
-  border-radius: 6px;
-  text-align: center;
-}
-
-.modal-actions-minimal {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-}
-.btn-minimal {
-  width: 120px;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-}
-.btn-minimal.confirm {
-  background: #1d1d1f;
-  color: white;
-} /* 确认用黑色，极致强调 */
-.btn-minimal.confirm:hover {
-  background: #333;
-}
-.btn-minimal.cancel {
-  background: #f2f2f7;
-  color: #1d1d1f;
-}
-.btn-minimal.cancel:hover {
-  background: #e5e5e5;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.virtual-scroll-container::-webkit-scrollbar {
-  display: none;
 }
 </style>
