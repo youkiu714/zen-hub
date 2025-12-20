@@ -7,6 +7,7 @@ export function getApplications(params: {
   pageSize: number
   keyword?: string
   applicationType?: number
+  departmentCode?: string
   status?: number
   checkinFrom?: string
   checkinTo?: string
@@ -21,6 +22,10 @@ export function getApplications(params: {
 
 export function getApplicationById(id: number) {
   return request.get<Request<ApplicationDetailVO>>(`/apply/applications/${id}`)
+}
+
+export function getVolunteerPerformanceById(id: number) {
+  return request.get<Request<ApplicationDetailVO>>(`extensions/${id}/volunteer-performance`)
 }
 
 // 取消申请

@@ -246,6 +246,7 @@ export interface PendingCheckinItemVO {
    * 预计入住日期（取申请单或预定记录）
    */
   expectedCheckinDate?: string;
+  expectedCheckoutAt?: string;
   idCardMasked?: string;
   name?: string;
   personId?: number;

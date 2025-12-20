@@ -75,7 +75,7 @@
             <el-button @click="() => handleViewDetail(row)" link>
               查看
             </el-button>
-            <el-button type="primary" link @click="handleConfirmCheckout(row)">
+            <el-button type="primary" link @click="handleConfirmCheckout(row)" v-if="row.status==10">
               确认退单
             </el-button>
           </template>
@@ -207,6 +207,8 @@ const confirmRules: FormRules = {
 
 const handleTabChange = (key: number) => {
   filterStatus.value = key
+  console.log(key);
+  console.log(filterStatus.value==30);
   pagination.current = 1
   fetchCheckoutList()
 }

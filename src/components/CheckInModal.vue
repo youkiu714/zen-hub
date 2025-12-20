@@ -28,7 +28,11 @@
             <el-col :span="12">
               <div class="info-item">
                 <label class="info-label">身份证号</label>
-                <div class="info-value">{{ checkInForm.idCard || '-' }}</div>
+                <div class="info-value">
+                  <el-tooltip v-if="checkInForm.idCard" :content="idCard" placement="top" effect="dark">
+                    <span>{{ checkInForm.idCard || '-' }}</span>
+                  </el-tooltip>
+                </div>
               </div>
             </el-col>
             <el-col :span="12">
@@ -147,7 +151,7 @@ import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { FormInstance, FormRules } from 'element-plus'
 import { User, OfficeBuilding, List, InfoFilled } from '@element-plus/icons-vue'
-import { confirmCheckin, getCheckinDetail } from '@/api/checkin'
+import { confirmCheckin, getCheckinDetail, getIdcard } from '@/api/checkin'
 import type { CheckinConfirmRequest, CheckinDetailResponse, PendingCheckinItemVO } from '@/types/checkin'
 import { useUserStore } from '@/store/modules/user'
 import { createCheckInForm } from '@/views/Order/CheckInManagement/utils'
@@ -171,6 +175,7 @@ const visible = ref(false)
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const checkInForm = reactive(createCheckInForm())
+const idCard = ref('')
 
 const rules: FormRules = {
   actualCheckinDate: [{ required: true, message: '请选择实际入住日期', trigger: 'change' }],
@@ -194,6 +199,10 @@ const loadCheckInData = async (row: PendingCheckinItemVO) => {
     resetForm()
 
     if (row.applicationId) {
+      idCard.value = await getIdcard(row.applicationId)
+      console.log(idCard);
+
+
       const detailData: CheckinDetailResponse = await getCheckinDetail(row.applicationId)
 
       checkInForm.applicationId =
@@ -209,17 +218,17 @@ const loadCheckInData = async (row: PendingCheckinItemVO) => {
 
       const now = new Date()
       checkInForm.actualCheckinDate = detailData.actualCheckinAt
-        ? new Date(detailData.actualCheckinAt).toISOString().split('T')[0]
+        ? (detailData.actualCheckinAt).substring(0, 10)  // new Date(detailData.actualCheckinAt).toISOString().split('T')[0]
         : now.toISOString().split('T')[0]
 
+      console.log(detailData.expectedCheckoutAt);
+
       checkInForm.expectedCheckoutDate = detailData.expectedCheckoutAt
-        ? new Date(detailData.expectedCheckoutAt).toISOString().split('T')[0]
+        ? (detailData.expectedCheckoutAt).substring(0, 10)  // new Date(detailData.expectedCheckoutAt).toISOString().split('T')[0]
         : new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-      checkInForm.registrationTime = now.toISOString().replace('T', ' ').slice(0, 19)
+      checkInForm.registrationTime = now.toLocaleString('sv-SE')
       checkInForm.registeredBy = userStore.user.username || checkInForm.registeredBy
-
-      ElMessage.success('获取入住详情成功')
     } else {
       fillDefaultData(row)
     }
@@ -231,6 +240,8 @@ const loadCheckInData = async (row: PendingCheckinItemVO) => {
 }
 
 const fillDefaultData = (row: PendingCheckinItemVO) => {
+  console.log(row);
+
   const now = new Date()
   Object.assign(checkInForm, {
     applicationId: row.applicationId?.toString() || '',
@@ -244,46 +255,61 @@ const fillDefaultData = (row: PendingCheckinItemVO) => {
     expectedCheckoutDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split('T')[0],
-    registrationTime: now.toISOString().replace('T', ' ').slice(0, 19),
+    registrationTime: now.toLocaleString('sv-SE'),
     registeredBy: userStore.user.username || '客堂义工'
   })
 }
 
 const handleConfirm = async () => {
+
+  // 1. 校验表单
   if (!formRef.value) return
 
-  try {
-    await formRef.value.validate()
+  await formRef.value.validate(async (valid) => {
+    if (valid) {
+      // 2. 日期逻辑校验
+      const actualTime = new Date(checkInForm.actualCheckinDate).getTime()
+      const expectedTime = new Date(checkInForm.expectedCheckoutDate).getTime()
 
-    if (!checkInForm.bedStayId) {
-      ElMessage.warning('缺少申请ID，无法完成入住确认')
-      return
+      if (actualTime > expectedTime) {
+        ElMessage.warning('实际入住日期不能晚于预计退房日期')
+        return
+      }
+
+      if (!checkInForm.bedStayId) {
+        ElMessage.warning('缺少申请ID，无法完成入住确认')
+        return
+      }
+
+      // 3. 开启 Loading
+      submitting.value = true
+
+      const confirmRequest: CheckinConfirmRequest = {
+        bedStayId: checkInForm.bedStayId,
+        actualCheckinAt: checkInForm.actualCheckinDate
+          ? `${checkInForm.actualCheckinDate} ${new Date().toTimeString().slice(0, 8)}`
+          : undefined,
+        expectedCheckoutAt: checkInForm.expectedCheckoutDate
+          ? `${checkInForm.expectedCheckoutDate} ${new Date().toTimeString().slice(0, 8)}`
+          : undefined,
+        remark: checkInForm.remark
+      }
+
+      try {
+        await confirmCheckin(confirmRequest)
+        ElMessage.success('入住确认成功！')
+        visible.value = false
+        resetForm()
+        emit('success')
+      } catch (error) {
+        console.error('入住确认失败:', error)
+        ElMessage.error('入住确认失败，请稍后重试')
+      } finally {
+        submitting.value = false
+      }
     }
+  })
 
-    submitting.value = true
-
-    const confirmRequest: CheckinConfirmRequest = {
-      bedStayId: checkInForm.bedStayId,
-      actualCheckinAt: checkInForm.actualCheckinDate
-        ? `${checkInForm.actualCheckinDate} ${new Date().toTimeString().slice(0, 8)}`
-        : undefined,
-      expectedCheckoutAt: checkInForm.expectedCheckoutDate
-        ? `${checkInForm.expectedCheckoutDate} ${new Date().toTimeString().slice(0, 8)}`
-        : undefined,
-      remark: checkInForm.remark
-    }
-
-    await confirmCheckin(confirmRequest)
-    ElMessage.success('入住确认成功！')
-    visible.value = false
-    resetForm()
-    emit('success')
-  } catch (error) {
-    console.error('入住确认失败:', error)
-    ElMessage.error('入住确认失败，请稍后重试')
-  } finally {
-    submitting.value = false
-  }
 }
 
 const handleCancel = () => {

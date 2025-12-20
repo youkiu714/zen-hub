@@ -22,6 +22,10 @@
             <el-option label="女" :value="2" />
           </el-select>
 
+          <el-select v-model="recordTypeFilter" placeholder="类型" clearable style="width: 120px; margin-right: 16px;">
+            <el-option v-for="type in recordTypeOptions" :key="type.value" :label="type.label" :value="type.value" />
+          </el-select>
+
           <el-select v-model="groupFilter" placeholder="全部分组" clearable style="width: 120px; margin-right: 16px;">
             <el-option v-for="group in groupOptions" :key="group" :label="group" :value="group" />
           </el-select>
@@ -99,7 +103,8 @@
 
             <el-table-column prop="recordTypeName" label="类型" min-width="100">
               <template #default="{ row }">
-                <el-tag v-if="row.recordTypeName" size="small" :type="getTypeTagType(row.recordTypeName)" effect="light">
+                <el-tag v-if="row.recordTypeName" size="small" :type="getTypeTagType(row.recordTypeName)"
+                  effect="light">
                   {{ row.recordTypeName }}
                 </el-tag>
               </template>
@@ -111,6 +116,7 @@
               <template #default="{ row }">
                 <el-button type="primary" link @click="handleAssign(row)">分配床位</el-button>
                 <el-button type="info" link @click="handleViewDetails(row)">详情</el-button>
+                <!-- <el-button type="info" link @click="handleReview(row)">流程</el-button> -->
               </template>
             </el-table-column>
           </template>
@@ -131,6 +137,15 @@
             <el-table-column prop="group" label="分组" min-width="120">
               <template #default="{ row }">
                 {{ row.group || '-' }}
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="recordTypeName" label="类型" min-width="100">
+              <template #default="{ row }">
+                <el-tag v-if="row.recordTypeName" size="small" :type="getTypeTagType(row.recordTypeName)"
+                  effect="light">
+                  {{ row.recordTypeName }}
+                </el-tag>
               </template>
             </el-table-column>
 
@@ -331,6 +346,7 @@ const pagination = ref({
 // 筛选条件模型
 const searchKeyword = ref('')
 const genderFilter = ref<number | undefined>(undefined)
+const recordTypeFilter = ref<number | undefined>(undefined)
 const groupFilter = ref<string | undefined>(undefined)
 const roomFilter = ref<number | undefined>(undefined)
 const departmentFilter = ref<string | undefined>(undefined)
@@ -351,7 +367,11 @@ const roomOptions = ref([
   { label: '1401', value: 3 },
   { label: '1402', value: 4 }
 ])
-
+const recordTypeOptions = ref([
+  { label: '新住', value: 'NEW' },
+  { label: '续单', value: 'EXTENSION' },
+  { label: '换床', value: 'CHANGE' }
+])
 // 计算属性
 const paginationRange = computed(() => {
   const start = (pagination.value.currentPage - 1) * pagination.value.pageSize + 1
@@ -366,7 +386,7 @@ onMounted(() => {
 
 // 监听所有筛选条件变化，自动刷新
 watch(
-  [searchKeyword, genderFilter, groupFilter, roomFilter, departmentFilter, checkoutNameFilter, checkoutRoomFilter],
+  [searchKeyword, genderFilter, groupFilter, recordTypeFilter, roomFilter, departmentFilter, checkoutNameFilter, checkoutRoomFilter],
   () => {
     pagination.value.currentPage = 1
     fetchData()
@@ -417,7 +437,8 @@ const fetchData = async () => {
           pageSize: pagination.value.pageSize,
           gender: genderFilter.value,
           groupName: groupFilter.value,
-          keyword: searchKeyword.value || undefined
+          keyword: searchKeyword.value || undefined,
+          recordType: recordTypeFilter.value
         }
         response = await getPendingAssignments(pendingParams)
         break
@@ -427,7 +448,8 @@ const fetchData = async () => {
           pageNo: pagination.value.currentPage,
           pageSize: pagination.value.pageSize,
           keyword: searchKeyword.value || undefined,
-          roomId: roomFilter.value || undefined
+          roomId: roomFilter.value || undefined,
+          recordType: recordTypeFilter.value
         }
         response = await getAssignedList(assignedParams)
         break
@@ -438,7 +460,8 @@ const fetchData = async () => {
           pageSize: pagination.value.pageSize,
           keyword: searchKeyword.value || undefined,
           gender: genderFilter.value,
-          departmentCode: departmentFilter.value || undefined
+          departmentCode: departmentFilter.value || undefined,
+          recordType: recordTypeFilter.value
         }
         response = await getCheckedInList(checkedInParams)
         break
@@ -449,7 +472,8 @@ const fetchData = async () => {
           pageSize: pagination.value.pageSize,
           // 注意：已退住接口不使用 keyword，而是具体的 name 和 roomNo
           name: checkoutNameFilter.value || undefined,
-          roomNo: checkoutRoomFilter.value || undefined
+          roomNo: checkoutRoomFilter.value || undefined,
+          recordType: recordTypeFilter.value
         }
         response = await getCheckedOutList(checkedOutParams)
         break
@@ -516,6 +540,14 @@ const handleViewDetails = (row: any) => {
   }
 }
 
+const handleReview = (row: any) => {
+  console.log('审核流程:', row)
+  console.log('审核流程:', row.id)
+  currentReviewId.value = row.id
+  reviewVisible.value = true
+}
+
+
 const handleUploadItems = (row: CheckedOutLodgingVO) => {
   ElMessageBox.prompt('请输入遗留物品描述', '登记物品', {
     inputValue: row.lostItemsRemark,
@@ -543,7 +575,6 @@ const getTypeTagType = (recordTypeName?: string) => {
 </script>
 
 <style scoped lang="scss">
-
 .table-container {
   background-color: white;
   padding: 12px 10px;
@@ -718,5 +749,4 @@ const getTypeTagType = (recordTypeName?: string) => {
     color: #666;
   }
 }
-
 </style>
