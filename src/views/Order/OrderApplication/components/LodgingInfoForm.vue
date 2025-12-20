@@ -86,7 +86,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="入住当天用斋选择" prop="mealPreference">
-            <el-select v-model="form.mealPreference" placeholder="请选择所属部组" clearable>
+            <el-select v-model="form.mealPreference" placeholder="请选择用斋类型" clearable>
               <el-option
                 v-for="item in mealOptions"
                 :key="item.value"
