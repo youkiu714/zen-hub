@@ -22,17 +22,6 @@
 
       <!-- 表格 -->
       <el-table :data="filteredTableData" stripe style="width: 100%" class="application-table" v-loading="loading">
-        <!-- <el-table-column label="挂单人" min-width="120">
-          <template #default="{ row }">
-            <div class="person-info">
-              <el-avatar :size="32">
-                {{ row.applicantName?.charAt(0) || '用' }}
-              </el-avatar>
-              <span class="person-name">{{ row.applicantName }}</span>
-            </div>
-          </template>
-        </el-table-column> -->
-
         <el-table-column label="挂单人" min-width="150">
           <template #default="{ row }">
             <div class="applicant-info">
@@ -57,7 +46,7 @@
 
         <el-table-column prop="applicationTypeName" label="挂单类型" min-width="100">
           <template #default="{ row }">
-            {{ row.applicationTypeName || getApplicationTypeLabel(row.applicationType) }}
+            {{ row.applicationTypeName}}
           </template>
         </el-table-column>
 
@@ -115,23 +104,18 @@
       @start-evaluation="handleStartEvaluationFromProfile" @cancel-evaluation="handleCancelEvaluation"
       @submit-evaluation="handleSubmitEvaluation" @download-profile="handleDownloadProfile" @set-rating="setRating" />
 
-    <!-- 导出选项弹窗 -->
-    <ExportDialog v-model:visible="exportDialog.visible" :form="exportForm" :exporting="exporting"
-      @close="exportDialog.visible = false" @confirm-export="handleConfirmExport" />
-
        <!-- 查看详情 -->
     <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import EvaluationStatusFilter from './components/EvaluationStatusFilter.vue'
 import EvaluationDialog from './components/EvaluationDialog.vue'
-import ExportDialog from './components/ExportDialog.vue'
 import { EvaluationStatus } from '@/types/review'
 import {
   EvaluationRecord,
@@ -149,18 +133,14 @@ import {
   type ResultBoolean,
   type EvaluationDetailResponse,
   type EvaluationDetailVO,
-  type EvaluationInfo,
-  type LodgingInfo,
-  type PersonInfo,
 } from '@/api/review'
 
 import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
+import { ApplicationTypeMap } from '@/utils/constants'
 
 // 响应式数据
 const loading = ref(false)
 const submitting = ref(false)
-const exporting = ref(false)
-const activeTab = ref('pending')
 
 const filterStatus = ref(EvaluationStatus.PENDING)
 
@@ -243,15 +223,6 @@ const viewEvaluationData = reactive({
   overall: 'good'
 })
 
-// 导出弹窗
-const exportDialog = reactive({
-  visible: false
-})
-
-const exportForm = reactive({
-  range: 'current',
-  format: 'excel'
-})
 
 // 计算属性
 const filteredTableData = computed(() => {
@@ -270,22 +241,6 @@ const filteredTableData = computed(() => {
   return data
 })
 
-
-const pendingCount = computed(() => {
-  // 计算待评价数量
-  const filteredData = tableData.value.filter(item => {
-    return item.status === 10 // 待评价
-  })
-  return filteredData.length
-})
-
-const completedCount = computed(() => {
-  // 计算已评价数量
-  const filteredData = tableData.value.filter(item => {
-    return item.status === 20 // 已评价
-  })
-  return filteredData.length
-})
 
 // 获取评价列表 - 使用新的评价接口
 const fetchEvaluationRecords = async () => {
@@ -340,13 +295,6 @@ const statusChange = () => {
   fetchEvaluationRecords(); // 重新加载数据
 };
 
-
-// 方法
-const handleTabChange = (tabName: string) => {
-  activeTab.value = tabName
-  pagination.currentPage = 1
-}
-
 const handleSearch = () => {
   pagination.currentPage = 1
   fetchEvaluationRecords()
@@ -363,50 +311,25 @@ const handleCurrentChange = (page: number) => {
   fetchEvaluationRecords()
 }
 
-// 查看
-const handleViewProfile = (row: EvaluationListItemVO) => {
-  currentProfile.value = {
-    // id: row.applicationId?.toString() || row.evaluationId?.toString() || '',
-    id: row.evaluationId?.toString() || '',
-    name: row.applicantName || '',
-    avatar: '', // 新接口没有头像字段
-    idCard: row.idCardMasked || '',
-    type: getApplicationTypeLabel(row.applicationType),
-    checkInDate: row.checkinDate || '',
-    checkOutDate: row.actualCheckoutDate || row.plannedCheckoutDate || '',
-    status: row.status === 10 ? 'pending' : 'completed',
-    gender: row.gender ? (row.gender === 1 ? '男' : '女') : '',
-    age: '', // 新接口没有年龄字段
-    nation: '', // 新接口没有民族字段
-    phone: row.mobileMasked || '',
-    duration: '', // 新接口没有住宿天数字段
-    purpose: '禅修' // 默认值
-  }
-  evaluationDialog.title = `挂单人详情 - ${row.applicantName}`
-  evaluationDialog.visible = true
-  evaluationDialog.showForm = false
-  evaluationDialog.showEvaluation = false
-}
-
 // 评价
 const handleStartEvaluation = (row: EvaluationListItemVO) => {
   currentProfile.value = {
     id: row.evaluationId?.toString() || row.applicationId?.toString() || '',
     name: row.applicantName || '',
-    avatar: '', // 新接口没有头像字段
     idCard: row.idCardMasked || '',
-    type: getApplicationTypeLabel(row.applicationType),
+    type: row.applicationType && ApplicationTypeMap[row.applicationType],
     checkInDate: row.checkinDate || '',
     checkOutDate: row.actualCheckoutDate || row.plannedCheckoutDate || '',
     status: row.status === 10 ? 'pending' : 'completed',
     gender: row.gender ? (row.gender === 1 ? '男' : '女') : '',
-    age: '', // 新接口没有年龄字段
-    nation: '', // 新接口没有民族字段
+    age: row.age, // 新接口没有年龄字段
+    nation: row.nation, // 新接口没有民族字段
     phone: row.mobileMasked || '',
     duration: '', // 新接口没有住宿天数字段
+    stayDays: row.stayDays || '-',
     purpose: '禅修' // 默认值
   }
-  evaluationDialog.title = `挂单人详情 - ${row.applicantName}`
+  evaluationDialog.title = `${row.applicantName}挂单详情`
   evaluationDialog.visible = true
   evaluationDialog.showForm = true
   evaluationDialog.showEvaluation = false
@@ -436,13 +359,14 @@ const handleViewEvaluation = async (row: EvaluationListItemVO) => {
     viewEvaluationData.comments = detailData.evaluation?.comment || ''
     viewEvaluationData.overall = getOverallGradeByNumber(detailData.evaluation?.overallGrade) || 'average'
 
+    console.log("detailData.lodging?.applicationType]:",detailData.lodging?.applicationType)
     // 设置档案信息
     currentProfile.value = {
       id: detailData.person?.personId?.toString() || detailData.lodging?.applicationId?.toString() || evaluationId.toString(),
       name: detailData.person?.name?.toString() || detailData.lodging?.applicationTypeName || '',
       avatar: '', // 接口没有头像字段
       idCard: detailData.person?.idCard || detailData.lodging?.bedNo || '',
-      type: getApplicationTypeLabel(detailData.lodging?.applicationType),
+      type: ApplicationTypeMap[detailData.lodging?.applicationType],
       checkInDate: detailData.lodging?.checkinDate || '',
       checkOutDate: detailData.lodging?.actualCheckoutDate || '',
       status: row.status === 10 ? 'pending' : 'completed',
@@ -450,7 +374,7 @@ const handleViewEvaluation = async (row: EvaluationListItemVO) => {
       age: detailData.person?.age?.toString() || '',
       nation: detailData.person?.nation || '',
       phone: detailData.person?.mobile || '',
-      duration: '', // 接口没有住宿天数字段
+      stayDays: row.stayDays || '-',
       purpose: detailData.lodging?.purpose || '禅修'
     }
 
@@ -545,22 +469,6 @@ const handleSubmitEvaluation = async () => {
     handleCloseDialog()
 
     fetchEvaluationRecords()
-
-    // if (response.code === 0) {
-    //   ElMessage.success('评价提交成功')
-
-    //   // 更新数据状态 - 将入住中状态改为已退住状态
-    //   const index = tableData.value.findIndex(item =>
-    //     item.applicationId === evaluationId || item.personId === evaluationId
-    //   )
-    //   if (index !== -1) {
-    //     tableData.value[index].status = 40 // 已退住
-    //   }
-
-    //   handleCloseDialog()
-    // } else {
-    //   ElMessage.error(response.message || '评价提交失败')
-    // }
   } catch (error) {
     console.error('提交评价失败:', error)
     ElMessage.error('评价提交失败')
@@ -571,91 +479,6 @@ const handleSubmitEvaluation = async () => {
 
 const handleDownloadProfile = () => {
   ElMessage.info('挂单记录下载功能已触发')
-}
-
-const handleExport = () => {
-  exportDialog.visible = true
-}
-
-const handleConfirmExport = async () => {
-  try {
-    exporting.value = true
-
-    // 模拟导出过程
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
-    const rangeText = {
-      current: '当前页记录',
-      filtered: '筛选后记录',
-      all: '全部记录'
-    }[exportForm.range]
-
-    ElMessage.success(`导出成功！文件格式: ${exportForm.format.toUpperCase()}, 范围: ${rangeText}`)
-    exportDialog.visible = false
-  } catch (error) {
-    ElMessage.error('导出失败')
-  } finally {
-    exporting.value = false
-  }
-}
-
-
-const getOverallLabel = (overall: string) => {
-  const labels = {
-    excellent: '优秀',
-    good: '良好',
-    average: '一般',
-    poor: '较差',
-    bad: '差'
-  }
-  return labels[overall] || overall
-}
-
-
-// 工具函数
-const maskIdCard = (idCard: string) => {
-  if (!idCard || idCard.length < 8) return idCard
-  return idCard.slice(0, 3) + '********' + idCard.slice(-4)
-}
-
-// 获取状态标签类型
-const getStatusType = (status?: number): string => {
-  switch (status) {
-    case 10: // 申请中
-      return 'warning'
-    case 20: // 待入住
-      return 'info'
-    case 30: // 入住中
-      return 'success'
-    case 40: // 已退住
-      return 'info'
-    case 70: // 未通过
-      return 'danger'
-    case 90: // 已取消
-      return 'info'
-    default:
-      return 'info'
-  }
-}
-
-// 获取状态标签文本
-const getStatusLabel = (status?: number): string => {
-  switch (status) {
-    case 10:
-      return '申请中'
-    case 20:
-      return '待入住'
-    case 30:
-      return '入住中'
-    case 40:
-      return '已退住'
-    case 70:
-      return '未通过'
-    case 90:
-      return '已取消'
-    default:
-      return '未知'
-  }
 }
 
 // 获取评价状态标签类型
@@ -682,23 +505,6 @@ const getEvaluationStatusLabel = (status?: number): string => {
   }
 }
 
-// 根据挂单类型编码获取标签
-const getApplicationTypeLabel = (type?: number): string => {
-  switch (type) {
-    case 1:
-      return '短住'
-    case 2:
-      return '直通车'
-    case 3:
-      return '僧亲'
-    case 4:
-      return '团队挂单'
-    case 5:
-      return '特殊客人'
-    default:
-      return '未知类型'
-  }
-}
 
 // 将综合评价字符串转换为数值（根据API文档：1优秀 2良好 3一般 4较差 5差）
 const getOverallGradeValue = (overall: string): number => {
@@ -878,5 +684,8 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+.search-box {
+    width: 300px;
 }
 </style>

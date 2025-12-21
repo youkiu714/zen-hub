@@ -2,7 +2,7 @@
  * @Author: zhaoziying zhaoziying@kuaishou.com
  * @Date: 2025-11-09 10:23:51
  * @LastEditors: zhaoziying zhaoziying@kuaishou.com
- * @LastEditTime: 2025-11-16 00:43:54
+ * @LastEditTime: 2025-12-21 11:02:59
  * @FilePath: /zen-hub/src/types/application.ts
  * @Description: 
  * 
@@ -55,6 +55,8 @@ export enum ApplicationStatus {
   WAITING_CHECKIN = 20, // 待入住
   CHECKED_IN = 30, // 入住中  
   CHECKED_OUT = 40, // 已退住
+  RENEWAL_REVIEW_SUCCESS = 50, // 续住审核通过
+  RENEWAL_REVIEW_REJECTED = 60, // 续住审核拒绝
   REJECTED = 70, // 未通过
   CANCELED = 90, // 已取消
 }

@@ -6,6 +6,8 @@ export enum ApplicationStatus {
   WAITING_CHECKIN = 20, // 待入住
   CHECKED_IN = 30, // 入住中
   CHECKED_OUT = 40, // 已退住
+RENEWAL_REVIEW_SUCCESS = 50, // 续住审核通过
+  RENEWAL_REVIEW_REJECTED = 60, // 续住审核拒绝
   REJECTED = 70, // 未通过
   CANCELED = 90 // 已取消
 }
@@ -18,6 +20,8 @@ export const APPLICATION_STATUS_MAP: Record<ApplicationStatus, string> = {
   [ApplicationStatus.CHECKED_IN]: '入住中',
   [ApplicationStatus.CHECKED_OUT]: '已退住',
   [ApplicationStatus.REJECTED]: '未通过',
+  [ApplicationStatus.RENEWAL_REVIEW_SUCCESS]: '续住审核通过',
+  [ApplicationStatus.RENEWAL_REVIEW_REJECTED]: '续住审核拒绝',
   [ApplicationStatus.CANCELED]: '已取消'
 }
 
@@ -28,7 +32,10 @@ export const APPLICATION_STATUS_OPTIONS = [
   { code: ApplicationStatus.WAITING_CHECKIN, name: '待入住' },
   { code: ApplicationStatus.CHECKED_IN, name: '入住中' },
   { code: ApplicationStatus.CHECKED_OUT, name: '已退住' },
-  { code: ApplicationStatus.REJECTED, name: '未通过' }
+  { code: ApplicationStatus.REJECTED, name: '未通过' },
+  { code: ApplicationStatus.RENEWAL_REVIEW_SUCCESS, name: '续住审核通过' },
+  { code: ApplicationStatus.RENEWAL_REVIEW_REJECTED, name: '续住审核拒绝' },
+  { code: ApplicationStatus.CANCELED, name: '已取消' }
 ]
 
 // 获取状态文案的工具函数

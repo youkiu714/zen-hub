@@ -1,15 +1,25 @@
 <template>
-  <el-dialog v-model="visible" :title="`入住登记 - ${checkInForm.applicationId || ''}`" width="800px"
-    :close-on-click-modal="false" :close-on-press-escape="false" @close="resetForm"
-    class="check-in-dialog fixed-header-footer">
+  <el-dialog
+    v-model="visible"
+    :title="`入住登记 - ${checkInForm.applicationId || ''}`"
+    width="800px"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    @close="resetForm"
+    class="check-in-dialog fixed-header-footer"
+  >
     <template #header>
-      <div class="custom-header">
-        入住登记 - {{ checkInForm.applicationId }}
-      </div>
+      <div class="custom-header">入住登记 - {{ checkInForm.applicationId }}</div>
     </template>
 
-    <el-form ref="formRef" :model="checkInForm" :rules="rules" label-width="100px" label-position="top"
-      class="check-in-form">
+    <el-form
+      ref="formRef"
+      :model="checkInForm"
+      :rules="rules"
+      label-width="100px"
+      label-position="top"
+      class="check-in-form"
+    >
       <div class="dialog-content-wrapper">
         <div class="check-in-section">
           <h3 class="section-title">
@@ -29,7 +39,12 @@
               <div class="info-item">
                 <label class="info-label">身份证号</label>
                 <div class="info-value">
-                  <el-tooltip v-if="checkInForm.idCard" :content="idCard" placement="top" effect="dark">
+                  <el-tooltip
+                    v-if="checkInForm.idCard"
+                    :content="idCard"
+                    placement="top"
+                    effect="dark"
+                  >
                     <span>{{ checkInForm.idCard || '-' }}</span>
                   </el-tooltip>
                 </div>
@@ -74,14 +89,26 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="实际入住日期" prop="actualCheckinDate" required>
-                <el-date-picker v-model="checkInForm.actualCheckinDate" type="date" placeholder="选择实际入住日期"
-                  format="YYYY/MM/DD" value-format="YYYY-MM-DD" style="width: 100%" />
+                <el-date-picker
+                  v-model="checkInForm.actualCheckinDate"
+                  type="date"
+                  placeholder="选择实际入住日期"
+                  format="YYYY/MM/DD"
+                  value-format="YYYY-MM-DD"
+                  style="width: 100%"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="预计退房日期" prop="expectedCheckoutDate" required>
-                <el-date-picker v-model="checkInForm.expectedCheckoutDate" type="date" placeholder="yyyy/mm/dd"
-                  format="YYYY/MM/DD" value-format="YYYY-MM-DD" style="width: 100%" />
+                <el-date-picker
+                  v-model="checkInForm.expectedCheckoutDate"
+                  type="date"
+                  placeholder="yyyy/mm/dd"
+                  format="YYYY/MM/DD"
+                  value-format="YYYY-MM-DD"
+                  style="width: 100%"
+                />
               </el-form-item>
             </el-col>
           </el-row>
@@ -99,8 +126,15 @@
           <el-row :gutter="24">
             <el-col :span="24">
               <el-form-item label="入住备注" prop="remark">
-                <el-input v-model="checkInForm.remark" type="textarea" :rows="3" placeholder="请输入入住备注信息" maxlength="200"
-                  show-word-limit resize="none" />
+                <el-input
+                  v-model="checkInForm.remark"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="请输入入住备注信息"
+                  maxlength="200"
+                  show-word-limit
+                  resize="none"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -110,8 +144,15 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="登记时间" prop="registrationTime">
-                <el-date-picker v-model="checkInForm.registrationTime" type="datetime" placeholder="选择登记时间"
-                  format="YYYY/MM/DD HH:mm" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%" disabled />
+                <el-date-picker
+                  v-model="checkInForm.registrationTime"
+                  type="datetime"
+                  placeholder="选择登记时间"
+                  format="YYYY/MM/DD HH:mm"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  style="width: 100%"
+                  disabled
+                />
               </el-form-item>
             </el-col>
           </el-row>
@@ -152,7 +193,11 @@ import { ElMessage } from 'element-plus'
 import { FormInstance, FormRules } from 'element-plus'
 import { User, OfficeBuilding, List, InfoFilled } from '@element-plus/icons-vue'
 import { confirmCheckin, getCheckinDetail, getIdcard } from '@/api/checkin'
-import type { CheckinConfirmRequest, CheckinDetailResponse, PendingCheckinItemVO } from '@/types/checkin'
+import type {
+  CheckinConfirmRequest,
+  CheckinDetailResponse,
+  PendingCheckinItemVO
+} from '@/types/checkin'
 import { useUserStore } from '@/store/modules/user'
 import { createCheckInForm } from '@/views/Order/CheckInManagement/utils'
 
@@ -183,12 +228,15 @@ const rules: FormRules = {
   registrationTime: [{ required: true, message: '请选择登记时间', trigger: 'change' }]
 }
 
-watch(() => props.modelValue, (newVal) => {
-  visible.value = newVal
-  if (newVal && props.applicantData) {
-    loadCheckInData(props.applicantData)
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    visible.value = newVal
+    if (newVal && props.applicantData) {
+      loadCheckInData(props.applicantData)
+    }
   }
-})
+)
 
 watch(visible, (newVal) => {
   emit('update:modelValue', newVal)
@@ -200,8 +248,7 @@ const loadCheckInData = async (row: PendingCheckinItemVO) => {
 
     if (row.applicationId) {
       idCard.value = await getIdcard(row.applicationId)
-      console.log(idCard);
-
+      console.log(idCard)
 
       const detailData: CheckinDetailResponse = await getCheckinDetail(row.applicationId)
 
@@ -218,13 +265,13 @@ const loadCheckInData = async (row: PendingCheckinItemVO) => {
 
       const now = new Date()
       checkInForm.actualCheckinDate = detailData.actualCheckinAt
-        ? (detailData.actualCheckinAt).substring(0, 10)  // new Date(detailData.actualCheckinAt).toISOString().split('T')[0]
+        ? detailData.actualCheckinAt.substring(0, 10) // new Date(detailData.actualCheckinAt).toISOString().split('T')[0]
         : now.toISOString().split('T')[0]
 
-      console.log(detailData.expectedCheckoutAt);
+      console.log(detailData.expectedCheckoutAt)
 
       checkInForm.expectedCheckoutDate = detailData.expectedCheckoutAt
-        ? (detailData.expectedCheckoutAt).substring(0, 10)  // new Date(detailData.expectedCheckoutAt).toISOString().split('T')[0]
+        ? detailData.expectedCheckoutAt.substring(0, 10) // new Date(detailData.expectedCheckoutAt).toISOString().split('T')[0]
         : new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
       checkInForm.registrationTime = now.toLocaleString('sv-SE')
@@ -240,7 +287,7 @@ const loadCheckInData = async (row: PendingCheckinItemVO) => {
 }
 
 const fillDefaultData = (row: PendingCheckinItemVO) => {
-  console.log(row);
+  console.log(row)
 
   const now = new Date()
   Object.assign(checkInForm, {
@@ -261,7 +308,6 @@ const fillDefaultData = (row: PendingCheckinItemVO) => {
 }
 
 const handleConfirm = async () => {
-
   // 1. 校验表单
   if (!formRef.value) return
 
@@ -309,7 +355,6 @@ const handleConfirm = async () => {
       }
     }
   })
-
 }
 
 const handleCancel = () => {
@@ -338,14 +383,18 @@ $jobs-background-color: #f7f7f7;
 $header-height: 52px;
 $footer-height: 52px;
 
+:deep(.el-dialog) {
+  height: 600px;
+}
+
 /* =========================================
    2. 弹窗样式 - FIXED HEADER/FOOTER + SCROLLABLE BODY
    ========================================= */
 .check-in-dialog.fixed-header-footer {
-
   /* 限制整个对话框最大高度，防止超出视口 */
   :deep(.el-dialog) {
-    max-height: 90vh; // 90% 视口高度，留出呼吸空间
+    height: 600px;
+    max-height: 600px;
     display: flex;
     flex-direction: column;
     margin: 0 auto;
@@ -361,13 +410,6 @@ $footer-height: 52px;
     height: $header-height;
     display: flex;
     align-items: center;
-
-    .custom-header {
-      font-size: 17px;
-      font-weight: 600;
-      color: $jobs-text-color;
-      flex-grow: 1;
-    }
 
     .el-dialog__headerbtn .el-dialog__close {
       color: #999999;
@@ -389,10 +431,22 @@ $footer-height: 52px;
     align-items: center;
   }
 
-
+  /* Body - 占满剩余空间，内部内容自行滚动 */
+  :deep(.el-dialog__body) {
+    flex-grow: 1;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
 }
-
-
+.custom-header {
+  font-size: 18px;
+  font-weight: 600;
+  color: $jobs-text-color;
+  flex-grow: 1;
+}
 
 /* 表单容器 - 不再控制高度，由 body 滚动 */
 .check-in-form {
@@ -402,25 +456,23 @@ $footer-height: 52px;
   padding: 0;
 }
 
-/* 核心：让 body 区域可滚动且高度自适应 */
-.check-in-dialog {
-  :deep(.el-dialog__footer) {
-    padding: 0;
-    flex-grow: 1;
-    min-height: 0;
-    /* 计算可用高度：90vh - header - footer - dialog 内边距（估算） */
-    display: flex;
-    flex-direction: column;
-  }
-}
-
 /* 内容区域增加内边距 */
 .check-in-form .dialog-content-wrapper {
-  padding: 24px 32px;
-  flex-shrink: 0; // 防止被压缩
-  max-height: calc(80vh - #{$header-height} - #{$footer-height} - 32px);
-  /* 32px 是 Element Plus dialog 默认 vertical padding 估算 */
+  box-sizing: border-box;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  height: 400px;
+
+  /* 隐藏滚动条但保留滚动能力 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/旧 Edge */
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none; /* Chrome/Safari */
+  }
 }
 
 /* =========================================

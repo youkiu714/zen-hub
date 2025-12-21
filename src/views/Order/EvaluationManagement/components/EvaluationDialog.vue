@@ -17,16 +17,26 @@
           <el-descriptions-item label="性别">{{ profile.gender || '-' }}</el-descriptions-item>
           <el-descriptions-item label="年龄">{{ profile.age || '-' }}</el-descriptions-item>
           <el-descriptions-item label="民族">{{ profile.nation || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="联系电话">{{ maskPhone(profile.phone) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="联系电话">{{
+            profile.phone|| '-'
+          }}</el-descriptions-item>
           <el-descriptions-item label="挂单类型">
-            <el-tag :type="getTypeTagType(profile.type)" size="small">
-              {{ getTypeLabel(profile.type) }}
+            <el-tag  size="small">
+              {{ profile.type }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="入住日期">{{ profile.checkInDate || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="退房日期">{{ profile.checkOutDate || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="入住天数">{{ profile.duration || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="挂单目的">{{ profile.purpose || '禅修' }}</el-descriptions-item>
+          <el-descriptions-item label="入住日期">{{
+            profile.checkInDate || '-'
+          }}</el-descriptions-item>
+          <el-descriptions-item label="退房日期">{{
+            profile.checkOutDate || '-'
+          }}</el-descriptions-item>
+          <el-descriptions-item label="入住天数">{{
+            profile.stayDays || '-'
+          }}</el-descriptions-item>
+          <el-descriptions-item label="挂单目的">{{
+            profile.purpose || '禅修'
+          }}</el-descriptions-item>
         </el-descriptions>
       </div>
 
@@ -38,11 +48,7 @@
 
         <el-form :model="form" label-width="140px" label-position="top">
           <div class="rating-sections">
-            <div
-              v-for="(item, index) in ratingItems"
-              :key="index"
-              class="rating-item"
-            >
+            <div v-for="(item, index) in ratingItems" :key="index" class="rating-item">
               <label class="rating-label">{{ index + 1 }}. {{ item.label }}</label>
               <div class="rating-options">
                 <el-rate
@@ -64,15 +70,12 @@
               :rows="4"
               style="width: 100%"
               placeholder="请输入对挂单人在寺表现的具体评价和建议"
+              resize="none"
             />
           </el-form-item>
 
           <el-form-item label="综合评价等级" required>
-            <el-select
-              v-model="form.overall"
-              placeholder="请选择综合评价等级"
-              style="width: 200px"
-            >
+            <el-select v-model="form.overall" placeholder="请选择综合评价等级" style="width: 200px">
               <el-option label="优秀" value="excellent" />
               <el-option label="良好" value="good" />
               <el-option label="一般" value="average" />
@@ -148,18 +151,16 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <div v-if="!showForm && !showEvaluation" class="view-actions">
-          <el-button @click="handleClose" class="btn-secondary">关闭</el-button>
-          <el-button type="primary" @click="$emit('start-evaluation')" class="btn-primary">开始评价</el-button>
-        </div>
-        <div v-else-if="showForm" class="form-actions">
-          <el-button @click="$emit('cancel-evaluation')" class="btn-secondary">取消</el-button>
-          <el-button type="primary" @click="$emit('submit-evaluation')" :loading="submitting" class="btn-primary">
+        <div class="form-actions">
+          <el-button @click="handleClose" class="btn-secondary">取消</el-button>
+          <el-button
+            type="primary"
+            @click="$emit('submit-evaluation')"
+            :loading="submitting"
+            class="btn-primary"
+          >
             提交评价
           </el-button>
-        </div>
-        <div v-else class="evaluation-actions">
-          <el-button @click="handleClose" class="btn-secondary">关闭</el-button>
         </div>
       </div>
     </template>
@@ -167,14 +168,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { User, Star, StarFilled, Menu, Message, Download } from '@element-plus/icons-vue'
+import { computed, watch } from 'vue'
+import { User, Star} from '@element-plus/icons-vue'
 import type {
   EvaluationRecord as Profile,
   EvaluationForm,
-  RatingOption,
   RatingItem,
-  ViewEvaluationData,
+  ViewEvaluationData
 } from '@/types/evaluation'
 
 // Props (保持不变)
@@ -193,7 +193,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   visible: false,
   title: '',
-  profile: () => ({} as Profile),
+  profile: () => ({}) as Profile,
   showForm: false,
   showEvaluation: false,
   form: () => ({
@@ -214,10 +214,16 @@ const props = withDefaults(defineProps<Props>(), {
   ratingItems: () => []
 })
 
+watch(() => props.profile, (newVal) => {   
+console.log("newVal:",newVal)
+}, {
+    deep: true
+})
+
 // Emits (保持不变)
 const emit = defineEmits<{
   'update:visible': [value: boolean]
-  'close': []
+  close: []
   'start-evaluation': []
   'cancel-evaluation': []
   'submit-evaluation': []
@@ -240,22 +246,6 @@ const setRating = (index: number, value: number) => {
   emit('set-rating', index, value)
 }
 
-// 工具函数 (保持不变)
-const maskPhone = (phone: string) => {
-  if (!phone || phone.length < 7) return phone
-  return phone.slice(0, 3) + '****' + phone.slice(-4)
-}
-
-const getTypeLabel = (type: string) => {
-  const labels = {
-    short: '短住',
-    express: '直通车',
-    monk: '僧亲',
-    group: '团队挂单',
-    special: '特殊客人'
-  }
-  return labels[type] || type
-}
 
 const getTypeTagType = (type: string) => {
   const types = {
@@ -289,7 +279,6 @@ const getOverallTagType = (overall: string) => {
   }
   return types[overall] || 'info'
 }
-
 </script>
 
 <style scoped lang="scss">
@@ -303,7 +292,7 @@ $jobs-border-color: #e0e0e0;
 $jobs-background-color: #f7f7f7;
 
 /* 定义 Header 和 Footer 的大致高度，用于 Flex 计算 */
-$header-height: 52px; 
+$header-height: 52px;
 $footer-height: 60px; // 稍微增加，确保底部按钮有足够的 padding
 
 /* =========================================
@@ -335,38 +324,42 @@ $footer-height: 60px; // 稍微增加，确保底部按钮有足够的 padding
 
   /* 覆盖 Body - 容器弹性伸展，不负责滚动 */
   :deep(.el-dialog__body) {
-    padding: 0; 
-    flex-grow: 1;      
-    overflow: hidden;  
-    min-height: 0; 
+    padding: 0;
+    flex-grow: 1;
+    overflow: hidden;
+    min-height: 0;
 
     // 使 dialog body 采用 flex 布局，以容纳内部 content wrapper
     display: flex;
     flex-direction: column;
   }
-  
+
   /* 覆盖 Footer - 固定高度 */
   :deep(.el-dialog__footer) {
     padding: 16px 24px; // 增加垂直 padding
     border-top: 1px solid $jobs-border-color;
     background-color: #ffffff;
-    flex-shrink: 0; 
+    flex-shrink: 0;
     height: $footer-height;
   }
 
-  /* 核心滚动区域 */
   .dialog-content {
-    // 之前是 max-height: 70vh; overflow-y: auto;
-    // 现在让它占据 Body 的全部空间，并作为滚动容器
     flex-grow: 1;
     overflow-y: auto;
-    padding: 24px 32px; // 恢复内容所需的 padding
     max-height: calc(80vh - #{$header-height} - #{$footer-height} - 4vh);
-    // 80vh (Dialog max-height) - Header - Footer - Dialog 上下 margin 约 4vh
+
+    /* 隐藏滚动条但保留滚动能力 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none; /* Chrome/Safari */
+    }
   }
 }
 
-/* 描述列表样式覆盖 - 乔布斯风格：更细、更少的线条 */
 .jobs-descriptions {
   :deep(.el-descriptions__header) {
     margin-bottom: 16px;
@@ -390,10 +383,6 @@ $footer-height: 60px; // 稍微增加，确保底部按钮有足够的 padding
     padding: 12px 16px;
   }
 }
-
-/* =========================================
-   3. 内容区块样式
-   ========================================= */
 
 .profile-section {
   margin-bottom: 32px;
@@ -432,10 +421,6 @@ $footer-height: 60px; // 稍微增加，确保底部按钮有足够的 padding
     }
   }
 }
-
-// 评分组件颜色覆盖 (已在 template 中完成)
-// :colors="['#ff6e6e', '#ffb948', '#fecb65', '#98e34c', '#52c41a']"
-
 /* 按钮样式覆盖 */
 .dialog-footer {
   .btn-primary.el-button--primary {

@@ -18,8 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { ApplicationStatus, StatusTag } from '@/types/application'
+import { ref } from 'vue'
 
 const props = defineProps<{
   modelValue: number
@@ -29,51 +28,6 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue'])
 
 const selectedStatus = ref(props.modelValue)
-
-// const statusOptions = computed<StatusTag[]>(() => [
-//   {
-//     value: ApplicationStatus.DRAFT,
-//     label: '全部状态',
-//     type: 'default',
-//     icon: 'Document'
-//   },
-//   {
-//     value: ApplicationStatus.PENDING_REVIEW,
-//     label: '申请中',
-//     type: 'default',
-//     icon: 'Edit'
-//   },
-//   {
-//     value: ApplicationStatus.WAITING_CHECKIN,
-//     label: '待入住',
-//     type: 'default',
-//     icon: 'CircleCheck'
-//   },
-//   {
-//     value: ApplicationStatus.CHECKED_IN,
-//     label: '入住中',
-//     type: 'default',
-//     icon: 'HomeFilled'
-//   },
-//   {
-//     value: ApplicationStatus.CHECKED_OUT,
-//     label: '已退住',
-//     type: 'default',
-//     icon: 'SwitchButton'
-//   },
-//   {
-//     value: ApplicationStatus.REJECTED,
-//     label: '未通过',
-//     type: 'default',
-//     icon: 'Close'
-//   },
-//   {
-//     value: ApplicationStatus.CANCELED,
-//     label: '已取消',
-//     type: 'default',
-//     icon: 'Close'
-//   }
-// ])
 
 const handleStatusChange = (value: number) => {
   selectedStatus.value = value
