@@ -4,7 +4,7 @@
     <template #header="{ close }">
       <div class="custom-dialog-header">
         <div class="header-left">
-          <span class="title-text">续单申请审核</span>
+          <span class="title-text">续单审核</span>
           <!-- <span class="sub-id">- XS20230615001</span> -->
         </div>
         <button class="close-btn" @click="close">
@@ -181,7 +181,7 @@
         <div class="audit-header-title">
           <el-icon class="mr-2">
             <Stamp />
-          </el-icon> 客堂义工审核
+          </el-icon> 客堂{{ userStore.roles == 'MASTER'?'法师':'义工' }}审核
         </div>
 
         <el-form ref="formRef" :model="formData" :rules="formRules" label-position="top">
@@ -239,6 +239,9 @@ import { reviewExtension, type ExtensionReviewParams } from '@/api/extensions'
 import { getApplicationById, getVolunteerPerformanceById } from "@/api/application"
 import type { ReviewListItemVO } from '@/types/review'
 import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types'
+import { useUserStore } from '@/store/modules/user'
+const userStore = useUserStore()
+
 
 const props = defineProps<{
   modelValue: boolean

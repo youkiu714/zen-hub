@@ -15,9 +15,8 @@
           <el-input v-model="searchKeyword" placeholder="可以输入申请人姓名或身份证号" clearable prefix-icon="Search"
             style="width: 300px" @keyup.enter="fetchData" @input="handleSearchChange" />
           <el-select v-model="selectedType" placeholder="全部申请类型" style="width: 150px" @change="fetchData" clearable>
-            <el-option label="全部申请类型" :value="undefined" />
-            <el-option v-for="(label, value) in ApplicationTypeMap" :key="value" :label="label"
-              :value="Number(value)" />
+            <el-option v-for="(item, index) in applicationTypeOptions" :key="item.value" :label="item.label"
+              :value="Number(item.value)" />
           </el-select>
           <el-select v-model="selectedDateRange" placeholder="全部日期" style="width: 150px" @change="fetchData" clearable>
             <el-option label="全部日期" value="" />
@@ -52,13 +51,22 @@
             <div>{{ row.gender === 1 ? '男' : '女' }} / {{ row.age }}岁</div>
           </template>
         </el-table-column>
-        <el-table-column prop="applicationType" label="申请类型" :min-width="100">
+        <el-table-column prop="applicationType" label="挂单类型" min-width="90">
+          <template #default="scope">
+            <span class="dot" :class="getApplicationTypeClass(scope.row.applicationType)"></span>
+            {{
+              applicationTypeOptions.find((item) => item.value === scope.row.applicationType)?.label ??
+              '其他'
+            }}
+          </template>
+        </el-table-column>
+        <!-- <el-table-column prop="applicationType" label="申请类型" :min-width="100">
           <template #default="scope">
             <el-tag :type="getApplicationTypeTagType(scope.row.applicationType)" size="small">
               {{ ApplicationTypeMap[scope.row.applicationType] || '-' }}
             </el-tag>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="申请起止日期" :min-width="200">
           <template #default="scope">
             {{ scope.row.checkinDate }} 至 {{ scope.row.checkoutDate }}
@@ -118,6 +126,11 @@ import ReviewStatusFilter from './components/ReviewStatusFilter.vue'
 import { ReviewStatus } from '@/types/review'
 import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
 import ReviewPage from '@/components/ReviewPage.vue'
+
+import {
+  applicationTypeOptions,
+} from '@/utils/constants'
+
 import { useUserStore } from '@/store/modules/user'
 const userStore = useUserStore()
 
@@ -136,6 +149,17 @@ const ReviewStatusMap = {
   30: '已通过',
   40: '已驳回',
 } as const;
+
+// 获取申请类型对应的样式类
+const getApplicationTypeClass = (applicationType: number) => {
+  const typeClassMap: Record<number, string> = {
+    1: 'short-stay', // 短住 - #5F3DC4
+    2: 'long-stay', // 常住 - #08979C
+    3: 'direct-bus', // 直通车 - #D4B106
+    4: 'special-guest' // 特殊客人 - #C41D7F
+  }
+  return typeClassMap[applicationType] || 'default'
+}
 
 const filterStatus = ref(ReviewStatus.WAITING_REVIEW)
 

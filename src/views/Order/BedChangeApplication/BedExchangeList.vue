@@ -57,10 +57,7 @@
                     <el-table-column label="房间信息" min-width="160">
                         <template #default="{ row }">
                             <div class="room-info">
-                                <div class="room-no">{{ row.roomNo }}室</div>
-                                <div class="bed-detail">
-                                    {{ row.bedTypeName }} {{ row.bedNo }}号床
-                                </div>
+                                <div class="room-no">{{ row.roomNo }}（{{ row.bedNo }}）</div>
                             </div>
                         </template>
                     </el-table-column>
@@ -178,7 +175,7 @@ const queryParams = reactive<BedQueryParams>({
     pageNo: 1,
     pageSize: 10,
     keyword: '',
-    roomType: 'normal' // 默认选中 '常规'，如果想默认全部则设为 ''
+    // roomType: 'normal' // 默认选中 '常规'，如果想默认全部则设为 ''
 });
 
 

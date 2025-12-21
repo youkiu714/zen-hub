@@ -61,11 +61,22 @@
           </template>
         </el-table-column>
         <el-table-column prop="mobile" label="联系电话" width="130" />
-        <el-table-column label="申请类型" width="100">
+        <!-- <el-table-column label="申请类型" width="100">
           <template #default="{ row }">
             {{ getApplicationTypeText(row.applicationType) }}
           </template>
+        </el-table-column> -->
+
+        <el-table-column prop="applicationType" label="挂单类型" min-width="90">
+          <template #default="scope">
+            <span class="dot" :class="getApplicationTypeClass(scope.row.applicationType)"></span>
+            {{
+              applicationTypeOptions.find((item) => item.value === scope.row.applicationType)?.label ??
+              '其他'
+            }}
+          </template>
         </el-table-column>
+
         <el-table-column prop="checkinDate" label="入住日期" width="120" />
         <el-table-column prop="checkoutDate" label="原定退单" width="120" />
         <el-table-column prop="actualCheckoutDate" label="实际退单" width="120" />
@@ -191,6 +202,17 @@ const statusOptions = [
     icon: 'Edit'
   }
 ]
+
+// 获取申请类型对应的样式类
+const getApplicationTypeClass = (applicationType: number) => {
+  const typeClassMap: Record<number, string> = {
+    1: 'short-stay', // 短住 - #5F3DC4
+    2: 'long-stay', // 常住 - #08979C
+    3: 'direct-bus', // 直通车 - #D4B106
+    4: 'special-guest' // 特殊客人 - #C41D7F
+  }
+  return typeClassMap[applicationType] || 'default'
+}
 
 const pagination = reactive<PaginationParams>({
   current: 1,

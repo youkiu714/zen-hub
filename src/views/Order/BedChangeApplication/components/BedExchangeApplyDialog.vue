@@ -133,7 +133,7 @@ const reasonOptions = [
     { value: 1, label: '身体原因', desc: '上下铺不便、行动困难等身体因素' },
     { value: 2, label: '亲属同行', desc: '与同行亲属需要住同一房间' },
     { value: 3, label: '环境因素', desc: '噪音、采光等环境不适' },
-    { value: 4, label: '其他原因', desc: '请在下方详细说明' }
+    { value: 9, label: '其他原因', desc: '请在下方详细说明' }
 ];
 
 const rules = reactive<FormRules>({
