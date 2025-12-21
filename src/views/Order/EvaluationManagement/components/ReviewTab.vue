@@ -71,6 +71,18 @@ const statusOptions = computed<StatusTag[]>(() => [
     label: '已取消',
     type: 'default',
     icon: 'Close'
+  },
+  {
+    value: ApplicationStatus.RENEWAL_REVIEW_SUCCESS,
+    label: '续住审核通过',
+    type: 'default',
+    icon: 'Close'
+  },
+  {
+    value: ApplicationStatus.RENEWAL_REVIEW_REJECTED,
+    label: '续住审核拒绝',
+    type: 'default',
+    icon: 'Close'
   }
 ])
 

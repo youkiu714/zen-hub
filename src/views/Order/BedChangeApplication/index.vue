@@ -35,7 +35,7 @@
                   </el-icon>
                 </template>
               </el-input>
-              <el-select v-model="availableQuery.roomType" placeholder="全部房型" clearable style="width: 150px"
+              <!-- <el-select v-model="availableQuery.roomType" placeholder="全部房型" clearable style="width: 150px"
                 @change="handleAvailableSearch">
                 <el-option label="全部房型" value="" />
                 <el-option label="常规" value="regular" />
@@ -43,7 +43,7 @@
                 <el-option label="双人间" value="double" />
                 <el-option label="四人间" value="quad" />
                 <el-option label="多人间" value="dorm" />
-              </el-select>
+              </el-select> -->
             </div>
           </div>
         </template>
@@ -241,16 +241,6 @@
           </template>
 
           <el-form ref="formRef" :model="changeForm" :rules="formRules" label-width="120px">
-            <el-form-item label="期望房间类型" prop="newRoomType">
-              <el-select v-model="changeForm.newRoomType" placeholder="请选择房间类型" style="width: 100%">
-                <el-option label="常规" value="regular" />
-                <el-option label="单人间" value="single" />
-                <el-option label="双人间" value="double" />
-                <el-option label="四人间" value="quad" />
-                <el-option label="多人间" value="dorm" />
-              </el-select>
-            </el-form-item>
-
             <el-form-item label="期望床位类型" prop="preferredBedType">
               <el-radio-group v-model="changeForm.preferredBedType">
                 <el-radio value="lower">下铺</el-radio>
@@ -535,44 +525,12 @@ const fetchAvailableData = async () => {
   }
 }
 
-// 获取已申请换床列表（使用模拟数据）
-const fetchAppliedData = async () => {
-  try {
-    appliedLoading.value = true
-    // 模拟API延迟
-    await new Promise(resolve => setTimeout(resolve, 300))
-
-    let filteredData = [...mockAppliedData]
-
-    // 关键词筛选
-    if (appliedQuery.keyword) {
-      filteredData = filteredData.filter(item =>
-        item.applicantName.toLowerCase().includes(appliedQuery.keyword.toLowerCase()) ||
-        item.applicationId.toLowerCase().includes(appliedQuery.keyword.toLowerCase())
-      )
-    }
-
-    // 分页
-    const startIndex = (appliedCurrentPage.value - 1) * appliedPageSize.value
-    const endIndex = startIndex + appliedPageSize.value
-    appliedData.value = filteredData.slice(startIndex, endIndex)
-    appliedTotal.value = filteredData.length
-  } catch (error) {
-    console.error('获取已申请换床列表失败:', error)
-    ElMessage.error('获取已申请换床列表失败')
-  } finally {
-    appliedLoading.value = false
-  }
-}
-
 // 页签切换
 const handleTabChange = (tabName: string) => {
   activeTab.value = tabName
   if (tabName === 'available') {
     fetchAvailableData()
-  } else {
-    fetchAppliedData()
-  }
+  } 
 }
 
 // 可申请换床搜索
@@ -584,7 +542,6 @@ const handleAvailableSearch = () => {
 // 已申请换床搜索
 const handleAppliedSearch = () => {
   appliedCurrentPage.value = 1
-  fetchAppliedData()
 }
 
 // 分页处理
@@ -602,12 +559,10 @@ const handleAvailableCurrentChange = (val: number) => {
 const handleAppliedSizeChange = (val: number) => {
   appliedPageSize.value = val
   appliedCurrentPage.value = 1
-  fetchAppliedData()
 }
 
 const handleAppliedCurrentChange = (val: number) => {
   appliedCurrentPage.value = val
-  fetchAppliedData()
 }
 
 // 申请换床
@@ -652,7 +607,6 @@ const handleSubmitApplication = async () => {
 
     // 刷新列表
     fetchAvailableData()
-    fetchAppliedData()
   } catch (error) {
     if (error === false) {
       // 表单验证失败
@@ -691,7 +645,6 @@ const handleCancelApplication = async (row: AppliedChangeItem) => {
     // await cancelBedChangeApplication(row.applicationId)
 
     ElMessage.success('换床申请已取消')
-    fetchAppliedData()
   } catch (error) {
     if (error === 'cancel') {
       return
@@ -740,10 +693,6 @@ const getStatusText = (status: string) => {
   }
 }
 
-// 页面加载时获取数据
-onMounted(() => {
-  fetchAvailableData()
-})
 </script>
 
 <style scoped lang="scss">
