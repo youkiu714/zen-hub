@@ -13,23 +13,12 @@
     </div>
     <!-- 头像上传 -->
     <div class="photo-upload">
-      <div
-        class="avatar-wrapper"
-        @mouseenter="isHovering = true"
-        @mouseleave="isHovering = false"
-        v-loading="isUploading"
-      >
+      <div class="avatar-wrapper" @mouseenter="isHovering = true" @mouseleave="isHovering = false"
+        v-loading="isUploading">
         <img :src="form.photoUrl" class="avatar" />
         <div v-if="isHovering" class="upload-overlay">
-          <el-upload
-            action="#"
-            :show-file-list="false"
-            :auto-upload="false"
-            :on-change="handleAvatarChange"
-            accept=".jpg,.jpeg,.png"
-            :limit="1"
-            :disabled="isUploading"
-          >
+          <el-upload action="#" :show-file-list="false" :auto-upload="false" :on-change="handleAvatarChange"
+            accept=".jpg,.jpeg,.png" :limit="1" :disabled="isUploading">
             <div class="camera-icon">
               <el-icon v-if="isHovering">
                 <Camera />
@@ -44,14 +33,7 @@
       </div>
     </div>
 
-    <el-form
-      ref="formRef"
-      class="form-content"
-      label-position="top"
-      :model="form"
-      :rules="rules"
-      label-width="120px"
-    >
+    <el-form ref="formRef" class="form-content" label-position="top" :model="form" :rules="rules" label-width="120px">
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="姓名" prop="name" required>
@@ -60,24 +42,13 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="身份证号" prop="idCard">
-            <el-input
-              v-model="form.idCard"
-              placeholder="请输入18位身份证号"
-              clearable
-              max="18"
-              @change="handleIdCardChange"
-            />
+            <el-input v-model="form.idCard" placeholder="请输入18位身份证号" clearable max="18" @change="handleIdCardChange" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="性别" prop="gender" required>
             <el-select v-model="form.gender" placeholder="请选择性别" clearable disabled>
-              <el-option
-                v-for="item in genderOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
+              <el-option v-for="item in genderOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -90,16 +61,8 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="出生年月" prop="birthDate">
-            <el-date-picker
-              v-model="form.birthDate"
-              type="date"
-              placeholder="yyyy/mm/dd"
-              format="YYYY/MM/DD"
-              value-format="YYYY-MM-DD"
-              :disabled-date="disabledBirthDate"
-              clearable
-              disabled
-            />
+            <el-date-picker v-model="form.birthDate" type="date" placeholder="yyyy/mm/dd" format="YYYY/MM/DD"
+              value-format="YYYY-MM-DD" :disabled-date="disabledBirthDate" clearable disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -135,23 +98,14 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="常住地省市" prop="provinceCity">
-            <el-cascader
-              v-model="provinceCity"
-              :options="regionData as CascaderOption[]"
-              :props="{ checkStrictly: true, emitPath: true }"
-              placeholder="请选择省份/城市"
-              clearable
-              @change="handleProvinceCityChange"
-            />
+            <el-cascader v-model="provinceCity" :options="regionData as CascaderOption[]"
+              :props="{ checkStrictly: true, emitPath: true }" placeholder="请选择省份/城市" clearable
+              @change="handleProvinceCityChange" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="详细地址" prop="address">
-            <el-input
-              v-model="form.address"
-              placeholder="请输入详细地址，包括街道、门牌号等"
-              clearable
-            />
+            <el-input v-model="form.address" placeholder="请输入详细地址，包括街道、门牌号等" clearable />
           </el-form-item>
         </el-col>
       </el-row>
@@ -187,11 +141,7 @@
       <el-row :gutter="20">
         <el-col :span="24">
           <el-form-item label="技能特长" prop="skills">
-            <el-input
-              v-model="form.skills"
-              placeholder="请输入技能特长，多个技能用逗号分隔"
-              clearable
-            />
+            <el-input v-model="form.skills" placeholder="请输入技能特长，多个技能用逗号分隔" clearable />
           </el-form-item>
         </el-col>
       </el-row>
@@ -200,21 +150,13 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="紧急联系人1" prop="emergencyContacts.0.contactName">
-            <el-input
-              v-model="form.emergencyContacts[0].contactName"
-              placeholder="请输入紧急联系人姓名"
-              clearable
-              maxlength="20"
-            />
+            <el-input v-model="form.emergencyContacts[0].contactName" placeholder="请输入紧急联系人姓名" clearable
+              maxlength="20" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="电话" prop="emergencyContacts.0.contactPhone">
-            <el-input
-              v-model="form.emergencyContacts[0].contactPhone"
-              placeholder="请输入紧急联系人电话号码"
-              clearable
-            />
+            <el-input v-model="form.emergencyContacts[0].contactPhone" placeholder="请输入紧急联系人电话号码" clearable />
           </el-form-item>
         </el-col>
       </el-row>
@@ -222,21 +164,13 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="紧急联系人2" prop="emergencyContacts.1.contactName">
-            <el-input
-              v-model="form.emergencyContacts[1].contactName"
-              placeholder="请输入紧急联系人姓名"
-              clearable
-              maxlength="20"
-            />
+            <el-input v-model="form.emergencyContacts[1].contactName" placeholder="请输入紧急联系人姓名" clearable
+              maxlength="20" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="电话" prop="emergencyContacts.1.contactPhone">
-            <el-input
-              v-model="form.emergencyContacts[1].contactPhone"
-              placeholder="请输入紧急联系人电话号码"
-              clearable
-            />
+            <el-input v-model="form.emergencyContacts[1].contactPhone" placeholder="请输入紧急联系人电话号码" clearable />
           </el-form-item>
         </el-col>
       </el-row>
@@ -345,6 +279,8 @@ const validatePhone1 = (rule, value, callback) => {
     callback() // 电话为空时可能由required规则处理，或者允许为空，视需求而定
   } else if (value === form.value.emergencyContacts[1].contactPhone) {
     callback(new Error('两个紧急联系人电话不能一致'))
+  } else if (!/^1[3-9]\d{9}$/.test(value)) {
+    callback(new Error('请输入正确的11位手机号码'))
   } else {
     callback()
   }
@@ -356,6 +292,8 @@ const validatePhone2 = (rule, value, callback) => {
     callback()
   } else if (value === form.value.emergencyContacts[0].contactPhone) {
     callback(new Error('两个紧急联系人电话不能一致'))
+  } else if (!/^1[3-9]\d{9}$/.test(value)) {
+    callback(new Error('请输入正确的11位手机号码'))
   } else {
     callback()
   }

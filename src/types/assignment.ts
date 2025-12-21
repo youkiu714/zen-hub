@@ -183,6 +183,7 @@ export interface AllocateBedRequest {
   checkoutAt?: string;
   remark?: string;
   type?: number;
+  bedChangeId?: number;
 }
 
 export interface AllocateBedResponse {

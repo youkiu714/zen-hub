@@ -12,7 +12,6 @@ declare module 'vue' {
     Breadcrumb: typeof import('./src/components/Layout/Breadcrumb.vue')['default']
     CheckInModal: typeof import('./src/components/CheckInModal.vue')['default']
     CloudCover: typeof import('./src/components/CloudCover.vue')['default']
-    ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']

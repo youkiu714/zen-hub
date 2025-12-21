@@ -382,6 +382,14 @@ const handleSubmit = async () => {
     return
   }
 
+  let type = 1; // 1新住 2换床 3续单
+  if (props.selectedPerson.recordType=="CHANGE"){
+    type = 2;
+  }
+  if (props.selectedPerson.recordType=="EXTENSION"){
+    type = 3;
+  }
+
   submitting.value = true
   try {
     const params: AllocateBedRequest = {
@@ -390,7 +398,8 @@ const handleSubmit = async () => {
       checkinAt: checkinTime.value,
       checkoutAt: checkoutTime.value,
       remark: remark.value,
-      type: 1 // 1=新住
+      type: type, 
+      bedChangeId: props.selectedPerson.bedChangeId
     }
 
     const response = await allocateBed(params)
