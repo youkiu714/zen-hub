@@ -45,21 +45,32 @@ export const asyncRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/dashboard',
+    name: 'Dashboard',
+    // 直接指向 Dashboard 组件，而不是 Layout
+    component: () => import('@/views/dashboard/index.vue'),
+    meta: {
+      title: '首页',
+      icon: 'House',
+      affix: true
+    }
+  },
+  {
     path: '/',
     name: 'Layout',
     component: () => import('@/components/Layout/index.vue'),
     redirect: '/dashboard',  // /dashboard  statistics
     children: [
-      {
-        path: '/dashboard',
-        name: 'Dashboard',
-        component: () => import('@/views/dashboard/index.vue'),
-        meta: {
-          title: '首页',
-          icon: 'House',
-          affix: true
-        }
-      },
+      // {
+      //   path: '/dashboard',
+      //   name: 'Dashboard',
+      //   component: () => import('@/views/dashboard/index.vue'),
+      //   meta: {
+      //     title: '首页',
+      //     icon: 'House',
+      //     affix: true
+      //   }
+      // },
       {
         path: '/statistics',
         name: 'Statistics',
@@ -224,7 +235,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
           title: '基础信息校验',
           icon: 'CircleCheck' // 建议使用 Element Plus 的校验类图标
         }
-      }
+      },
     ]
   },
   {

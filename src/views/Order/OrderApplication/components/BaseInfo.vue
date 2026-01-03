@@ -99,7 +99,7 @@
         <el-col :span="12">
           <el-form-item label="常住地省市" prop="provinceCity">
             <el-cascader v-model="provinceCity" :options="regionData as CascaderOption[]"
-              :props="{ checkStrictly: true, emitPath: true }" placeholder="请选择省份/城市" clearable
+              :props="{ checkStrictly: true, emitPath: true, showAllLevels: false }" placeholder="请选择省份/城市" clearable
               @change="handleProvinceCityChange" />
           </el-form-item>
         </el-col>
@@ -178,17 +178,17 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="疾病史" prop="diseaseHistory">
-            <el-input v-model="form.diseaseHistory" placeholder="请输入疾病史信息" clearable />
+            <el-input v-model="form.diseaseHistory" placeholder="重视业果，请诚实回答" clearable />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="服药史" prop="medicationHistory">
-            <el-input v-model="form.medicationHistory" placeholder="请输入服药史信息" clearable />
+            <el-input v-model="form.medicationHistory" placeholder="重视业果，请诚实回答" clearable />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="传染病史" prop="infectiousHistory">
-            <el-input v-model="form.infectiousHistory" placeholder="请输入传染病史信息" clearable />
+            <el-input v-model="form.infectiousHistory" placeholder="重视业果，请诚实回答" clearable />
           </el-form-item>
         </el-col>
       </el-row>
@@ -328,21 +328,21 @@ const rules = reactive<FormRules>({
   idCard: vr.idCard,
   ethnic: [{ required: true, message: '请选择民族', trigger: 'change' }],
   mobile: vr.mobile,
-  weChat: [
-    { required: true, message: '请填写微信号', trigger: 'blur' },
-    { min: 1, max: 50, message: '微信号长度应在1-50个字符之间', trigger: 'blur' }
-  ],
+  // weChat: [
+  //   { required: true, message: '请填写微信号', trigger: 'blur' },
+  //   { min: 1, max: 50, message: '微信号长度应在1-50个字符之间', trigger: 'blur' }
+  // ],
   marital: [{ required: true, message: '请选择婚姻状况', trigger: 'change' }],
   provinceCity: [{ required: true, message: '请选择省份', trigger: 'change' }],
   address: [
     { required: true, message: '请输入详细地址', trigger: 'blur' },
     { min: 3, max: 200, message: '详细地址长度应在3-200个字符之间', trigger: 'blur' }
   ],
-  education: [{ required: true, message: '请选择最高学历', trigger: 'change' }],
-  school: [{ required: true, message: '请输入毕业院校', trigger: 'blur' }],
-  major: [{ required: true, message: '请输入专业', trigger: 'blur' }],
-  occupation: [{ required: true, message: '请输入职业', trigger: 'blur' }],
-  skills: [{ required: true, max: 500, message: '技能特长描述不能超过500个字符', trigger: 'blur' }],
+  // education: [{ required: true, message: '请选择最高学历', trigger: 'change' }],
+  // school: [{ required: true, message: '请输入毕业院校', trigger: 'blur' }],
+  // major: [{ required: true, message: '请输入专业', trigger: 'blur' }],
+  // occupation: [{ required: true, message: '请输入职业', trigger: 'blur' }],
+  // skills: [{ required: true, max: 500, message: '技能特长描述不能超过500个字符', trigger: 'blur' }],
   'emergencyContacts.0.contactName': [
     { required: true, validator: validateContactName1, trigger: 'blur' }
   ],
@@ -350,12 +350,12 @@ const rules = reactive<FormRules>({
   'emergencyContacts.0.contactPhone': [
     { validator: validatePhone1, trigger: 'blur', required: true }
   ],
-  'emergencyContacts.1.contactName': [
-    { required: true, validator: validateContactName2, trigger: 'blur' }
-  ],
-  'emergencyContacts.1.contactPhone': [
-    { validator: validatePhone2, trigger: 'blur', required: true }
-  ],
+  // 'emergencyContacts.1.contactName': [
+  //   { required: true, validator: validateContactName2, trigger: 'blur' }
+  // ],
+  // 'emergencyContacts.1.contactPhone': [
+  //   { validator: validatePhone2, trigger: 'blur', required: true }
+  // ],
   diseaseHistory: [
     { required: true, max: 200, message: '疾病史描述不能超过200个字符', trigger: 'blur' }
   ],

@@ -13,7 +13,6 @@
             </template>
           </BaseInfo>
         </section>
-
         <!-- 学修情况 -->
         <section id="practice-info">
           <PracticeInfoForm v-model="formData.practice" ref="practiceFormRef" />
