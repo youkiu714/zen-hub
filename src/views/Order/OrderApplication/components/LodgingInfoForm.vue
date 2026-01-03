@@ -254,7 +254,7 @@ const rules = reactive<FormRules>({
   checkoutDate: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
   departureDate: [{ required: true, message: '请选择出发行程时间', trigger: 'change' }],
   returnDate: [{ required: true, message: '请选择离开行程时间', trigger: 'change' }],
-  specialRequest: [{ required: true, message: '请输特殊需求', trigger: 'blur' }],
+  // specialRequest: [{ required: true, message: '请输特殊需求', trigger: 'blur' }],
   shortStayReason: [{ required: true, message: '请输入短住原因及期许', trigger: 'blur' }],
   causeOfVisit: [{ required: true, message: '请输入短住原因及期许', trigger: 'blur' }],
   recommenderPhone: vr.recommenderPhone,

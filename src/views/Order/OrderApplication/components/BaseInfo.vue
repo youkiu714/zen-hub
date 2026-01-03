@@ -47,7 +47,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="性别" prop="gender" required>
-            <el-select v-model="form.gender" placeholder="请选择性别" clearable disabled>
+            <el-select v-model="form.gender" placeholder="请选择性别" clearable>
               <el-option v-for="item in genderOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
@@ -56,13 +56,13 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="年龄" prop="age">
-            <el-input v-model="form.age" placeholder="请输入年龄" clearable disabled />
+            <el-input v-model="form.age" placeholder="请输入年龄" clearable />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="出生年月" prop="birthDate">
             <el-date-picker v-model="form.birthDate" type="date" placeholder="yyyy/mm/dd" format="YYYY/MM/DD"
-              value-format="YYYY-MM-DD" :disabled-date="disabledBirthDate" clearable disabled />
+              value-format="YYYY-MM-DD" :disabled-date="disabledBirthDate" clearable />
           </el-form-item>
         </el-col>
         <el-col :span="8">
