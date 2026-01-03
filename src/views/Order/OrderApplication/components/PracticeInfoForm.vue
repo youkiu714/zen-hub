@@ -108,11 +108,11 @@ const disabledDate = (time: Date) => time.getTime() > Date.now()
 
 const vr = useFormValidationRules()
 const rules = reactive<FormRules>({
-  refugeTakenDate: [{ required: true, message: '请选择皈依时间', trigger: 'change' }],
-  refugeTemple: [
-    { required: true, message: '请输入皈依寺庙', trigger: 'blur' },
-    { min: 2, max: 50, message: '皈依寺庙名称长度应在2-50个字符之间', trigger: 'blur' }
-  ],
+  // refugeTakenDate: [{ required: true, message: '请选择皈依时间', trigger: 'change' }],
+  // refugeTemple: [
+  //   { required: true, message: '请输入皈依寺庙', trigger: 'blur' },
+  //   { min: 2, max: 50, message: '皈依寺庙名称长度应在2-50个字符之间', trigger: 'blur' }
+  // ],
   //   hasTakenPrecepts: [
   //     { required: true, message: '请选择是否受戒', trigger: 'change' },
   //   ],

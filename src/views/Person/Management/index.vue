@@ -16,14 +16,10 @@
           </template>
         </el-input>
 
-        <el-select v-model="queryForm.departmentCode" placeholder="全部部组" clearable style="width: 120px" @change="handleSearch">
+        <el-select v-model="queryForm.departmentCode" placeholder="全部部组" clearable style="width: 120px"
+          @change="handleSearch" v-if="userStore.roles == 'MASTER' || userStore.roles == 'VOLUNTEER'">
           <el-option label="全部部组" value="" />
-          <el-option
-            v-for="dept in departmentOptions"
-            :key="dept.value"
-            :label="dept.label"
-            :value="dept.value"
-          />
+          <el-option v-for="dept in departmentOptions" :key="dept.value" :label="dept.label" :value="dept.value" />
         </el-select>
 
         <el-button type="primary" @click="handleFilter">
@@ -96,11 +92,7 @@
 
 
     <!-- 历史记录弹窗 -->
-    <PersonHistoryDialog
-      v-model="historyVisible"
-      :current-person="currentRow"
-      @close="handleHistoryClose"
-    />
+    <PersonHistoryDialog v-model="historyVisible" :current-person="currentRow" @close="handleHistoryClose" />
   </div>
 </template>
 
@@ -118,6 +110,17 @@ import PageHeader from '@/components/PageHeader.vue'
 import { departmentOptions } from '@/utils/constants'
 import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
 import PersonHistoryDialog from '@/components/PersonHistoryDialog.vue'
+import { useUserStore } from '@/store/modules/user'
+
+const userStore = useUserStore()
+
+// 权限处理：确保 roles 是数组
+const currentRoles = computed(() => {
+  const roles = userStore.roles
+  if (Array.isArray(roles)) return roles
+  if (typeof roles === 'string' && roles) return [roles]
+  return []
+})
 
 // 查询表单数据
 const queryForm = reactive({
@@ -155,7 +158,9 @@ const fetchPersonProfiles = async () => {
     if (queryForm.departmentCode) {
       params.departmentCode = queryForm.departmentCode
     }
-
+    if (userStore.roles == 'LIAISON') {
+      params.departmentCode = userStore.user?.department
+    }
     const response = await getPersonProfiles(params)
     console.log('人员档案查询响应:', response)
 
@@ -310,7 +315,7 @@ onMounted(() => {
 .pending-records {
   padding: 20px;
 
-  
+
 
   .filter-card {
     margin-bottom: 20px;

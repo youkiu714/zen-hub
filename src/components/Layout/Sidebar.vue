@@ -230,7 +230,7 @@ const menuList = ref([
     meta: {
       title: '人员管理界面',
       icon: 'School',
-      roles: ['MASTER']
+      roles: ['MASTER','LIAISON']
     },
     children: [
       {
@@ -238,17 +238,19 @@ const menuList = ref([
         name: 'personManagementList',
         meta: {
           title: '人员管理',
-          icon: 'List'
+          icon: 'List',
+          roles: ['MASTER','LIAISON']
         }
       },
-      {
-        path: '/person-management/checklist',
-        name: 'personManagementCheckList',
-        meta: {
-          title: '基础信息校验',
-          icon: 'CircleCheck'
-        }
-      }
+      // {
+      //   path: '/person-management/checklist',
+      //   name: 'personManagementCheckList',
+      //   meta: {
+      //     title: '基础信息校验',
+      //     icon: 'CircleCheck'
+      //   }
+      // },
+
     ]
   }
 ])
