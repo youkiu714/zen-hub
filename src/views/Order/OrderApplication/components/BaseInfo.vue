@@ -29,7 +29,7 @@
       </div>
       <div class="upload-tips">
         <p>点击上传个人照片</p>
-        <p>支持 JPG、PNG 、JPEG格式，大小不超过 2MB</p>
+        <p>支持 JPG、PNG 、JPEG格式，大小不超过 10MB</p>
       </div>
     </div>
 
@@ -372,8 +372,8 @@ const isHovering = ref(false)
 const isUploading = ref(false)
 
 const handleAvatarChange = async (file: any) => {
-  const isLt2M = file.raw.size / 1024 / 1024 < 2
-  if (!isLt2M) return ElMessage.error('图片大小不能超过 2MB!')
+  const isLt2M = file.raw.size / 1024 / 1024 < 10
+  if (!isLt2M) return ElMessage.error('图片大小不能超过 10MB!')
   const allowed = ['image/jpeg', 'image/jpg', 'image/png']
   if (!allowed.includes(file.raw.type)) return ElMessage.error('只支持 JPG、PNG 格式的图片!')
 
