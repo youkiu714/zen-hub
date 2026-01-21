@@ -73,8 +73,8 @@
       </el-row>
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="所属部组" prop="departmentCode">
-            <el-select v-model="form.departmentCode" placeholder="请选择所属部组" clearable>
+          <el-form-item label="现承担部组" prop="departmentCode">
+            <el-select v-model="form.departmentCode" placeholder="请选择现承担部组" clearable>
               <el-option
                 v-for="item in departmentOptions"
                 :key="item.value"

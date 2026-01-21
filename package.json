@@ -24,6 +24,7 @@
     "lunar-typescript": "^1.8.6",
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
+    "fflate": "^0.8.2",
     "vue": "^3.3.11",
     "vue-echarts": "^6.6.1",
     "vue-router": "^4.2.5",

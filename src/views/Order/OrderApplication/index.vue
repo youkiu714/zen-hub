@@ -4,13 +4,28 @@
     <div class="lodging-wrapper">
       <el-card class="form-container">
         <!-- 基本信息 -->
+        <div class="docx-upload">
+          <el-upload
+            v-model:file-list="docxFileList"
+            drag
+            :auto-upload="false"
+            :limit="1"
+            accept=".docx"
+            :before-upload="handleDocxBeforeUpload"
+            :on-exceed="handleDocxExceed"
+            :on-change="handleDocxChange"
+          >
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text">请上传docx文件</div>
+          </el-upload>
+        </div>
         <section id="basic-info" class="section">
           <BaseInfo v-model="formData.basic" ref="basicFormRef">
-            <template #headerRight>
+            <!-- <template #headerRight>
               <el-button v-if="hasDraft" size="small" type="primary" @click="applyCachedDraft">
                 使用缓存数据
               </el-button>
-            </template>
+            </template> -->
           </BaseInfo>
         </section>
         <!-- 学修情况 -->
@@ -38,7 +53,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, computed, nextTick, watch } from 'vue'
-import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
+import { ElMessage, FormInstance, ElMessageBox } from 'element-plus'
+import type { UploadFile, UploadRawFile, UploadUserFile } from 'element-plus'
 import throttle from 'lodash-es/throttle'
 import type { BasicInfo, PracticeInfo, LodgingInfo, ApplicationSubmitRequest } from '@/types'
 import PageHeader from '@/components/PageHeader.vue'
@@ -48,6 +64,7 @@ import LodgingInfoForm from '@/views/Order/OrderApplication/components/LodgingIn
 import { applications } from '@/api/pendingOrder'
 import { useUserStore } from '@/store/modules/user'
 import avatarImg from '@/assets/avatar.png'
+import { analyzeDocx } from '@/utils/analyze-docx'
 
 const userStore = useUserStore()
 const user = computed(() => userStore.user)
@@ -195,8 +212,123 @@ watch(
 const basicFormRef = ref<FormInstance>()
 const practiceFormRef = ref<FormInstance>()
 const lodgingFormRef = ref<FormInstance>()
+const docxFileList = ref<UploadUserFile[]>([])
 
 const activeTab = ref('basic-info')
+
+const normalizeDocxDate = (value: string) => {
+  const trimmed = value.trim()
+  const match = trimmed.match(/(\d{4})[./年-]?(\d{1,2})?[./月-]?(\d{1,2})?/)
+  if (!match) return trimmed
+  const year = match[1]
+  const month = match[2]?.padStart(2, '0') ?? '01'
+  const day = match[3]?.padStart(2, '0') ?? '01'
+  return `${year}-${month}-${day}`
+}
+
+const applyDocxData = (data: Record<string, string | string[]>) => {
+  const setIf = (setter: (value: string) => void, value?: string) => {
+    if (value && value.trim()) setter(value.trim())
+  }
+  const toList = (value?: string | string[]) => {
+    if (!value) return []
+    return Array.isArray(value) ? value : [value]
+  }
+
+  setIf((value) => (formData.basic.name = value), data['姓名'])
+  setIf((value) => (formData.basic.ethnic = value), data['民族'])
+  setIf((value) => (formData.basic.mobile = value), data['电话号码'])
+  setIf((value) => (formData.basic.weChat = value), data['微信号'])
+  setIf((value) => (formData.basic.idCard = value), data['身份证号'])
+  setIf((value) => (formData.basic.marital = value), data['婚姻状况'])
+  setIf((value) => (formData.basic.address = value), data['详细地址'])
+  setIf((value) => (formData.basic.education = value), data['最高学历'])
+  setIf((value) => (formData.basic.school = value), data['毕业院校'])
+  setIf((value) => (formData.basic.major = value), data['专业'])
+  setIf((value) => (formData.basic.occupation = value), data['职业'])
+  setIf((value) => (formData.basic.diseaseHistory = value), data['疾病史（请如实填写）'])
+  setIf((value) => (formData.basic.medicationHistory = value), data['服药史（请如实填写）'])
+  setIf((value) => (formData.basic.infectiousHistory = value), data['传染病史（请如实填写）'])
+  const contactNames = toList(data['紧急联系人'])
+  const contactPhones = toList(data['联系方式'])
+
+  setIf(
+    (value) => (formData.basic.emergencyContacts[0].contactName = value),
+    contactNames[0]
+  )
+  setIf(
+    (value) => (formData.basic.emergencyContacts[0].contactPhone = value),
+    contactPhones[0]
+  )
+  setIf(
+    (value) => (formData.basic.emergencyContacts[1].contactName = value),
+    contactNames[1]
+  )
+  setIf(
+    (value) => (formData.basic.emergencyContacts[1].contactPhone = value),
+    contactPhones[1]
+  )
+
+  setIf((value) => (formData.practice.pastPracticeExperience = value), data['过往学修、承担经历'])
+  setIf((value) => (formData.lodging.departmentCode = value), data['现承担部组'])
+  setIf((value) => (formData.practice.visitRecords = value), data['来崇恩寺的次数及时间'])
+
+  setIf((value) => (formData.lodging.checkinDate = normalizeDocxDate(value)), data['申请短住开始时间'])
+  setIf((value) => (formData.lodging.checkoutDate = normalizeDocxDate(value)), data['申请短住结束时间'])
+  setIf((value) => (formData.lodging.shortStayReason = value), data['短住的原因及期许'])
+  setIf((value) => (formData.lodging.recommenderName = value), data['推荐人'])
+  setIf((value) => (formData.lodging.recommenderComment = value), data['推荐人评价'])
+
+  setIf((value) => {
+    const normalized = value.trim()
+    if (normalized === '男') formData.basic.gender = '1'
+    else if (normalized === '女') formData.basic.gender = '2'
+    else formData.basic.gender = normalized as any
+  }, data['性别'])
+
+  setIf((value) => (formData.basic.birthDate = normalizeDocxDate(value)), data['出生年月'])
+
+  const location = data['省市'] || data['常住地']
+  if (location && !formData.basic.provinceCity) {
+    formData.basic.provinceCity = location
+  }
+
+  if (data['头像']) {
+    formData.basic.photoUrl = data['头像']
+  }
+}
+
+const handleDocxChange = async (file: UploadFile) => {
+  const rawFile = file.raw
+  if (!rawFile) return
+  const isDocx =
+    rawFile.name.toLowerCase().endsWith('.docx') ||
+    rawFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  if (!isDocx) return
+
+  try {
+    const data = await analyzeDocx(rawFile)
+    applyDocxData(data)
+    ElMessage.success('已解析并填充表单')
+  } catch (error) {
+    ElMessage.error('解析失败，请确认文件格式是否正确')
+  }
+}
+
+const handleDocxBeforeUpload = (rawFile: UploadRawFile) => {
+  const name = rawFile.name.toLowerCase()
+  const isDocx =
+    name.endsWith('.docx') ||
+    rawFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  if (!isDocx) {
+    ElMessage.error('仅支持上传 .docx 文件')
+  }
+  return isDocx
+}
+
+const handleDocxExceed = () => {
+  ElMessage.warning('最多只能上传 1 个文件')
+}
 
 // 监听滚动事件，更新当前激活的Tab
 const handleScroll = () => {
@@ -451,6 +583,19 @@ onBeforeUnmount(() => {
   justify-content: center;
   margin-bottom: 24px;
   flex-direction: column;
+}
+
+.docx-upload {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.docx-upload :deep(.el-upload) {
+  width: 100%;
+}
+
+.docx-upload :deep(.el-upload .el-button) {
+  width: 100%;
 }
 
 .avatar-wrapper {

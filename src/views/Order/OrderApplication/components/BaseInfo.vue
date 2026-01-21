@@ -157,7 +157,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="电话" prop="emergencyContacts.0.contactPhone">
+          <el-form-item label="联系方式" prop="emergencyContacts.0.contactPhone">
             <el-input v-model="form.emergencyContacts[0].contactPhone" placeholder="请输入紧急联系人电话号码" clearable />
           </el-form-item>
         </el-col>
@@ -171,7 +171,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="电话" prop="emergencyContacts.1.contactPhone">
+          <el-form-item label="联系方式" prop="emergencyContacts.1.contactPhone">
             <el-input v-model="form.emergencyContacts[1].contactPhone" placeholder="请输入紧急联系人电话号码" clearable />
           </el-form-item>
         </el-col>
