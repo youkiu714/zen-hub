@@ -434,6 +434,43 @@ const formData = reactive<{
   }
 })
 
+const parseIdCardAge = (idCard: string) => {
+  if (!/^\d{17}[\dXx]$/.test(idCard)) return null
+
+  const birthStr = idCard.slice(6, 14)
+  const year = birthStr.slice(0, 4)
+  const month = birthStr.slice(4, 6)
+  const day = birthStr.slice(6, 8)
+  const birthDateObj = new Date(`${year}-${month}-${day}`)
+
+  if (Number.isNaN(birthDateObj.getTime())) return null
+
+  const today = new Date()
+  let age = today.getFullYear() - birthDateObj.getFullYear()
+  const monthDiff = today.getMonth() - birthDateObj.getMonth()
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDateObj.getDate())) {
+    age--
+  }
+
+  if (age < 0) return null
+
+  return {
+    age,
+    birthDate: `${year}-${month}-${day}`
+  }
+}
+
+watch(
+  () => formData.basic.idCard,
+  (idCard) => {
+    const parsed = parseIdCardAge(idCard)
+    if (!parsed) return
+    formData.basic.age = parsed.age
+    formData.basic.birthDate = parsed.birthDate
+  }
+)
+
 watch(
   () => user.value?.department,
   (dept) => {

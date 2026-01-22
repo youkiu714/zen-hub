@@ -116,7 +116,7 @@
           <div class="flex-space-between line-margin">
             <div class="info-left">
               <div class="base-info-label">常住地省市：</div>
-              <div class="base-info-value">{{ provinceCity }}</div>
+              <div class="base-info-value">{{ detail?.basic?.provinceCity }}</div>
             </div>
             <div class="info-right">
               <div class="base-info-label">详细地址：</div>
@@ -320,45 +320,6 @@ const handleClose = () => {
   emit('update:modelValue', false)
   emit('close')
 }
-
-const provinceCity = computed(() => {
-  const codes = detail.value?.basic?.provinceCity
-  if (!codes || !Array.isArray(codes) || codes.length === 0) {
-    return '暂无信息'
-  }
-
-  // 递归查找地区名称
-  const findAreaName = (data: any[], code: string): string => {
-    for (const item of data) {
-      if (item.value === code) {
-        return item.label
-      }
-      if (item.children) {
-        const found = findAreaName(item.children, code)
-        if (found) return found
-      }
-    }
-    return ''
-  }
-
-  const names: string[] = []
-  let currentData = regionData
-
-  for (const code of codes) {
-    const name = findAreaName(currentData, code)
-    if (name) {
-      names.push(name)
-      const currentItem = currentData.find((item) => item.value === code)
-      if (currentItem?.children) {
-        currentData = currentItem.children
-      }
-    }
-  }
-
-  const cityName = names.length > 0 ? names.join(' ') : '暂无信息'
-
-  return cityName
-})
 </script>
 
 <style scoped lang="scss">

@@ -152,6 +152,7 @@ export interface BasicInfo {
   medicationHistory?: string
   infectiousHistory?: string
   emergencyContacts: ContactItem[]
+  provinceCity?: string,
   /**
    * 年龄（可留空，后端会按出生年月计算填充） 新增加
    */

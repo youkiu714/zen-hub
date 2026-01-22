@@ -94,13 +94,10 @@
         </el-col>
       </el-row>
 
-      <!-- 省市联动 -->
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="常住地省市" prop="provinceCity">
-            <el-cascader v-model="provinceCity" :options="provinceAndCityData as CascaderOption[]"
-              :props="{ checkStrictly: true, emitPath: true, showAllLevels: false }" placeholder="请选择省份/城市" clearable
-              @change="handleProvinceCityChange" />
+            <el-input v-model="form.provinceCity" placeholder="请输入" clearable />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -202,17 +199,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
+import { ref, computed, reactive, onMounted } from 'vue'
+import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { User, Camera } from '@element-plus/icons-vue'
-import { provinceAndCityData } from 'element-china-area-data'
 import { uploadAvatar } from '@/api/upload'
 import { useFormValidationRules } from '@/views/Order/OrderApplication/CheckHook'
 import avatarImg from '@/assets/avatar.png'
 import { disabledBirthDate } from '@/utils/format-date'
 
 import type { BasicInfo } from '@/types'
-import type { CascaderOption, CascaderValue } from 'element-plus'
 
 // 定义一个通用的建议列表
 const noneSuggestion = [{ value: '无' }]
@@ -232,24 +227,6 @@ const form = computed({
   get: () => props.modelValue,
   set: (v) => emit('update:modelValue', v)
 })
-
-/** 省市联动 */
-const provinceCity = ref<string[]>()
-watch(provinceCity, (val) => {
-  if (val && val.length === 2) {
-    form.value.province = val[0]
-    form.value.city = val[1]
-  }
-})
-
-const handleProvinceCityChange = (val: CascaderValue | null | undefined) => {
-  console.log('val:', val)
-  if (!val || (Array.isArray(val) && val.length === 0)) {
-    form.value.provinceCity = val as string[]
-  } else if (Array.isArray(val)) {
-    form.value.provinceCity = val as string[]
-  }
-}
 
 /** 选项 */
 const ethnicOptions = ['汉族', '满族', '回族', '藏族', '维吾尔族', '苗族', '彝族', '壮族']
@@ -349,7 +326,7 @@ const rules = reactive<FormRules>({
   //   { min: 1, max: 50, message: '微信号长度应在1-50个字符之间', trigger: 'blur' }
   // ],
   marital: [{ required: true, message: '请选择婚姻状况', trigger: 'change' }],
-  provinceCity: [{ required: true, message: '请选择省份', trigger: 'change' }],
+  provinceCity: [{ required: true, message: '请输入省市', trigger: 'change' }],
   address: [
     { required: true, message: '请输入详细地址', trigger: 'blur' },
     { min: 3, max: 200, message: '详细地址长度应在3-200个字符之间', trigger: 'blur' }
