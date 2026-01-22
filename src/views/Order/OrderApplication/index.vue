@@ -218,12 +218,28 @@ const activeTab = ref('basic-info')
 
 const normalizeDocxDate = (value: string) => {
   const trimmed = value.trim()
-  const match = trimmed.match(/(\d{4})[./年-]?(\d{1,2})?[./月-]?(\d{1,2})?/)
-  if (!match) return trimmed
-  const year = match[1]
-  const month = match[2]?.padStart(2, '0') ?? '01'
-  const day = match[3]?.padStart(2, '0') ?? '01'
-  return `${year}-${month}-${day}`
+  const cleaned = trimmed.replace(/\s+/g, '')
+  const fullMatch = cleaned.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/)
+  if (fullMatch) {
+    const year = fullMatch[1]
+    const month = fullMatch[2].padStart(2, '0')
+    const day = fullMatch[3].padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const partialMatch = cleaned.match(/(\d{4})\D+(\d{1,2})/)
+  if (partialMatch) {
+    const year = partialMatch[1]
+    const month = partialMatch[2].padStart(2, '0')
+    return `${year}-${month}-01`
+  }
+
+  const yearMatch = cleaned.match(/(\d{4})/)
+  if (yearMatch) {
+    return `${yearMatch[1]}-01-01`
+  }
+
+  return trimmed
 }
 
 const applyDocxData = (data: Record<string, string | string[]>) => {
