@@ -65,6 +65,7 @@ import { applications } from '@/api/pendingOrder'
 import { useUserStore } from '@/store/modules/user'
 import avatarImg from '@/assets/avatar.png'
 import { analyzeDocx } from '@/utils/analyze-docx'
+import { uploadAvatar } from '@/api/upload'
 
 const userStore = useUserStore()
 const user = computed(() => userStore.user)
@@ -242,7 +243,29 @@ const normalizeDocxDate = (value: string) => {
   return trimmed
 }
 
-const applyDocxData = (data: Record<string, string | string[]>) => {
+const uploadDocxAvatar = async (file: File) => {
+  const isLt10M = file.size / 1024 / 1024 < 10
+  if (!isLt10M) {
+    ElMessage.error('图片大小不能超过 10MB!')
+    return
+  }
+
+  const allowed = ['image/jpeg', 'image/jpg', 'image/png']
+  if (!allowed.includes(file.type)) {
+    ElMessage.error('只支持 JPG、PNG 格式的图片!')
+    return
+  }
+
+  try {
+    const res = await uploadAvatar(file)
+    const url = String(res.url).substring('/uploads'.length)
+    formData.basic.photoUrl = `http://49.232.241.94/${url}`
+  } catch (error) {
+    ElMessage.error('上传失败，请稍后重试')
+  }
+}
+
+const applyDocxData = async (data: Record<string, string | string[] | File>) => {
   const setIf = (setter: (value: string) => void, value?: string) => {
     if (value && value.trim()) setter(value.trim())
   }
@@ -257,7 +280,7 @@ const applyDocxData = (data: Record<string, string | string[]>) => {
   setIf((value) => (formData.basic.weChat = value), data['微信号'])
   setIf((value) => (formData.basic.idCard = value), data['身份证号'])
   setIf((value) => (formData.basic.marital = value), data['婚姻状况'])
-  setIf((value) => (formData.basic.address = value), data['详细地址'])
+  setIf((value) => (formData.basic.address = value), data['常住详细地址'] || data['详细地址'])
   setIf((value) => (formData.basic.education = value), data['最高学历'])
   setIf((value) => (formData.basic.school = value), data['毕业院校'])
   setIf((value) => (formData.basic.major = value), data['专业'])
@@ -304,13 +327,16 @@ const applyDocxData = (data: Record<string, string | string[]>) => {
 
   setIf((value) => (formData.basic.birthDate = normalizeDocxDate(value)), data['出生年月'])
 
-  const location = data['省市'] || data['常住地']
+  const location = data['常住省市'] || data['省市'] || data['常住地']
   if (location && !formData.basic.provinceCity) {
     formData.basic.provinceCity = location
   }
 
-  if (data['头像']) {
-    formData.basic.photoUrl = data['头像']
+  const avatar = data['头像']
+  if (avatar instanceof File) {
+    await uploadDocxAvatar(avatar)
+  } else if (typeof avatar === 'string' && avatar.trim()) {
+    formData.basic.photoUrl = avatar
   }
 }
 
@@ -324,7 +350,7 @@ const handleDocxChange = async (file: UploadFile) => {
 
   try {
     const data = await analyzeDocx(rawFile)
-    applyDocxData(data)
+    await applyDocxData(data)
     ElMessage.success('已解析并填充表单')
   } catch (error) {
     ElMessage.error('解析失败，请确认文件格式是否正确')

@@ -96,12 +96,12 @@
 
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="常住地省市" prop="provinceCity">
+          <el-form-item label="常住省市" prop="provinceCity">
             <el-input v-model="form.provinceCity" placeholder="请输入" clearable />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="详细地址" prop="address">
+          <el-form-item label="常住详细地址" prop="address">
             <el-input v-model="form.address" placeholder="请输入详细地址，包括街道、门牌号等" clearable />
           </el-form-item>
         </el-col>

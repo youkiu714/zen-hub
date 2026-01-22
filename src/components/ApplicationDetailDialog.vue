@@ -115,11 +115,11 @@
           </div>
           <div class="flex-space-between line-margin">
             <div class="info-left">
-              <div class="base-info-label">常住地省市：</div>
+              <div class="base-info-label">常住省市：</div>
               <div class="base-info-value">{{ detail?.basic?.provinceCity }}</div>
             </div>
             <div class="info-right">
-              <div class="base-info-label">详细地址：</div>
+              <div class="base-info-label">常住详细地址：</div>
               <div class="base-info-value">{{ detail?.basic?.address }}</div>
             </div>
           </div>
