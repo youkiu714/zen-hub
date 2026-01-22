@@ -161,36 +161,7 @@
           </div>
         </el-tab-pane>
         <el-tab-pane label="学修信息" name="practiceInfo">
-          <div class="flex-space-between line-margin">
-            <div class="info-left">
-              <div class="base-info-label">皈依时间：</div>
-              <div class="base-info-value">
-                {{
-                  detail?.practice?.refugeTakenDate ? detail?.practice?.refugeTakenDate : '暂无信息'
-                }}
-              </div>
-            </div>
-            <div class="info-right">
-              <div class="base-info-label">受戒情况</div>
-              <div class="base-info-value">
-                {{
-                  detail?.practice?.hasTakenPrecepts
-                    ? preceptsOptions.find(
-                      (item) => item.label == detail?.practice?.hasTakenPrecepts
-                    )?.text
-                    : '无'
-                }}
-              </div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-left">
-              <div class="base-info-label">皈依寺庙：</div>
-              <div class="base-info-value">
-                {{ detail?.practice?.refugeTemple ? detail?.practice?.refugeTemple : '暂无信息' }}
-              </div>
-            </div>
-          </div>
+          
           <div class="flex-space-between line-margin">
             <div class="info-fill">
               <div class="base-info-label">过往学修/承担经历</div>
@@ -198,18 +169,6 @@
                 {{
                   detail?.practice?.pastPracticeExperience
                     ? detail?.practice?.pastPracticeExperience
-                    : '暂无信息'
-                }}
-              </div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-fill">
-              <div class="base-info-label">现参加承担/学修</div>
-              <div class="base-info-value">
-                {{
-                  detail?.practice?.currentPracticeExperience
-                    ? detail?.practice?.currentPracticeExperience
                     : '暂无信息'
                 }}
               </div>
@@ -227,16 +186,6 @@
         <el-tab-pane label="挂单信息" name="lodgingINfo">
           <div class="flex-space-between line-margin">
             <div class="info-left">
-              <div class="base-info-label">挂单类型：</div>
-              <div class="base-info-value">
-                {{
-                  detail?.lodging?.applicationType
-                    ? applicationTypeOptions.find(
-                      (item) => item.value === detail?.lodging.applicationType
-                    )?.label
-                    : '暂无信息'
-                }}
-              </div>
             </div>
             <div class="info-right">
               <div class="base-info-label">所属部组：</div>
@@ -284,28 +233,10 @@
             </div>
           </div>
           <div class="flex-space-between line-margin">
-            <div class="info-fill">
-              <div class="base-info-label">自我评价</div>
-              <div class="base-info-value">
-                {{
-                  detail?.lodging.selfEvaluation ? detail?.lodging.selfEvaluation : '暂无推荐人评价'
-                }}
-              </div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
             <div class="info-left">
               <div class="base-info-label">推荐人：</div>
               <div class="base-info-value">
                 {{ detail?.lodging.recommenderName ? detail?.lodging.recommenderName : '暂无信息' }}
-              </div>
-            </div>
-            <div class="info-right">
-              <div class="base-info-label">推荐人联系方式</div>
-              <div class="base-info-value">
-                {{
-                  detail?.lodging.recommenderPhone ? detail?.lodging.recommenderPhone : '暂无信息'
-                }}
               </div>
             </div>
           </div>
@@ -330,12 +261,6 @@
             </div>
           </div>
 
-          <div class="info-fill">
-            <div class="base-info-label">来寺因缘:</div>
-            <div class="base-info-value">
-              {{ detail?.lodging.causeOfVisit ? detail?.lodging.causeOfVisit : '暂无信息' }}
-            </div>
-          </div>
         </el-tab-pane>
       </el-tabs>
     </div>

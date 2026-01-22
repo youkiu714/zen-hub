@@ -66,7 +66,7 @@ export const DEPARTMENT = {
   PROJECT: 'PROJECT',
   READING: 'READING',
   COMPILATION: 'COMPILATION',
-  OTHER: 'OTHER'
+  NOTDEPARTMENT: 'NOTDEPARTMENT'
 } as const
 
 // 部门文字映射
@@ -74,14 +74,14 @@ export const DepartmentMap: Record<string, string> = {
   [DEPARTMENT.PROJECT]: '项目部',
   [DEPARTMENT.READING]: '教化部',
   [DEPARTMENT.COMPILATION]: '汇编',
-  [DEPARTMENT.OTHER]: '其他'
+  [DEPARTMENT.NOTDEPARTMENT]: '无部组'
 }
 
 export const DepartmentMapColor: Record<string, { name: string, className: string }> = {
   [DEPARTMENT.PROJECT]: { name: '项目部', className: 'g-green' },
   [DEPARTMENT.READING]: { name: '教化部', className: 'g-blue' },
   [DEPARTMENT.COMPILATION]: { name: '汇编', className: 'g-purple' },
-  [DEPARTMENT.OTHER]: { name: '其他', className: 'g-gray' },
+  [DEPARTMENT.NOTDEPARTMENT]: { name: '无部组', className: 'g-gray' },
 }
 
 export const departmentOptions = [
@@ -98,8 +98,8 @@ export const departmentOptions = [
     value: DEPARTMENT.COMPILATION
   },
   {
-    label: '其他',
-    value: DEPARTMENT.OTHER
+    label: '无部组',
+    value: DEPARTMENT.NOTDEPARTMENT
   }
 ]
 export const mealOptions = [

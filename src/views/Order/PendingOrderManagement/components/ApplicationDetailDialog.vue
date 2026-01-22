@@ -80,10 +80,6 @@
             <span>{{ detail.lodging?.recommenderName || '—' }}</span>
           </div>
           <div class="info-item">
-            <label>推荐人电话</label>
-            <span>{{ detail.lodging?.recommenderPhone || '—' }}</span>
-          </div>
-          <div class="info-item">
             <label>推荐关系</label>
             <span>{{ detail.lodging?.recommenderRelation || '—' }}</span>
           </div>

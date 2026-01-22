@@ -27,13 +27,7 @@
           <el-button type="primary" @click="handleSubmit">提交申请</el-button>
         </div>
       </el-card>
-      <el-tabs
-        v-model="activeTab"
-        tab-position="right"
-        style="height: 120px"
-        class="tabs"
-        @tab-click="handleTabClick"
-      >
+      <el-tabs v-model="activeTab" tab-position="right" style="height: 120px" class="tabs" @tab-click="handleTabClick">
         <el-tab-pane label="基本信息" name="basic-info"></el-tab-pane>
         <el-tab-pane label="学修情况" name="practice-info"></el-tab-pane>
         <el-tab-pane label="挂单信息" name="lodging-info"></el-tab-pane>
@@ -44,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, computed, nextTick, watch } from 'vue'
-import { ElMessage, FormInstance } from 'element-plus'
+import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 import throttle from 'lodash-es/throttle'
 import type { BasicInfo, PracticeInfo, LodgingInfo, ApplicationSubmitRequest } from '@/types'
 import PageHeader from '@/components/PageHeader.vue'
@@ -90,7 +84,6 @@ const shouldCacheDraft = (draft: OrderApplicationDraft['data']) => {
     'gender',
     'age',
     'birthDate',
-    'hasTakenPrecepts'
   ])
 
   const hasMeaningfulValue = (value: unknown, key?: string): boolean => {
@@ -243,7 +236,7 @@ const handleScroll = () => {
 
 const formData = reactive<{
   basic: BasicInfo
-  practice: PracticeInfo
+  practice: PracticeInfo 
   lodging: LodgingInfo & { agreement: boolean }
 }>({
   basic: {
@@ -275,26 +268,18 @@ const formData = reactive<{
     departmentCode: user.value?.department
   },
   practice: {
-    refugeTakenDate: '',
-    refugeTemple: '',
     pastPracticeExperience: '',
-    currentPracticeExperience: '',
     visitRecords: '',
-    hasTakenPrecepts: 0
   },
   lodging: {
     applicationType: 1,
     checkinDate: '',
     checkoutDate: '',
     specialRequest: '',
-    selfEvaluation: '',
     recommenderName: '',
-    recommenderPhone: '',
     recommenderComment: '',
     agreement: false,
-    causeOfVisit: '',
     departureDate: '',
-    mealPreference: undefined,
     returnDate: '',
     shortStayReason: '',
     departmentCode: user.value?.department
@@ -353,21 +338,36 @@ const _handleSubmit = async () => {
     return
   }
 
-  // const { selfEvaluation, agreement, ...lodgingData } = formData.lodging
-  const { agreement, ...lodgingData } = formData.lodging
-  const payload: ApplicationSubmitRequest = {
-    basic: { ...formData.basic },
-    practice: { ...formData.practice },
-    lodging: { ...lodgingData }
-  }
   try {
+
+    await ElMessageBox.confirm(
+      '提交后将无法修改，是否确认提交挂单申请？', 
+      '提交确认', 
+      {
+        confirmButtonText: '确认提交',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    const { agreement, ...lodgingData } = formData.lodging
+    const payload: ApplicationSubmitRequest = {
+      basic: { ...formData.basic },
+      practice: { ...formData.practice },
+      lodging: { ...lodgingData }
+    }
+
     await applications(payload)
 
     ElMessage.success(`申请提交成功`)
     resetFormData()
     scrollToTop()
+    
   } catch (err) {
-    ElMessage.error(err)
+    if (err !== 'cancel') {
+      console.error(err)
+      ElMessage.error(typeof err === 'string' ? err : '提交失败，请稍后重试')
+    }
   }
 }
 
@@ -405,16 +405,20 @@ onBeforeUnmount(() => {
   position: relative;
   padding: 24px;
   min-height: 100vh;
+
   :deep(.el-cascader) {
     width: 100%;
   }
+
   :deep(.el-date-editor) {
     width: 100%;
   }
 }
+
 .lodging-wrapper {
   display: flex;
 }
+
 .tabs {
   position: fixed;
   right: 24px;
@@ -528,6 +532,7 @@ onBeforeUnmount(() => {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

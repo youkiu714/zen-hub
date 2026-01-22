@@ -48,20 +48,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="入住当天用斋选择" prop="mealPreference">
-            <el-select
-              v-model="formData.mealPreference"
-              placeholder="请选择用斋类型"
-              style="width: 100%"
-            >
-              <el-option
-                v-for="item in mealOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
         </el-col>
       </el-row>
 
@@ -138,15 +124,6 @@
         />
       </el-form-item>
 
-      <el-form-item label="自我评价" prop="selfEvaluation">
-        <el-input
-          v-model="formData.selfEvaluation"
-          type="textarea"
-          :rows="2"
-          placeholder="请输入自我评价"
-          resize="none"
-        />
-      </el-form-item>
 
       <el-form-item label="推荐人评价" prop="recommenderComment">
         <el-input
@@ -188,9 +165,7 @@ interface ApplicationEditData {
   checkinDate: string
   checkoutDate: string
   shortStayReason: string
-  selfEvaluation: string
   departmentCode: string
-  mealPreference: number
   departureDate: string
   returnDate: string
   recommenderComment: string
@@ -211,9 +186,7 @@ const props = withDefaults(defineProps<Props>(), {
     checkinDate: '',
     checkoutDate: '',
     shortStayReason: '',
-    selfEvaluation: '',
     departmentCode: '',
-    mealPreference: 0,
     departureDate: '',
     returnDate: '',
     recommenderComment: ''
@@ -231,9 +204,7 @@ const formData = reactive<ApplicationEditData>({
   checkinDate: '',
   checkoutDate: '',
   shortStayReason: '',
-  selfEvaluation: '',
   departmentCode: '',
-  mealPreference: 0,
   departureDate: '',
   returnDate: '',
   recommenderComment: ''
@@ -244,12 +215,9 @@ const formRules: FormRules = {
   applicationType: [{ required: true, message: '请选择申请类型', trigger: 'change' }],
   checkinDate: [{ required: true, message: '请选择短住开始时间', trigger: 'change' }],
   checkoutDate: [{ required: true, message: '请选择短住结束时间', trigger: 'change' }],
-  departureDate: [{ required: true, message: '请选择行程到达时间', trigger: 'change' }],
-  returnDate: [{ required: true, message: '请选择行程离开时间', trigger: 'change' }],
+
   departmentCode: [{ required: true, message: '请选择所属部组', trigger: 'change' }],
-  mealPreference: [{ required: true, message: '请选择用餐类型', trigger: 'change' }],
   shortStayReason: [{ required: true, message: '请输入短住期许', trigger: 'blur' }],
-  selfEvaluation: [{ required: true, message: '请输入自我评价', trigger: 'blur' }],
   recommenderComment: [{ required: true, message: '请输入推荐人评价', trigger: 'blur' }]
 }
 
@@ -269,9 +237,7 @@ const getApplicationDetail = async (applicationId: number) => {
       formData.checkinDate = data.lodging?.checkinDate || ''
       formData.checkoutDate = data.lodging?.checkoutDate || ''
       formData.shortStayReason = data.lodging?.shortStayReason || ''
-      formData.selfEvaluation = data.lodging?.selfEvaluation || ''
       formData.departmentCode = departmentCode
-      formData.mealPreference = data.lodging?.mealPreference || 0
       formData.departureDate = data.lodging?.departureDate || ''
       formData.returnDate = data.lodging?.returnDate || ''
       formData.recommenderComment = data.lodging?.recommenderComment || ''
@@ -355,8 +321,6 @@ const handleSubmit = debounce(async () => {
         checkinDate: formData.checkinDate,
         checkoutDate: formData.checkoutDate,
         shortStayReason: formData.shortStayReason,
-        selfEvaluation: formData.selfEvaluation,
-        mealPreference: formData.mealPreference,
         departureDate: formData.departureDate,
         returnDate: formData.returnDate,
         recommenderComment: formData.recommenderComment

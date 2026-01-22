@@ -67,7 +67,6 @@ export interface OrderItem {
   checkoutDate: string
   specialRequest: string
   recommenderName: string
-  recommenderPhone: string
   recommenderRelation: string
   recommenderComment: string
   status: number
@@ -115,11 +114,8 @@ export interface EmergencyContact {
 // 修行快照类型
 export interface PracticeSnapshot {
   visitRecords: string
-  refugeTakenDate: string
   yearsOfPractice: number
-  hasTakenPrecepts: boolean
   pastPracticeExperience: string
-  currentPracticeExperience: string
 }
 
 
@@ -173,12 +169,8 @@ export interface BasicInfo {
 
 export interface PracticeInfo {
   yearsOfPractice?: number
-  refugeTakenDate?: string
-  refugeTemple?: string
   pastPracticeExperience?: string
-  currentPracticeExperience?: string
   visitRecords?: string
-  hasTakenPrecepts?: number | null // 修改为数字类型：0=无, 1=居士五戒, 2=八戒, 3=八关斋戒, 4=菩萨戒
   [property: string]: any
 }
 
@@ -188,29 +180,16 @@ export interface LodgingInfo {
   checkoutDate?: string
   specialRequest?: string
   recommenderName?: string
-  recommenderPhone?: string
   recommenderRelation?: string
   recommenderComment?: string
-  /**
-   * 来寺因缘（若 practice.visitAffinity 未填可在此提供）  新增加
-   */
-  causeOfVisit?: string
   /**
    * 出发行程日期
    */
   departureDate?: string
   /**
-   * 用斋选择（0无 1早斋 2午斋 3药石）  新增加
-   */
-  mealPreference?: number
-  /**
    * 离开行程日期  新增加
    */
   returnDate?: string
-  /**
-   * 自我评价  新增加
-   */
-  selfEvaluation?: string
   /**
    * 短住原因及期许  新增加
    */

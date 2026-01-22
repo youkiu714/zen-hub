@@ -42,8 +42,6 @@ export function updateLodgingInfo(
       checkinDate: string
       checkoutDate: string
       shortStayReason: string
-      selfEvaluation: string
-      mealPreference: number
       departureDate: string
       returnDate: string
       recommenderComment: string

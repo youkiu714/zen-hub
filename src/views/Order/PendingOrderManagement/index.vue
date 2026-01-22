@@ -271,7 +271,6 @@ const currentEditData = ref({
   checkinDate: '',
   checkoutDate: '',
   shortStayReason: '',
-  selfEvaluation: ''
 })
 
 const departmentOptions = ref([
@@ -429,8 +428,7 @@ const handleEditApplication = (row: any) => {
     applicationType: row.applicationType || 0,
     checkinDate: row.checkinDate || '',
     checkoutDate: row.checkoutDate || '',
-    shortStayReason: row.shortStayReason || '',
-    selfEvaluation: row.selfEvaluation || ''
+    shortStayReason: row.shortStayReason || ''
   }
   editVisible.value = true
 }

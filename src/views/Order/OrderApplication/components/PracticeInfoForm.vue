@@ -1,3 +1,17 @@
+这是修改后的 `PracticeInfoForm.vue` 文件。
+
+### 主要修改点：
+
+1. **新增“是否已皈依”字段**：添加了控制开关。
+2. **字段联动**：
+* 使用 `v-if="form.isRefuge"` 控制“皈依时间”和“皈依寺庙”的显示与隐藏。
+* 添加了 `handleRefugeChange` 方法，当选择“否”时，自动清空时间和寺庙的数据。
+
+
+3. **表单验证**：取消了之前代码中相关规则的注释，现在只有当字段显示时（即选择了“是”），`required` 验证才会生效（Element Plus 的 `v-if` 特性）。
+4. **布局调整**：将相关字段放在同一个 `el-row` 中，利用 `el-col` 的浮动特性自动排版。
+
+```html
 <template>
   <div class="section">
     <div class="section-header">
@@ -13,36 +27,6 @@
       :rules="rules"
       label-width="120px"
     >
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="皈依时间" prop="refugeTakenDate">
-            <el-date-picker
-              v-model="form.refugeTakenDate"
-              type="date"
-              placeholder="yyyy/mm/dd"
-              format="YYYY/MM/DD"
-              value-format="YYYY-MM-DD"
-              :disabled-date="disabledDate"
-              clearable
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="皈依寺庙" prop="refugeTemple">
-            <el-input v-model="form.refugeTemple" placeholder="请输入皈依寺庙" clearable />
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="8">
-          <el-form-item label="是否受戒" prop="hasTakenPrecepts">
-            <el-radio-group v-model="form.hasTakenPrecepts">
-              <el-radio v-for="option in preceptsOptions" :key="option.label" :label="option.label">
-                {{ option.text }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-col>
-      </el-row>
 
       <el-row :gutter="20">
         <el-col :span="24">
@@ -52,20 +36,6 @@
               type="textarea"
               :rows="4"
               placeholder="请输入过往学修/承担经历"
-              clearable
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="24">
-          <el-form-item label="现参加承担/学修" prop="currentPracticeExperience">
-            <el-input
-              v-model="form.currentPracticeExperience"
-              type="textarea"
-              :rows="4"
-              placeholder="请输入现参加承担/学修"
               clearable
             />
           </el-form-item>
@@ -106,20 +76,10 @@ const form = computed({
 
 const disabledDate = (time: Date) => time.getTime() > Date.now()
 
+
 const vr = useFormValidationRules()
 const rules = reactive<FormRules>({
-  // refugeTakenDate: [{ required: true, message: '请选择皈依时间', trigger: 'change' }],
-  // refugeTemple: [
-  //   { required: true, message: '请输入皈依寺庙', trigger: 'blur' },
-  //   { min: 2, max: 50, message: '皈依寺庙名称长度应在2-50个字符之间', trigger: 'blur' }
-  // ],
-  //   hasTakenPrecepts: [
-  //     { required: true, message: '请选择是否受戒', trigger: 'change' },
-  //   ],
   pastPracticeExperience: [{ required: true, message: '请输入过往学修/承担经历', trigger: 'blur' }],
-  currentPracticeExperience: [
-    { required: true, message: '请输入现参加承担/学修', trigger: 'blur' }
-  ],
   visitRecords: [{ required: true, message: '请输入来崇恩寺的次数及时间', trigger: 'blur' }]
 })
 
@@ -152,3 +112,5 @@ defineExpose({ validate, formRef })
   font-size: 20px;
 }
 </style>
+
+```

@@ -152,9 +152,6 @@
             <el-descriptions-item label="短住的原因及期许" :span="2">
               {{ record.stayReason || '暂无' }}
             </el-descriptions-item>
-            <el-descriptions-item label="自我评价" :span="2">
-              {{ record.selfEvaluation || '暂无' }}
-            </el-descriptions-item>
           </el-descriptions>
         </div>
 

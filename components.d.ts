@@ -13,6 +13,7 @@ declare module 'vue' {
     CheckInModal: typeof import('./src/components/CheckInModal.vue')['default']
     CloudCover: typeof import('./src/components/CloudCover.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
+    ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
