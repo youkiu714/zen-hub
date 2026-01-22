@@ -47,7 +47,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="性别" prop="gender" required>
-            <el-select v-model="form.gender" placeholder="请选择性别" clearable disabled>
+            <el-select v-model="form.gender" placeholder="请选择性别" clearable>
               <el-option v-for="item in genderOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
@@ -56,13 +56,13 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="年龄" prop="age">
-            <el-input v-model="form.age" placeholder="请输入年龄" clearable disabled />
+            <el-input v-model="form.age" placeholder="请输入年龄" clearable />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="出生年月" prop="birthDate">
             <el-date-picker v-model="form.birthDate" type="date" placeholder="yyyy/mm/dd" format="YYYY/MM/DD"
-              value-format="YYYY-MM-DD" :disabled-date="disabledBirthDate" clearable disabled />
+              value-format="YYYY-MM-DD" :disabled-date="disabledBirthDate" clearable />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -98,7 +98,7 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="常住地省市" prop="provinceCity">
-            <el-cascader v-model="provinceCity" :options="regionData as CascaderOption[]"
+            <el-cascader v-model="provinceCity" :options="provinceAndCityData as CascaderOption[]"
               :props="{ checkStrictly: true, emitPath: true, showAllLevels: false }" placeholder="请选择省份/城市" clearable
               @change="handleProvinceCityChange" />
           </el-form-item>
@@ -120,7 +120,8 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="毕业院校" prop="school">
-            <el-input v-model="form.school" placeholder="请输入毕业院校名称" clearable />
+            <el-autocomplete v-model="form.school" :fetch-suggestions="querySearchNone" placeholder="请输入毕业院校名称"
+              clearable style="width: 100%" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -133,7 +134,8 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="职业" prop="occupation">
-            <el-input v-model="form.occupation" placeholder="请输入职业" clearable />
+            <el-autocomplete v-model="form.occupation" :fetch-suggestions="querySearchNone" placeholder="请输入职业，或选择'无'"
+              clearable style="width: 100%" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -178,17 +180,20 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="疾病史" prop="diseaseHistory">
-            <el-input v-model="form.diseaseHistory" placeholder="重视业果，请诚实回答" clearable />
+            <el-autocomplete v-model="form.diseaseHistory" :fetch-suggestions="querySearchNone" placeholder="重视业果，请诚实回答"
+              clearable style="width: 100%" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="服药史" prop="medicationHistory">
-            <el-input v-model="form.medicationHistory" placeholder="重视业果，请诚实回答" clearable />
+            <el-autocomplete v-model="form.medicationHistory" :fetch-suggestions="querySearchNone"
+              placeholder="重视业果，请诚实回答" clearable style="width: 100%" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="传染病史" prop="infectiousHistory">
-            <el-input v-model="form.infectiousHistory" placeholder="重视业果，请诚实回答" clearable />
+            <el-autocomplete v-model="form.infectiousHistory" :fetch-suggestions="querySearchNone"
+              placeholder="重视业果，请诚实回答" clearable style="width: 100%" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -198,9 +203,9 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, watch, onMounted } from 'vue'
-import { ElMessage, FormInstance, FormRules } from 'element-plus'
+import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
 import { User, Camera } from '@element-plus/icons-vue'
-import { regionData } from 'element-china-area-data'
+import { provinceAndCityData } from 'element-china-area-data'
 import { uploadAvatar } from '@/api/upload'
 import { useFormValidationRules } from '@/views/Order/OrderApplication/CheckHook'
 import avatarImg from '@/assets/avatar.png'
@@ -208,6 +213,17 @@ import { disabledBirthDate } from '@/utils/format-date'
 
 import type { BasicInfo } from '@/types'
 import type { CascaderOption, CascaderValue } from 'element-plus'
+
+// 定义一个通用的建议列表
+const noneSuggestion = [{ value: '无' }]
+
+// 定义 fetch-suggestions 回调函数
+const querySearchNone = (queryString: string, cb: (arg: any) => void) => {
+  // 如果用户没有输入，或者是输入了 '无' 的相关部分（其实这里简单点直接返回 '无' 也可以）
+  // 这里的逻辑是：无论用户输入什么，只要下拉框弹出，就始终提供 '无' 这个选项供点击
+  // 当然，您也可以根据 queryString 做过滤，但对于由 "无" 组成的列表，直接返回即可
+  cb(noneSuggestion)
+}
 
 /** 双向绑定：v-model */
 const props = defineProps<{ modelValue: BasicInfo }>()

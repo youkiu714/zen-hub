@@ -38,7 +38,6 @@ export interface PendingOrderRecord {
   applyStartDate?: string
   applyEndDate?: string
   stayReason?: string
-  selfEvaluation?: string
   referee?: string
   refereeContact?: string
   refereeEvaluation?: string

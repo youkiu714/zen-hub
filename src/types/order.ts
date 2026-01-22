@@ -43,11 +43,8 @@ export interface PersonSnapshot {
 // 修行快照类型
 export interface PracticeSnapshot {
   visitRecords: string;
-  refugeTakenDate: string;
   yearsOfPractice: number;
-  hasTakenPrecepts: boolean;
   pastPracticeExperience: string;
-  currentPracticeExperience: string;
 }
 
 // 订单项类型
@@ -59,7 +56,6 @@ export interface OrderItem {
   checkoutDate: string;
   specialRequest: string;
   recommenderName: string;
-  recommenderPhone: string;
   recommenderRelation: string;
   recommenderComment: string;
   status: OrderStatus;

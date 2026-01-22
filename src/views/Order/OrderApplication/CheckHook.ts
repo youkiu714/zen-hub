@@ -45,11 +45,6 @@ export const useFormValidationRules = (): FormRules => {
     ],
     'emergencyContacts.1.contactPhone': [
       { validator: mobileValidator, trigger: 'blur' , required: true},
-    ],
-    
-    // 推荐人联系方式校验
-    recommenderPhone: [
-      { validator: mobileValidator, trigger: 'blur', required: true }
     ]
   }
 }

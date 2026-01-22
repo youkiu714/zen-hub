@@ -33,11 +33,8 @@ export interface BasicInfo {
 
 export interface PracticeInfo {
   yearsOfPractice?: number
-  refugeTakenDate?: string
   pastPracticeExperience?: string
-  currentPracticeExperience?: string
   visitRecords?: string
-  hasTakenPrecepts?: boolean | null // 注意：UI 需要区分 “无” vs true
   [property: string]: any
 }
 
@@ -47,7 +44,6 @@ export interface LodgingInfo {
   checkoutDate?: string
   specialRequest?: string
   recommenderName?: string
-  recommenderPhone?: string
   recommenderRelation?: string
   recommenderComment?: string
   [property: string]: any

@@ -40,17 +40,13 @@ export interface LodgingInfo {
   checkoutDate?: string;
   recommenderComment?: string;
   recommenderName?: string;
-  recommenderPhone?: string;
   recommenderRelation?: string;
   specialRequest?: string;
   status?: number;
 }
 
 export interface PracticeInfo {
-  currentPracticeExperience?: string;
-  hasTakenPrecepts?: boolean;
   pastPracticeExperience?: string;
-  refugeTakenDate?: string;
   visitRecords?: string;
   yearsOfPractice?: number;
 }
