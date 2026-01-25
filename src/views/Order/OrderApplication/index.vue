@@ -16,7 +16,9 @@
             :on-change="handleDocxChange"
           >
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            <div class="el-upload__text">请上传docx文件</div>
+            <div class="el-upload__text">
+              请上传docx文件,<a class="template-download" :href="templateDocx" download @click.stop>点击下载模版</a>
+            </div>
           </el-upload>
         </div>
         <section id="basic-info" class="section">
@@ -66,6 +68,7 @@ import { useUserStore } from '@/store/modules/user'
 import avatarImg from '@/assets/avatar.png'
 import { analyzeDocx } from '@/utils/analyze-docx'
 import { uploadAvatar } from '@/api/upload'
+import templateDocx from '@/docx/崇恩寺短住义工申请表.docx'
 
 const userStore = useUserStore()
 const user = computed(() => userStore.user)
@@ -675,6 +678,16 @@ onBeforeUnmount(() => {
 
 .docx-upload :deep(.el-upload .el-button) {
   width: 100%;
+}
+
+.template-download {
+  color: var(--el-color-primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.template-download:hover {
+  color: var(--el-color-primary-light-3);
 }
 
 .avatar-wrapper {

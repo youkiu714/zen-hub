@@ -8,6 +8,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig({
   base: '/', // 部署到根目录，如果是子目录请改为 '/子目录名/'
+  assetsInclude: ['**/*.docx'],
   build: {
     chunkSizeWarningLimit: 2000
   },
