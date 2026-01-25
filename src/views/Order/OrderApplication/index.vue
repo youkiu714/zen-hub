@@ -5,6 +5,13 @@
       <el-card class="form-container">
         <!-- 基本信息 -->
         <div class="docx-upload">
+          <div class="docx-upload-header">
+            <div class="docx-upload-title">申请表文档</div>
+            <el-button type="primary" size="small" @click="handleDownloadTemplate">
+              <el-icon class="el-icon--left"><download /></el-icon>
+              下载模板
+            </el-button>
+          </div>
           <el-upload
             v-model:file-list="docxFileList"
             drag
@@ -55,6 +62,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount, computed, nextTick, watch } from 'vue'
 import { ElMessage, FormInstance, ElMessageBox } from 'element-plus'
 import type { UploadFile, UploadRawFile, UploadUserFile } from 'element-plus'
+import { Download, UploadFilled } from '@element-plus/icons-vue'
 import throttle from 'lodash-es/throttle'
 import type { BasicInfo, PracticeInfo, LodgingInfo, ApplicationSubmitRequest } from '@/types'
 import PageHeader from '@/components/PageHeader.vue'
@@ -353,6 +361,7 @@ const handleDocxChange = async (file: UploadFile) => {
     await applyDocxData(data)
     ElMessage.success('已解析并填充表单')
   } catch (error) {
+    console.error('Docx 解析失败:', error)
     ElMessage.error('解析失败，请确认文件格式是否正确')
   }
 }
@@ -370,6 +379,21 @@ const handleDocxBeforeUpload = (rawFile: UploadRawFile) => {
 
 const handleDocxExceed = () => {
   ElMessage.warning('最多只能上传 1 个文件')
+}
+
+const handleDownloadTemplate = () => {
+  try {
+    const link = document.createElement('a')
+    link.href = '/templates/申请表.docx'
+    link.download = '申请表.docx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    console.error('下载模板失败:', error)
+    ElMessage.error('模板下载失败，请稍后重试')
+  }
 }
 
 // 监听滚动事件，更新当前激活的Tab
@@ -667,6 +691,19 @@ onBeforeUnmount(() => {
 .docx-upload {
   width: 100%;
   margin-bottom: 16px;
+}
+
+.docx-upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.docx-upload-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
 }
 
 .docx-upload :deep(.el-upload) {

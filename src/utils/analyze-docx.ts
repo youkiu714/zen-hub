@@ -18,8 +18,9 @@ const FIELD_LABELS = [
   '微信号',
   '身份证号',
   '婚姻状况',
-  '常住省市',
-  '常住详细地址',
+  '常住地',
+  '省市',
+  '详细地址',
   '最高学历',
   '毕业院校',
   '专业',
@@ -47,31 +48,137 @@ const getElementsByLocalName = (doc: Document, localName: string) =>
   Array.from(doc.getElementsByTagNameNS('*', localName))
 
 const extractTextFromNode = (node: Element) => {
-  const textNodes = getElementsByLocalName(node.ownerDocument ?? node, 't')
-  const texts: string[] = []
-  for (const textNode of textNodes) {
-    if (node.contains(textNode) && textNode.textContent) {
-      texts.push(textNode.textContent)
+  // 先获取所有段落
+  const paragraphs = getElementsByLocalName(node.ownerDocument ?? node, 'p')
+  const cellParagraphs: Element[] = []
+
+  // 筛选出属于当前单元格的段落
+  for (const para of paragraphs) {
+    if (node.contains(para)) {
+      cellParagraphs.push(para)
     }
   }
-  return texts.join('').trim()
+
+  // 如果没有段落，降级到直接获取文本节点
+  if (cellParagraphs.length === 0) {
+    const textNodes = getElementsByLocalName(node.ownerDocument ?? node, 't')
+    const texts: string[] = []
+    for (const textNode of textNodes) {
+      if (node.contains(textNode) && textNode.textContent) {
+        texts.push(textNode.textContent)
+      }
+    }
+    return texts.join('').trim()
+  }
+
+  // 提取每个段落的文本，并用换行符连接
+  const paragraphTexts: string[] = []
+  for (const para of cellParagraphs) {
+    const textNodes = getElementsByLocalName(para.ownerDocument ?? para, 't')
+    const texts: string[] = []
+    for (const textNode of textNodes) {
+      if (para.contains(textNode) && textNode.textContent) {
+        texts.push(textNode.textContent)
+      }
+    }
+    const paraText = texts.join('').trim()
+    if (paraText) {
+      paragraphTexts.push(paraText)
+    }
+  }
+
+  return paragraphTexts.join('\n').trim()
 }
 
 const extractTablePairs = (doc: Document) => {
   const results: Array<{ label: string; value: string }> = []
   const tables = getElementsByLocalName(doc, 'tbl')
+
+  // 辅助函数：检查文本是否是已知的字段标签
+  const isKnownLabel = (text: string): boolean => {
+    if (!text || !text.trim()) return false
+    const normalized = normalizeLabel(text)
+    return FIELD_LABEL_MAP.has(normalized)
+  }
+
+  // 辅助函数：检查文本是否是类别标签
+  const isCategoryLabel = (text: string): boolean => {
+    if (!text || !text.trim()) return false
+    const knownCategories = ['常住地', '基本信息', '学修情况', '挂单信息', '申请信息']
+    return knownCategories.includes(text.trim())
+  }
+
   for (const table of tables) {
     const rows = getElementsByLocalName(table, 'tr')
+
     for (const row of rows) {
       const cells = getElementsByLocalName(row, 'tc')
       const cellTexts = cells.map((cell) => extractTextFromNode(cell))
       if (!cellTexts.length) continue
 
-      for (let i = 0; i < cellTexts.length - 1; i += 2) {
-        const label = cellTexts[i]?.trim()
-        const value = cellTexts[i + 1]?.trim()
-        if (!label || !value) continue
-        results.push({ label, value })
+      // 清理空单元格
+      const filteredCells = cellTexts.filter(text => text && text.trim())
+
+      // 尝试不同的表格结构
+      if (filteredCells.length === 2) {
+        // 两列结构: 标签 | 值
+        const label = filteredCells[0]?.trim()
+        const value = filteredCells[1]?.trim()
+
+        // 检查值是否是标签（避免错位）
+        if (label && value && !isKnownLabel(value)) {
+          results.push({ label, value })
+        } else if (label && isKnownLabel(value)) {
+          // 如果值是标签，说明可能为空，记录空值
+          results.push({ label, value: '' })
+        }
+      } else if (filteredCells.length === 3) {
+        // 三列结构: 类别 | 字段 | 值  或  标签1 | 标签2 | 值
+        const col1 = filteredCells[0]?.trim()
+        const col2 = filteredCells[1]?.trim()
+        const col3 = filteredCells[2]?.trim()
+console.log('三列结构：', col1)
+        if (isCategoryLabel(col1)) {
+          // 结构: 类别 | 字段 | 值，例如：常住地 | 省市 | 北京市
+          if (col2 && col3 && !isKnownLabel(col3)) {
+            results.push({ label: col2, value: col3 })
+          } else if (col2 && isKnownLabel(col3)) {
+            // 第三列是标签，说明值为空
+            results.push({ label: col2, value: '' })
+          }
+        } else {
+          // 可能是 标签 | 空 | 标签 或 标签 | 值 | 标签 的结构
+          if (col1 && !isKnownLabel(col2) && !isKnownLabel(col3)) {
+            // 正常情况: 标签1 | 值 | 其他内容
+            results.push({ label: col1, value: col2 })
+          } else if (col1 && isKnownLabel(col2)) {
+            // 第二列是标签，说明第一列的值为空
+            results.push({ label: col1, value: '' })
+          } else if (col1 && col3 && !isKnownLabel(col3)) {
+            // 尝试使用第一和第三列
+            results.push({ label: col1, value: col3 })
+          }
+        }
+      } else if (filteredCells.length >= 4) {
+        // 多列结构，尝试所有相邻对
+        for (let i = 0; i < filteredCells.length - 1; i++) {
+          const label = filteredCells[i]?.trim()
+          const value = filteredCells[i + 1]?.trim()
+          console.log(label)
+          // 跳过类别标签和空值
+          // if (!label || isCategoryLabel(label)) continue
+          results.push({ label, value })
+          i++ // 跳过下一个，因为是值
+
+          // 如果值是标签，说明当前字段为空
+          // if (isKnownLabel(value)) {
+          //   results.push({ label, value: '' })
+          //   // 不跳过，因为value可能是下一个标签
+          // } else if (value && !isKnownLabel(value)) {
+          //   results.push({ label, value })
+          //   i++ // 跳过下一个，因为是值
+          // }
+        }
       }
     }
   }
