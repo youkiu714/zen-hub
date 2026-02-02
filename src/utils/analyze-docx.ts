@@ -43,18 +43,54 @@ const normalizeLabel = (label: string) => label.replace(/[\s:：()（）]/g, '')
 
 const FIELD_LABEL_MAP = new Map(FIELD_LABELS.map((label) => [normalizeLabel(label), label]))
 
-const getElementsByLocalName = (doc: Document, localName: string) =>
-  Array.from(doc.getElementsByTagNameNS('*', localName))
+// 获取指定节点下所有指定 localName 的子元素（递归）
+const getElementsByLocalName = (node: Node, localName: string) => {
+  // 兼容 Document 和 Element
+  const root = node instanceof Document ? node : (node as Element)
+  return Array.from(root.getElementsByTagNameNS('*', localName))
+}
 
 const extractTextFromNode = (node: Element) => {
-  const textNodes = getElementsByLocalName(node.ownerDocument ?? node, 't')
-  const texts: string[] = []
-  for (const textNode of textNodes) {
-    if (node.contains(textNode) && textNode.textContent) {
-      texts.push(textNode.textContent)
+  // 1. 尝试获取单元格内的所有段落 <w:p>
+  const paragraphs = getElementsByLocalName(node, 'p')
+
+  // 如果找到段落，则按段落处理（这是大多数情况）
+  if (paragraphs.length > 0) {
+    return paragraphs
+      .map((p) => {
+        // 获取段落内的所有后代元素，按文档顺序排列
+        const descendants = Array.from(p.getElementsByTagName('*'))
+        let pText = ''
+
+        for (const child of descendants) {
+          const localName = child.localName
+          if (localName === 't') {
+            // <w:t> 包含文本
+            pText += child.textContent || ''
+          } else if (localName === 'br' || localName === 'cr') {
+            // <w:br/> 或 <w:cr/> 代表换行
+            pText += '\n'
+          }
+        }
+        return pText
+      })
+      .join('\n') // 段落之间用换行符连接
+      .trim()
+  }
+
+  // 2. 兜底逻辑：如果没有发现段落结构，直接扫描当前节点下的 t 和 br
+  // 这通常用于处理非标准结构或简单片段
+  const descendants = Array.from(node.getElementsByTagName('*'))
+  let text = ''
+  for (const child of descendants) {
+    const localName = child.localName
+    if (localName === 't') {
+      text += child.textContent || ''
+    } else if (localName === 'br' || localName === 'cr') {
+      text += '\n'
     }
   }
-  return texts.join('').trim()
+  return text.trim()
 }
 
 const extractTablePairs = (doc: Document) => {
