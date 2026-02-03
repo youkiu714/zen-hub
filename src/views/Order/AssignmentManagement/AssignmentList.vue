@@ -74,7 +74,7 @@
         <el-table :data="tableData" stripe style="width: 100%" @selection-change="handleSelectionChange"
           class="assignment-table">
           <el-table-column v-if="activeTab === 'pending'" type="selection" width="55" />
-
+          <!-- 待分配 -->
           <template v-if="activeTab === 'pending'">
             <el-table-column label="挂单人" min-width="150">
               <template #default="{ row }">
@@ -120,7 +120,7 @@
               </template>
             </el-table-column>
           </template>
-
+          <!-- 已分配 -->
           <template v-if="activeTab === 'assigned'">
             <el-table-column prop="name" label="姓名" min-width="120">
               <template #default="{ row }">
@@ -158,7 +158,7 @@
               </template>
             </el-table-column>
           </template>
-
+          <!-- 已入住 -->
           <template v-if="activeTab === 'checked_in'">
             <el-table-column label="入住人" min-width="140">
               <template #default="{ row }">
@@ -205,10 +205,11 @@
             <el-table-column label="操作" min-width="120">
               <template #default="{ row }">
                 <el-button type="info" link @click="handleViewDetails(row)">详情</el-button>
+                <el-button type="info" link @click="handleCheckoutApplication(row)">退单办理</el-button>
               </template>
             </el-table-column>
           </template>
-
+          <!-- 已退住 -->
           <template v-if="activeTab === 'checked_out'">
             <el-table-column prop="name" label="姓名" min-width="100">
               <template #default="{ row }">
@@ -280,6 +281,9 @@
     <AssignBedModal v-model="showAssignBedModal" :selected-person="selectedPerson" @success="handleAssignSuccess" />
     <ApplicationDetailDialog v-model="detailVisible" :application-id="currentAppId" @close="onDetailClosed" />
     <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
+    <!-- 退单申请弹窗 -->
+    <CheckoutApplicationDialog v-model="checkoutVisible" :order-data="currentCheckoutData"
+      @submit="handleCheckoutSubmit" />
   </div>
 </template>
 
@@ -295,6 +299,7 @@ import ReviewPage from '@/components/ReviewPage.vue'
 import AssignBedModal from '@/components/AssignBed/AssignBedModal.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import ApplicationStatusFilter from './components/ApplicationStatusFilter.vue'
+import CheckoutApplicationDialog from '@/views/Order/PendingOrderManagement/components/CheckoutApplicationDialog.vue'
 
 import {
   getPendingAssignments,
@@ -333,6 +338,14 @@ const reviewVisible = ref(false)
 const currentReviewId = ref(0)
 const showAssignBedModal = ref(false)
 const selectedPerson = ref<AssignmentListItemVO | null>(null)
+
+  // 退单申请相关状态
+const checkoutVisible = ref(false)
+const currentCheckoutData = ref({
+  applicationId: 0,
+  checkoutDate: '',
+  applicantName: ''
+})
 
 // 分页数据
 const pagination = ref({
@@ -537,6 +550,28 @@ const handleViewDetails = (row: any) => {
     detailVisible.value = true
   } else {
     ElMessage.error('数据异常：无法获取ID')
+  }
+}
+
+// 处理退单申请
+const handleCheckoutApplication = (row: any) => {
+  // 保存当前退单申请的数据
+  console.log(row)
+  currentCheckoutData.value = {
+    applicationId: row.applicationId,
+    checkoutDate: row.expectedCheckoutDate || '',
+    applicantName: row.name
+  }
+  checkoutVisible.value = true
+}
+
+// 处理退单申请提交
+const handleCheckoutSubmit = async () => {
+  try {
+    checkoutVisible.value = false
+    fetchData()
+  } catch (error) {
+    ElMessage.error('退单申请失败，请稍后重试')
   }
 }
 

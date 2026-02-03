@@ -6,7 +6,7 @@
     <FilterTab v-model="filterStatus" @update:modelValue="handleTabChange" :statusOptions="statusOptions" />
 
     <el-card class="table-card" shadow="hover">
-      <el-form :model="queryForm" inline class="filter-form">
+      <el-form :model="queryForm" inline class="filter-form" v-if="filterStatus != 50">
         <el-form-item label="关键词搜索">
           <el-input v-model="queryForm.keyword" placeholder="申请编号、申请人姓名或房间号" clearable style="width: 250px"
             @input="handleSearch">
@@ -37,6 +37,14 @@
           </el-button>
         </el-form-item>
       </el-form>
+      <div class="filter-bar" v-if="filterStatus == 50">
+        <div style="display: flex;gap: 20px;">
+        <el-date-picker v-model="checkOutDate" type="date" placeholder="请选择退住日期" clearable style="width: 150px"
+          @change="handleCheckOutDateChange" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+
+          <el-alert title="默认显示第二天要退单的记录，也可以选择退单日期" type="info" show-icon style="width: 500px;"/>
+          </div>
+      </div>
 
       <el-table v-loading="loading" :data="tableData" style="width: 100%" size="large" class="cancel-table"
         :header-cell-style="{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: '#f5f7fa' }">
@@ -66,8 +74,14 @@
             {{ getApplicationTypeText(row.applicationType) }}
           </template>
         </el-table-column> -->
-
-        <el-table-column prop="applicationType" label="挂单类型" min-width="90">
+        <el-table-column prop="departmentCode" label="所属部组" min-width="90" v-if="filterStatus == 50">
+          <template #default="{ row }">
+            {{
+              departmentOptions.find((item) => item.value === row.departmentCode)?.label ?? '其他'
+            }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="applicationType" label="挂单类型" min-width="90" v-if="filterStatus != 50">
           <template #default="scope">
             <span class="dot" :class="getApplicationTypeClass(scope.row.applicationType)"></span>
             {{
@@ -79,14 +93,14 @@
 
         <el-table-column prop="checkinDate" label="入住日期" width="120" />
         <el-table-column prop="checkoutDate" label="原定退单" width="120" />
-        <el-table-column prop="actualCheckoutDate" label="实际退单" width="120" />
-        <el-table-column prop="stayDays" label="住宿天数" width="100" />
+        <el-table-column prop="actualCheckoutDate" label="实际退单" width="120" v-if="filterStatus != 50" />
+        <el-table-column prop="stayDays" :label="filterStatus != 50 ? '住宿天数' : '已住天数'" width="100" />
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button @click="() => handleViewDetail(row)" link>
               查看
             </el-button>
-            <el-button type="primary" link @click="handleConfirmCheckout(row)" v-if="row.status==10">
+            <el-button type="primary" link @click="handleConfirmCheckout(row)" v-if="row.status == 10">
               确认退单
             </el-button>
           </template>
@@ -139,7 +153,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElAlert } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import dayjs from 'dayjs'
 import { Search, Filter, User, View } from '@element-plus/icons-vue'
@@ -157,6 +171,7 @@ import { applicationTypeOptions, performanceOptions } from '@/utils/constants'
 import FilterTab from '@/components/FilterTab.vue'
 import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
 import { CheckinTabKey } from '../CheckInManagement/utils'
+import { getCheckoutDueTomorrow, type InhouseItemVO } from '@/api/tomorrow'
 
 // 查询表单数据
 const queryForm = reactive<CheckoutQueryParams>({
@@ -186,8 +201,15 @@ const confirmForm = reactive<ConfirmCheckoutPayload>({
   remark: ''
 })
 
-const filterStatus = ref(10)
+const departmentOptions = ref([
+  { label: '项目部', value: 'PROJECT' },
+  { label: '教化部', value: 'READING' },
+  { label: '汇编', value: 'COMPILATION' },
+  { label: '其他', value: 'OTHER' }
+])
 
+const filterStatus = ref(10)
+const checkOutDate = ref("")
 const statusOptions = [
   {
     value: 10,
@@ -200,6 +222,12 @@ const statusOptions = [
     label: '已确认',
     type: 'default',
     icon: 'Edit'
+  },
+  {
+    value: 50,
+    label: '待提醒',
+    type: 'default',
+    icon: 'AlarmClock'
   }
 ]
 
@@ -230,7 +258,7 @@ const confirmRules: FormRules = {
 const handleTabChange = (key: number) => {
   filterStatus.value = key
   console.log(key);
-  console.log(filterStatus.value==30);
+  console.log(filterStatus.value == 30);
   pagination.current = 1
   fetchCheckoutList()
 }
@@ -240,28 +268,70 @@ const fetchCheckoutList = async () => {
   try {
     loading.value = true
 
-    // 构建请求参数
-    const params: CheckoutQueryParams = {
-      keyword: queryForm.keyword,
-      status: filterStatus.value,
-      applicationType: queryForm.applicationType,
-      current: currentPage.value,
-      size: pageSize.value,
-      startDate: '',
-      endDate: ''
+
+    if (filterStatus.value === 50) {
+
+      let d = new Date();
+      d.setDate(d.getDate() + 1);
+      let tomorrowStr = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      if (checkOutDate.value) {
+        tomorrowStr = checkOutDate.value
+      }
+      const params = {
+        pageNo: pagination.current,
+        pageSize: pagination.pageSize,
+        date: tomorrowStr 
+      }
+
+      const res = await getCheckoutDueTomorrow(params)
+
+      if (res) { 
+        const { records, total } = res
+
+        tableData.value = (records || []).map((item: InhouseItemVO) => ({
+          ...item,
+          id: item.applicationId,        // 申请单ID
+          applicantName: item.name,      // 姓名
+          gender: item.gender === 1 ? '男' : '女',
+          roomNumber: item.roomNo,       // 房间号
+          bedNumber: item.bedNo,         // 床位号
+          mobile: item.mobile,
+          checkinDate: item.checkinAt?.split(' ')[0],
+          stayDays: item.stayedDays,
+          checkoutDate: item.expectedCheckoutAt?.split(' ')[0], // 预计离店时间
+          statusLabel: '待退单',          // 手动设置状态显示
+          // 其他可能需要的字段...
+        }))
+
+        pagination.total = total || 0
+      }
     }
+    // === 原有逻辑：其他 Tab ===
+    else {
 
-    // 处理日期范围
-    if (queryForm.dateRange && queryForm.dateRange.length === 2) {
-      params.startDate = queryForm.dateRange[0]
-      params.endDate = queryForm.dateRange[1]
+      // 构建请求参数
+      const params: CheckoutQueryParams = {
+        keyword: queryForm.keyword,
+        status: filterStatus.value,
+        applicationType: queryForm.applicationType,
+        current: currentPage.value,
+        size: pageSize.value,
+        startDate: '',
+        endDate: ''
+      }
+
+      // 处理日期范围
+      if (queryForm.dateRange && queryForm.dateRange.length === 2) {
+        params.startDate = queryForm.dateRange[0]
+        params.endDate = queryForm.dateRange[1]
+      }
+
+      const response = await getCheckouts(params)
+
+      tableData.value = response.records
+      total.value = response.total
+      currentPage.value = response.current
     }
-
-    const response = await getCheckouts(params)
-
-    tableData.value = response.records
-    total.value = response.total
-    currentPage.value = response.current
   } catch (error) {
     console.error('获取退单记录失败:', error)
     ElMessage.error('获取退单记录失败')
@@ -290,6 +360,10 @@ const handleSizeChange = (val: number) => {
 
 const handleCurrentChange = (val: number) => {
   currentPage.value = val
+  fetchCheckoutList()
+}
+
+const handleCheckOutDateChange = () => {
   fetchCheckoutList()
 }
 
@@ -427,6 +501,11 @@ onMounted(() => {
       display: flex;
       gap: 10px;
     }
+  }
+
+  .filter-bar {
+    margin-left: 10px;
+    margin-bottom: 10px;
   }
 }
 

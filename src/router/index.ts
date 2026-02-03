@@ -93,14 +93,35 @@ export const asyncRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: '/contact-application/pending-application-type',
+        name: 'PendingApplicationType',
+        component: () => import('@/views/Order/OrderApplicationType/index.vue'),
+        meta: {
+          title: '挂单申请类型',
+          icon: 'Plus',
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
+        }
+      },
+      {
         path: '/contact-application/pending-application',
         name: 'PendingApplication',
         component: () => import('@/views/Application/index.vue'),
         meta: {
           title: '挂单申请',
           icon: 'Plus',
+          hidden: true,
           roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
-
+        }
+      },
+      {
+        path: '/contact-application/direct-application',
+        name: 'DirectApplication',
+        component: () => import('@/views/Order/OrderDirect/index.vue'),
+        meta: {
+          title: '直通车申请',
+          icon: 'Plus',
+          hidden: true,
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
         }
       },
       {
