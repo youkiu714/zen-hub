@@ -1,11 +1,12 @@
 <template>
   <div class="lodging-application-page" id="lodging-application-page">
-    <PageHeader title="挂单申请" />
+    <ApplicationBreadcrumb :items="breadcrumbItems" :back-to="methodRoute" />
     <div class="lodging-wrapper">
       <el-card class="form-container">
         <!-- 基本信息 -->
         <div class="docx-upload">
           <el-upload
+            v-if="!isExistingImport"
             v-model:file-list="docxFileList"
             drag
             :auto-upload="false"
@@ -20,14 +21,28 @@
               请上传docx文件,<a class="template-download" :href="templateDocx" download @click.stop>点击下载模版</a>
             </div>
           </el-upload>
+          <el-select
+            v-else
+            v-model="existingSelected"
+            filterable
+            remote
+            clearable
+            reserve-keyword
+            placeholder="搜索已有挂单人员"
+            :remote-method="remoteMethod"
+            :loading="searchLoading"
+            class="existing-search"
+          >
+            <el-option
+              v-for="item in searchOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </div>
         <section id="basic-info" class="section">
           <BaseInfo v-model="formData.basic" ref="basicFormRef">
-            <!-- <template #headerRight>
-              <el-button v-if="hasDraft" size="small" type="primary" @click="applyCachedDraft">
-                使用缓存数据
-              </el-button>
-            </template> -->
           </BaseInfo>
         </section>
         <!-- 学修情况 -->
@@ -55,11 +70,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, computed, nextTick, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage, FormInstance, ElMessageBox } from 'element-plus'
 import type { UploadFile, UploadRawFile, UploadUserFile } from 'element-plus'
 import throttle from 'lodash-es/throttle'
+import debounce from 'lodash-es/debounce'
 import type { BasicInfo, PracticeInfo, LodgingInfo, ApplicationSubmitRequest } from '@/types'
-import PageHeader from '@/components/PageHeader.vue'
+import ApplicationBreadcrumb from '@/views/Application/components/ApplicationBreadcrumb.vue'
 import BaseInfo from '@/views/Order/OrderApplication/components/BaseInfo.vue'
 import PracticeInfoForm from '@/views/Order/OrderApplication/components/PracticeInfoForm.vue'
 import LodgingInfoForm from '@/views/Order/OrderApplication/components/LodgingInfoForm.vue'
@@ -69,9 +86,160 @@ import avatarImg from '@/assets/avatar.png'
 import { analyzeDocx } from '@/utils/analyze-docx'
 import { uploadAvatar } from '@/api/upload'
 import templateDocx from '@/docx/崇恩寺短住义工申请表.docx'
+import { getCheckedOutRecordDetail, getCheckedOutRecords } from '@/api/records'
+import { getGenderText } from '@/utils'
+import { DepartmentMap } from '@/utils/constants'
 
 const userStore = useUserStore()
 const user = computed(() => userStore.user)
+const route = useRoute()
+const isExistingImport = computed(() => route.query.method === 'existing')
+const existingSelected = ref<number | null>(null)
+const searchLoading = ref(false)
+const searchResults = ref<Awaited<ReturnType<typeof getCheckedOutRecords>>['records']>([])
+
+const runSearch = debounce(async (keyword: string) => {
+  const normalized = keyword.trim()
+  if (!normalized) {
+    searchResults.value = []
+    return
+  }
+  searchLoading.value = true
+  try {
+    const data = await getCheckedOutRecords(normalized)
+    if (Array.isArray(data)) {
+      searchResults.value = data
+    } else {
+      searchResults.value = data.records || []
+    }
+  } catch (error) {
+    searchResults.value = []
+    ElMessage.error('搜索人员失败')
+  } finally {
+    searchLoading.value = false
+  }
+}, 300)
+
+const searchOptions = computed(() =>
+  searchResults.value.map((item) => ({
+    value: item.personId,
+    label: `${item.name}-${getGenderText(item.gender)}-${DepartmentMap[item.departmentCode] || item.departmentCode || '未知'}`
+  }))
+)
+
+const remoteMethod = (keyword: string) => {
+  if (!isExistingImport.value) {
+    return
+  }
+  runSearch(keyword)
+}
+
+const normalizeGender = (gender?: number) => {
+  if (gender === 1) return '1'
+  if (gender === 2) return '2'
+  return gender != null ? String(gender) : ''
+}
+
+const normalizeEmergencyContacts = (
+  contacts?: { contactName: string; contactPhone: string; sortNo: number }[]
+) => {
+  const normalized = (contacts || []).map((item, index) => ({
+    contactName: item.contactName || '',
+    contactPhone: item.contactPhone || '',
+    sortNo: item.sortNo ?? index + 1
+  }))
+  while (normalized.length < 2) {
+    normalized.push({ contactName: '', contactPhone: '', sortNo: normalized.length + 1 })
+  }
+  return normalized.slice(0, 2)
+}
+
+const assignIfDefined = <T extends Record<string, any>>(target: T, key: keyof T, value: any) => {
+  if (value !== undefined && value !== null) {
+    target[key] = value
+  }
+}
+
+const applyCheckedOutDetail = (detail: Awaited<ReturnType<typeof getCheckedOutRecordDetail>>) => {
+  const basic = detail.basic
+  if (basic) {
+    assignIfDefined(formData.basic, 'name', basic.name)
+    assignIfDefined(formData.basic, 'gender', normalizeGender(basic.gender))
+    assignIfDefined(formData.basic, 'idCard', basic.idCard)
+    assignIfDefined(formData.basic, 'ethnic', basic.ethnic)
+    assignIfDefined(formData.basic, 'mobile', basic.mobile)
+    assignIfDefined(formData.basic, 'weChat', basic.weChat)
+    assignIfDefined(formData.basic, 'marital', basic.marital)
+    assignIfDefined(formData.basic, 'provinceCity', basic.provinceCity || '')
+    assignIfDefined(formData.basic, 'city', basic.city)
+    assignIfDefined(formData.basic, 'address', basic.address)
+    assignIfDefined(formData.basic, 'education', basic.education)
+    assignIfDefined(formData.basic, 'school', basic.school)
+    assignIfDefined(formData.basic, 'major', basic.major)
+    assignIfDefined(formData.basic, 'occupation', basic.occupation)
+    assignIfDefined(formData.basic, 'skills', basic.skills)
+    assignIfDefined(formData.basic, 'photoUrl', basic.photoUrl)
+    assignIfDefined(formData.basic, 'diseaseHistory', basic.diseaseHistory)
+    assignIfDefined(formData.basic, 'medicationHistory', basic.medicationHistory)
+    assignIfDefined(formData.basic, 'infectiousHistory', basic.infectiousHistory)
+    assignIfDefined(formData.basic, 'birthDate', basic.birthDate)
+    assignIfDefined(formData.basic, 'age', basic.age)
+    if (basic.departmentCode) {
+      formData.basic.departmentCode = basic.departmentCode
+      formData.lodging.departmentCode = basic.departmentCode
+    }
+    formData.basic.emergencyContacts = normalizeEmergencyContacts(basic.emergencyContacts)
+  }
+
+  const practice = detail.practice
+  if (practice) {
+    assignIfDefined(formData.practice, 'yearsOfPractice', practice.yearsOfPractice)
+    assignIfDefined(formData.practice, 'refugeTakenDate', practice.refugeTakenDate)
+    assignIfDefined(formData.practice, 'pastPracticeExperience', practice.pastPracticeExperience)
+    assignIfDefined(formData.practice, 'currentPracticeExperience', practice.currentPracticeExperience)
+    assignIfDefined(formData.practice, 'visitRecords', practice.visitRecords)
+    assignIfDefined(formData.practice, 'hasTakenPrecepts', practice.hasTakenPrecepts)
+    assignIfDefined(formData.practice, 'refugeTemple', practice.refugeTemple)
+  }
+}
+
+watch(existingSelected, async (personId) => {
+  if (!isExistingImport.value || !personId) {
+    return
+  }
+  try {
+    const detail = await getCheckedOutRecordDetail(personId)
+    applyCheckedOutDetail(detail)
+  } catch (error) {
+    ElMessage.error('获取人员信息失败')
+  }
+})
+
+const selectedType = computed(() => {
+  const type = route.query.type
+  if (type === 'short_stay' || type === 'express') {
+    return type
+  }
+  return null
+})
+
+const methodRoute = computed(() => ({
+  path: '/contact-application/pending-application/method',
+  query: selectedType.value ? { type: selectedType.value } : undefined
+}))
+
+const methodLabel = computed(() => {
+  if (route.query.method === 'existing') {
+    return '从已有挂单人员导入'
+  }
+  return '手动填写'
+})
+
+const breadcrumbItems = computed(() => [
+  { label: '挂单申请', to: '/contact-application/pending-application' },
+  { label: '挂单方式', to: methodRoute.value },
+  { label: methodLabel.value }
+])
 
 type OrderApplicationDraft = {
   version: 1
@@ -463,6 +631,48 @@ const formData = reactive<{
   }
 })
 
+const resolveApplicationTypeFromQuery = () => {
+  const rawValue = route.query.applicationType ?? route.query.type
+  const value = Array.isArray(rawValue) ? rawValue[0] : rawValue
+
+  if (value == null) return null
+
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim()
+    if (!normalized) return null
+
+    const map: Record<string, number> = {
+      short_stay: 1,
+      'short-stay': 1,
+      short: 1,
+      express: 3,
+      'direct-bus': 3,
+      direct_bus: 3,
+      direct: 3
+    }
+
+    if (map[normalized] != null) {
+      return map[normalized]
+    }
+
+    const parsed = Number(normalized)
+    if (!Number.isNaN(parsed)) return parsed
+  }
+
+  return null
+}
+
+const syncApplicationTypeFromRoute = () => {
+  const resolved = resolveApplicationTypeFromQuery()
+  if (resolved != null) {
+    formData.lodging.applicationType = resolved
+  }
+}
+
 const parseIdCardAge = (idCard: string) => {
   if (!/^\d{17}[\dXx]$/.test(idCard)) return null
 
@@ -505,6 +715,14 @@ watch(
   (dept) => {
     formData.basic.departmentCode = dept
     formData.lodging.departmentCode = dept
+  },
+  { immediate: true }
+)
+
+watch(
+  () => [route.query.applicationType, route.query.type],
+  () => {
+    syncApplicationTypeFromRoute()
   },
   { immediate: true }
 )
@@ -670,6 +888,10 @@ onBeforeUnmount(() => {
 .docx-upload {
   width: 100%;
   margin-bottom: 16px;
+}
+
+.existing-search {
+  width: 100%;
 }
 
 .docx-upload :deep(.el-upload) {

@@ -135,14 +135,6 @@ import { useUserStore } from '@/store/modules/user'
 const userStore = useUserStore()
 
 // =============== 常量 ===============
-const ApplicationTypeMap = {
-  1: '短住',
-  2: '直通车',
-  3: '僧亲',
-  4: '团队挂单',
-  5: '特殊客人',
-} as const;
-
 const ReviewStatusMap = {
   10: '待审核',
   20: '待法师审核',
