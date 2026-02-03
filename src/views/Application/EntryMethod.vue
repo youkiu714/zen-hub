@@ -3,7 +3,7 @@
     <ApplicationBreadcrumb :items="breadcrumbItems" :back-to="backTo" />
     <div class="entry-shell">
       <div class="type-panel">
-        <EntryMethodPanel @select="handleEntrySelect" />
+        <EntryMethodPanel :allow-batch="selectedType !== 'express'" @select="handleEntrySelect" />
       </div>
     </div>
   </div>
@@ -48,11 +48,26 @@ const handleEntrySelect = (method: EntryMethodKey) => {
     ensureType()
     return
   }
+  if (selectedType.value === 'express' && method === 'batch') {
+    ElMessage.warning('直通车暂不支持批量导入')
+    return
+  }
+  if (selectedType.value === 'express' && method === 'existing') {
+    router.push({
+      path: '/contact-application/direct-application',
+      query: { method }
+    })
+    return
+  }
   if (method === 'batch') {
     router.push({
       path: '/contact-application/pending-application/batch-import',
       query: { type: selectedType.value }
     })
+    return
+  }
+  if (method === 'manual' && selectedType.value === 'express') {
+    router.push('/contact-application/direct-application')
     return
   }
   router.push({

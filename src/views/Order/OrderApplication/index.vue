@@ -391,7 +391,23 @@ const activeTab = ref('basic-info')
 const normalizeDocxDate = (value: string) => {
   const trimmed = value.trim()
   const cleaned = trimmed.replace(/\s+/g, '')
-  const fullMatch = cleaned.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/)
+  const normalized = cleaned
+    .replace(/[./]/g, '-')
+    .replace(/年/g, '-')
+    .replace(/月/g, '-')
+    .replace(/日/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  const compactMatch = normalized.match(/^(\d{4})(\d{2})(\d{2})$/)
+  if (compactMatch) {
+    const year = compactMatch[1]
+    const month = compactMatch[2]
+    const day = compactMatch[3]
+    return `${year}-${month}-${day}`
+  }
+
+  const fullMatch = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/)
   if (fullMatch) {
     const year = fullMatch[1]
     const month = fullMatch[2].padStart(2, '0')
@@ -399,14 +415,14 @@ const normalizeDocxDate = (value: string) => {
     return `${year}-${month}-${day}`
   }
 
-  const partialMatch = cleaned.match(/(\d{4})\D+(\d{1,2})/)
+  const partialMatch = normalized.match(/^(\d{4})-(\d{1,2})$/)
   if (partialMatch) {
     const year = partialMatch[1]
     const month = partialMatch[2].padStart(2, '0')
     return `${year}-${month}-01`
   }
 
-  const yearMatch = cleaned.match(/(\d{4})/)
+  const yearMatch = normalized.match(/^(\d{4})$/)
   if (yearMatch) {
     return `${yearMatch[1]}-01-01`
   }

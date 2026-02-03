@@ -99,6 +99,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         meta: {
           title: '挂单申请类型',
           icon: 'Plus',
+          hidden: true,
           roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
         }
       },

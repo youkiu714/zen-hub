@@ -154,7 +154,6 @@ const handleIdCardChange = (val: string) => {
 const formRef = ref<FormInstance>()
 const validate = () => formRef.value?.validate()
 // 控制弹窗显示
-const showPersonSelector = ref(false) // 控制弹窗显示
 
 onMounted(() => {
   if (form.value.photoUrl === '') {

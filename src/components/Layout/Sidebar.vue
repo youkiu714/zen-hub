@@ -109,8 +109,8 @@ const menuList = ref([
         }
       },
       {
-        path: '/contact-application/pending-application-type',
-        name: 'PendingApplicationType',
+        path: '/contact-application/pending-application',
+        name: 'PendingApplication',
         meta: {
           title: '挂单申请',
           icon: 'Plus',

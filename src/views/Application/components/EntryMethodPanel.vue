@@ -11,7 +11,7 @@
           <div class="method-desc">逐项填写人员信息，适合小批量挂单。</div>
         </div>
       </div>
-      <div class="method-card" @click="handleSelect('batch')">
+      <div v-if="allowBatch" class="method-card" @click="handleSelect('batch')">
         <div class="method-icon">
           <el-icon><UploadFilled /></el-icon>
         </div>
@@ -37,6 +37,12 @@
 import { EditPen, UploadFilled, UserFilled } from '@element-plus/icons-vue'
 
 type EntryMethodKey = 'manual' | 'batch' | 'existing'
+
+const props = withDefaults(defineProps<{
+  allowBatch?: boolean
+}>(), {
+  allowBatch: true
+})
 
 const emit = defineEmits<{
   (e: 'select', method: EntryMethodKey): void
