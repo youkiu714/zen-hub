@@ -99,13 +99,14 @@ export const asyncRoutes: RouteRecordRaw[] = [
         meta: {
           title: '挂单申请类型',
           icon: 'Plus',
+          hidden: true,
           roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
         }
       },
       {
         path: '/contact-application/pending-application',
         name: 'PendingApplication',
-        component: () => import('@/views/Order/OrderApplication/index.vue'),
+        component: () => import('@/views/Application/index.vue'),
         meta: {
           title: '挂单申请',
           icon: 'Plus',
@@ -120,6 +121,36 @@ export const asyncRoutes: RouteRecordRaw[] = [
         meta: {
           title: '直通车申请',
           icon: 'Plus',
+          hidden: true,
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
+        }
+      },
+      {
+        path: '/contact-application/pending-application/method',
+        name: 'PendingApplicationMethod',
+        component: () => import('@/views/Application/EntryMethod.vue'),
+        meta: {
+          title: '挂单方式',
+          hidden: true,
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
+        }
+      },
+      {
+        path: '/contact-application/pending-application/batch-import',
+        name: 'PendingApplicationBatchImport',
+        component: () => import('@/views/Application/BatchImport.vue'),
+        meta: {
+          title: '批量导入',
+          hidden: true,
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
+        }
+      },
+      {
+        path: '/contact-application/pending-application/form',
+        name: 'PendingApplicationForm',
+        component: () => import('@/views/Order/OrderApplication/index.vue'),
+        meta: {
+          title: '挂单申请表',
           hidden: true,
           roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
         }
