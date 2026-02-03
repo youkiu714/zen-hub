@@ -102,7 +102,7 @@ const allActionsConfig = [
   {
     title: '挂单申请', // 新到人员录入
     desc: '新到人员信息录入',
-    path: '/contact-application/pending-application',
+    path: '/contact-application/pending-application-type',
     icon: EditPen,
     roles: ['LIAISON'],
     hex: '#E4FBE9', rgb: '228, 251, 233'

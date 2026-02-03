@@ -239,6 +239,7 @@ import {
   applicationTypeOptions,
   departmentOptions
 } from '@/utils/constants'
+
 import { formatDate } from '@/utils/format-date'
 import { throttle } from 'lodash-es'
 import { useUserStore } from '@/store/modules/user'
@@ -291,7 +292,8 @@ const currentRenewalData = ref({
 const checkoutVisible = ref(false)
 const currentCheckoutData = ref({
   applicationId: 0,
-  checkoutDate: ''
+  checkoutDate: '',
+  applicantName: ''
 })
 
 // 加载数据
@@ -458,9 +460,11 @@ const handleRenewalSubmit = async (data: any) => {
 // 处理退单申请
 const handleCheckoutApplication = (row: any) => {
   // 保存当前退单申请的数据
+  console.log(row)
   currentCheckoutData.value = {
     applicationId: row.id,
-    checkoutDate: row.checkoutDate || ''
+    checkoutDate: row.checkoutDate || '',
+    applicantName: row.applicantName
   }
   checkoutVisible.value = true
 }

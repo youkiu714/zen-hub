@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    title="退住申请"
+    :title="`退住申请 - ${props.orderData?.applicantName || ''}`"
     width="600px"
     :close-on-click-modal="false"
     :close-on-press-escape="false"

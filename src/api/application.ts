@@ -2,6 +2,7 @@ import request from '@/utils/request'
 import { Request, IPageApplicationListItemVO } from '@/types/application'
 import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types'
 
+
 export function getApplications(params: {
   pageNo: number
   pageSize: number
