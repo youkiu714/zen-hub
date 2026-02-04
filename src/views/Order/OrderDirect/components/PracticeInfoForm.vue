@@ -1,17 +1,3 @@
-这是修改后的 `PracticeInfoForm.vue` 文件。
-
-### 主要修改点：
-
-1. **新增“是否已皈依”字段**：添加了控制开关。
-2. **字段联动**：
-* 使用 `v-if="form.isRefuge"` 控制“皈依时间”和“皈依寺庙”的显示与隐藏。
-* 添加了 `handleRefugeChange` 方法，当选择“否”时，自动清空时间和寺庙的数据。
-
-
-3. **表单验证**：取消了之前代码中相关规则的注释，现在只有当字段显示时（即选择了“是”），`required` 验证才会生效（Element Plus 的 `v-if` 特性）。
-4. **布局调整**：将相关字段放在同一个 `el-row` 中，利用 `el-col` 的浮动特性自动排版。
-
-```html
 <template>
   <div class="section">
     <div class="section-header">
