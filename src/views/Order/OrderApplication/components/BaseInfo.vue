@@ -377,7 +377,7 @@ const handleAvatarChange = async (file: any) => {
     console.log('res:', res)
 
     const url = String(res.url).substring('/uploads'.length)
-
+console.log(url)
     form.value.photoUrl = 'http://49.232.241.94/' + url
   } catch (e) {
     ElMessage.error('上传失败，请稍后重试')

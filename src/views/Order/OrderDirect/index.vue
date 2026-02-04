@@ -18,11 +18,11 @@
           <el-button type="primary" @click="handleSubmit">提交申请</el-button>
         </div>
       </el-card>
-      <el-tabs v-model="activeTab" tab-position="right" style="height: 120px" class="tabs" @tab-click="handleTabClick">
+      <!-- <el-tabs v-model="activeTab" tab-position="right" style="height: 120px" class="tabs" @tab-click="handleTabClick">
         <el-tab-pane label="基本信息" name="basic-info"></el-tab-pane>
         <el-tab-pane label="学修情况" name="practice-info"></el-tab-pane>
         <el-tab-pane label="挂单信息" name="lodging-info"></el-tab-pane>
-      </el-tabs>
+      </el-tabs> -->
     </div>
   </div>
 </template>
@@ -387,7 +387,7 @@ onBeforeUnmount(() => {
 .form-container {
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  margin-right: 115px;
+  /* margin-right: 115px; */
   flex: 1;
 }
 
