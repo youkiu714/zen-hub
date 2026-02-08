@@ -53,7 +53,7 @@ export const createRoom = (
  */
 export const updateRoom = (
   data: CreateRoomRequest
-): Promise<ApiResponse<number>> => {
+): Promise<number> => {
   return request({
     url: `/rooms`,
     method: 'POST',

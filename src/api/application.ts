@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 import { Request, IPageApplicationListItemVO } from '@/types/application'
 import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types'
-
+import type { PersonDetailVO } from '@/types/person'
 
 export function getApplications(params: {
   pageNo: number
@@ -20,6 +20,11 @@ export function getApplications(params: {
     }
   )
 }
+
+
+export const getPersonInfoById = (id: number): Promise<PersonDetailVO> => {
+  return request.get(`/records/person/${id}/info`);
+};
 
 export function getApplicationById(id: number) {
   return request.get<Request<ApplicationDetailVO>>(`/apply/applications/${id}`)

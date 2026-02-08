@@ -30,8 +30,8 @@
             <el-option v-for="group in groupOptions" :key="group" :label="group" :value="group" />
           </el-select>
 
-          <el-button type="primary" :style="{ backgroundColor: '#8B5E3C', borderColor: '#8B5E3C' }" icon="Plus"
-            @click="handleBatchAssign">批量分配</el-button>
+          <!-- <el-button type="primary" :style="{ backgroundColor: '#8B5E3C', borderColor: '#8B5E3C' }" icon="Plus"
+            @click="handleBatchAssign">批量分配</el-button> -->
         </template>
 
         <template v-if="activeTab === 'assigned'">
@@ -369,10 +369,10 @@ const checkoutRoomFilter = ref('')
 // 静态选项数据 (实际项目中建议从 API 获取)
 const groupOptions = ref(['第一组', '第二组', '第三组'])
 const departmentOptions = ref([
-  { label: '项目组', value: 'PROJECT' },
-  { label: '学修组', value: 'READING' },
-  { label: '编译组', value: 'COMPILATION' },
-  { label: '其他', value: 'OTHER' }
+  { label: '项目部', value: 'PROJECT' },
+  { label: '教化部', value: 'READING' },
+  { label: '汇编', value: 'COMPILATION' },
+  { label: '无部组', value: 'OTHER' }
 ])
 const roomOptions = ref([
   { label: '104', value: 1 },

@@ -275,10 +275,10 @@ const currentEditData = ref({
 })
 
 const departmentOptions = ref([
-  { label: '项目组', value: 'PROJECT' },
-  { label: '学修组', value: 'READING' },
-  { label: '编译组', value: 'COMPILATION' },
-  { label: '其他', value: 'OTHER' }
+  { label: '项目部', value: 'PROJECT' },
+  { label: '教化部', value: 'READING' },
+  { label: '汇编', value: 'COMPILATION' },
+  { label: '无部组', value: 'OTHER' }
 ])
 
 // 续单申请相关状态

@@ -47,11 +47,11 @@
             <!-- 关键：为操作列设置最小宽度 -->
             <template #default="{ row }">
               <el-button type="primary" link @click.stop="handleBedManagement(row)">床位管理</el-button>
-              <el-button type="warning" link @click.stop="handleBedAdd(row)">增加床位</el-button>
+              <el-button type="warning" link @click.stop="handleBedAdd(row)">批量加床</el-button>
               <el-button type="warning" link @click.stop="handleEditRoom(row)">编辑</el-button>
-              <el-button type="danger" link @click.stop="handleToggleStatus(row)">
+              <!-- <el-button type="danger" link @click.stop="handleToggleStatus(row)">
                 {{ row.status === 1 ? '关闭' : '启用' }}
-              </el-button>
+              </el-button> -->
             </template>
           </el-table-column>
         </template>
@@ -81,42 +81,52 @@
     </div>
 
     <!-- 床位管理对话框 -->
-    <el-dialog v-model="bedManagementDialogVisible" title="床位管理" width="700px" @close="resetBedManagementForm">
+    <el-dialog v-model="bedManagementDialogVisible" :title="`房间 ${currentRoom?.roomNo || ''} - 床位列表`" width="800px"
+      class="bed-management-dialog" align-center @close="resetBedManagementForm" draggable>
       <div class="bed-management-content">
         <div class="bed-management-header">
-          <h3>房间 {{ currentRoom?.roomNo }} 的床位管理</h3>
-          <el-button type="primary" @click="showAddBedDialog">+ 新增床位</el-button>
+          <!-- <div class="header-title">
+            <el-icon class="mr-2">
+              <OfficeBuilding />
+            </el-icon>
+            <span>房间 {{ currentRoom?.roomNo }} - 床位列表</span>
+          </div> -->
+          <!-- <el-button type="primary" icon="Plus" @click="showAddBedDialog">新增床位</el-button>  -->
         </div>
 
-        <!-- 床位列表 -->
-        <el-table :data="bedList" style="width: 100%; margin-top: 20px">
-          <el-table-column prop="bedNo" label="床位号" width="120" />
-          <el-table-column prop="bedType" label="床位类型" width="120">
-            <template #default="{ row }">
-              <el-tag :type="row.bedType === 1 ? 'info' : 'success'" size="small">
-                {{ row.bedType === 1 ? '上铺' : '下铺' }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="status" label="状态" width="120">
-            <template #default="{ row }">
-              <el-tag :type="getBedStatusType(row.status)" size="small">
-                {{ getBedStatusText(row.status) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="200">
-            <template #default="{ row }">
-              <el-button type="primary" link @click="handleEditBed(row)">编辑</el-button>
-              <el-button type="danger" link @click="handleDeleteBed(row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <div class="table-wrapper">
+          <el-table :data="bedList" style="width: 100%" height="100%" border stripe
+            :header-cell-style="{ background: '#f5f7fa', color: '#606266' }">
+            <el-table-column prop="bedNo" label="床位号" min-width="120" align="center">
+              <template #default="{ row }">
+                <span class="bed-no-text">{{ row.bedNo }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="bedType" label="床位类型" min-width="120" align="center">
+              <template #default="{ row }">
+                <el-tag :type="row.bedType === 1 ? 'info' : 'success'" effect="plain">
+                  {{ row.bedType === 1 ? '上铺' : '下铺' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" min-width="120" align="center">
+              <template #default="{ row }">
+                <el-tag :type="getBedStatusType(row.status)" effect="light" round>
+                  {{ getBedStatusText(row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" min-width="120" align="center" fixed="right">
+              <template #default="{ row }">
+                <el-button type="primary" link icon="Edit" @click="handleEditBed(row)">编辑</el-button>
+                <el-button type="danger" link icon="Delete" @click="handleDeleteBed(row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
 
-        <!-- 分页 -->
-        <div class="pagination" style="margin-top: 20px">
-          <el-pagination background layout="prev, pager, next, jumper" :total="bedTotal" :page-size="bedPageSize"
-            :current-page="bedCurrentPage" @current-change="handleBedPageChange" />
+        <div class="pagination-container">
+          <el-pagination background layout="total" :total="bedTotal" />
         </div>
       </div>
     </el-dialog>
@@ -180,7 +190,7 @@ import BedStatusFilter from './components/BedStatusFilter.vue'
 import AddRoomDialog from './components/AddRoomDialog.vue'
 import BatchAddBedDialog from './components/BatchAddBedDialog.vue'
 
-const pageSize = ref(5)
+const pageSize = ref(10)
 
 // 床位分配状态：0-未分配床位，1-已分配床位
 const filterStatus = ref(0)
@@ -249,9 +259,10 @@ const fetchRooms = async () => {
       roomNo: searchQuery.value || undefined,
       gender: selectedGender.value || undefined,
       pageNo: currentPage.value,
-      pageSize: 10
+      pageSize: pageSize.value
     }
     const res = await getRooms(params)
+    console.log(res)
     roomList.value = res.records || []
     total.value = res.total || 0
     currentPage.value = res.current || 1
@@ -267,7 +278,7 @@ const fetchAssigned = async () => {
     const params = {
       keyword: searchQuery.value || undefined,
       pageNo: currentPage.value,
-      pageSize: 10
+      pageSize: pageSize.value
     }
     const res: IPageAssignedLodgingVO = await getAssignedList(params)
     assignedList.value = res.data?.records || []
@@ -505,27 +516,11 @@ const handleDeleteBed = (row: Bed) => {
     type: 'warning'
   })
     .then(async () => {
-      try {
-        if (row.id) {
-          const response = await deleteBed(row.id)
-          if (response.code === 0) {
-            ElMessage.success('床位删除成功')
-          } else {
-            throw new Error(response.message || '删除失败')
-          }
-        } else {
-          throw new Error('床位ID不存在')
-        }
-        // 重新加载床位列表
-        await loadBedList(row.roomId || 0)
-      } catch (error: any) {
-        console.error('删除床位失败:', error)
-        ElMessage.error(error.message || '删除床位失败')
-      }
+      await deleteBed(row.id)
+      ElMessage.success('床位删除成功')
+      await loadBedList(row.roomId || 0)
     })
-    .catch(() => {
-      ElMessage.info('操作已取消')
-    })
+
 }
 
 const handleBedPageChange = (newPage: number) => {
@@ -802,5 +797,58 @@ onMounted(() => {
   /* Firefox */
   -ms-overflow-style: none;
   /* IE 和 Edge */
+}
+</style>
+
+<style scoped>
+/* 1. 强制设置 Dialog 的高度和位置 */
+:deep(.bed-management-dialog) {
+  /* 固定高度为视窗的 75%，这样才有固定的空间让表格去“撑满”并产生滚动条 */
+  height: 75vh !important;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10vh !important;
+  /* 居中一些 */
+  overflow: hidden;
+  /* 防止 dialog 自身出现滚动条 */
+}
+
+/* 2. 让 Dialog 的 Body 占据剩余所有空间 */
+:deep(.bed-management-dialog .el-dialog__body) {
+  flex: 1;
+  /* 关键：撑满 header 剩下的空间 */
+  padding: 20px;
+  /* 保持内边距 */
+  overflow: hidden;
+  /* 关键：禁止 body 滚动，强制内部元素滚动 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 3. 内容容器撑满 Body */
+.bed-management-content {
+  height: 100%;
+  /* 继承 body 的高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 头部和底部防止被压缩 */
+.bed-management-header,
+.pagination-container {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* 4. 表格容器：占据剩余空间，并相对定位 */
+.table-wrapper {
+  flex: 1;
+  /* 占据头部和分页中间的所有空间 */
+  overflow: hidden;
+  /* 关键：必须隐藏溢出，el-table 才能计算高度 */
+  position: relative;
+  /* 辅助定位 */
+  margin-bottom: 10px;
+  /* 稍微给分页留点距离 */
 }
 </style>

@@ -15,7 +15,7 @@
     <div class="photo-upload">
       <div class="avatar-wrapper" @mouseenter="isHovering = true" @mouseleave="isHovering = false"
         v-loading="isUploading">
-        <img :src="form.photoUrl" class="avatar" />
+        <img :src="displayPhotoUrl" class="avatar" />
         <div v-if="isHovering" class="upload-overlay">
           <el-upload action="#" :show-file-list="false" :auto-upload="false" :on-change="handleAvatarChange"
             accept=".jpg,.jpeg,.png" :limit="1" :disabled="isUploading">
@@ -211,6 +211,7 @@ import type { BasicInfo } from '@/types'
 
 // 定义一个通用的建议列表
 const noneSuggestion = [{ value: '无' }]
+const fileHost = import.meta.env.VITE_FILE_HOST || ''
 
 // 定义 fetch-suggestions 回调函数
 const querySearchNone = (queryString: string, cb: (arg: any) => void) => {
@@ -434,6 +435,21 @@ const handleIdCardChange = (val: string) => {
 
 const formRef = ref<FormInstance>()
 const validate = () => formRef.value?.validate()
+
+const displayPhotoUrl = computed(() => {
+  const url = form.value.photoUrl
+  if (!url) return avatarImg
+  
+  // 如果数据库里已经是完整地址 (http://...)，直接使用，不拼接
+  if (url.startsWith('http')) {
+    return url
+  }
+
+  // 如果数据库里是相对地址 (/avatar/...)
+  // 本地开发时：'http://49.232.241.94' + '/avatar/xxx.jpg' -> 成功访问远程图片
+  // 正式发布时：'' + '/avatar/xxx.jpg' -> '/avatar/xxx.jpg' (浏览器会自动请求当前域名下的图片)
+  return `${fileHost}${url.startsWith('/') ? '' : '/'}${url}`
+})
 
 onMounted(() => {
   if (form.value.photoUrl === '') {

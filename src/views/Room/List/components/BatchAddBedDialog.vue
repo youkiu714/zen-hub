@@ -122,7 +122,7 @@ const visible = computed({
 const submitting = ref(false)
 
 const config = reactive({
-    count: 8,
+    count: 2,
     startNo: 1,
     pattern: 'pair-cn'
 })
@@ -132,7 +132,7 @@ const formList = ref<BedUpsertRequest[]>([])
 watch(() => props.modelValue, (val) => {
     if (val) {
         config.startNo = props.existingBedMaxNo ? props.existingBedMaxNo + 1 : 1
-        config.count = 8
+        config.count = 2
         generatePreview()
     }
 })
