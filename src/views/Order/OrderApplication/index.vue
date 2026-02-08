@@ -367,6 +367,7 @@ const applyCachedDraft = async () => {
     photoUrl,
     departmentCode: user.value?.department
   })
+  console.log(photoUrl)
   Object.assign(formData.practice, draft.data.practice)
   Object.assign(formData.lodging, draft.data.lodging, { departmentCode: user.value?.department })
 

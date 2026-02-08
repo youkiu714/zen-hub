@@ -204,10 +204,12 @@ import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { User, Camera } from '@element-plus/icons-vue'
 import { uploadAvatar } from '@/api/upload'
 import { useFormValidationRules } from '@/views/Order/OrderApplication/CheckHook'
-import avatarImg from '@/assets/avatar.png'
+// import avatarImg from '@/assets/avatar.png'
 import { disabledBirthDate } from '@/utils/format-date'
 
 import type { BasicInfo } from '@/types'
+
+const avatarImg = new URL('@/assets/avatar.png', import.meta.url)
 
 // 定义一个通用的建议列表
 const noneSuggestion = [{ value: '无' }]
@@ -438,7 +440,9 @@ const validate = () => formRef.value?.validate()
 
 const displayPhotoUrl = computed(() => {
   const url = form.value.photoUrl
-  if (!url) return avatarImg
+  if (!url || typeof url !== 'string') {
+    return avatarImg
+  }
   
   // 如果数据库里已经是完整地址 (http://...)，直接使用，不拼接
   if (url.startsWith('http')) {
