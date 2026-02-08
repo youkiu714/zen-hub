@@ -106,7 +106,7 @@
             </div>
             <div class="field-item">
               <div class="field-label">续单申请日期</div>
-              <div class="field-value">2023-07-10</div>
+              <div class="field-value">{{ formData?.reviewTime }}</div>
             </div>
             <div class="field-item">
               <div class="field-label">申请续住日期</div>
@@ -264,6 +264,7 @@ const detail = ref<ApplicationDetailVO>()
 const formRef = ref<FormInstance>()
 
 interface FormData {
+  reviewTime: string
   scoreRules: number
   scorePractice: number
   scoreBehavior: number
@@ -275,6 +276,7 @@ interface FormData {
 }
 
 const formData = reactive<FormData>({
+  reviewTime: '',
   scoreRules: 0,
   scorePractice: 0,
   scoreBehavior: 0,
@@ -360,6 +362,7 @@ const initData = async () => {
   try {
     const res = await getVolunteerPerformanceById(props.orderData.id)
     console.log(res);
+    formData.reviewTime = res.reviewTime;
     formData.scoreRules = res.scoreRules;
     formData.scorePractice = res.scorePractice;
     formData.scoreBehavior = res.scoreBehavior;

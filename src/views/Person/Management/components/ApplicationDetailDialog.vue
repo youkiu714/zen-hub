@@ -30,7 +30,7 @@
             </div>
             <div class="info-item">
               <span class="label info-item-more">短住开始时间：</span>
-              <span class="value">{{ detail?.lodging.checkinDate }}</span>
+              <!-- <span class="value">{{ detail?.lodging.checkinDate }}</span> -->
             </div>
           </div>
           <div class="info-row">
@@ -41,7 +41,7 @@
 
             <div class="info-item">
               <span class="label info-item-more">短住结束时间：</span>
-              <span class="value">{{ detail?.lodging.checkoutDate }}</span>
+              <!--<span class="value">{{ detail?.lodging.checkoutDate }}</span>-->
             </div>
           </div>
         </div>
@@ -183,85 +183,6 @@
             </div>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="挂单信息" name="lodgingINfo">
-          <div class="flex-space-between line-margin">
-            <div class="info-left">
-            </div>
-            <div class="info-right">
-              <div class="base-info-label">所属部组：</div>
-              <div class="base-info-value">
-                {{
-                  detail?.lodging?.departmentCode
-                    ? departmentOptions.find(
-                      (item) => item.value == detail?.lodging?.departmentCode
-                    )?.label
-                    : '其他'
-                }}
-              </div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-left">
-              <div class="base-info-label">短住开始时间：</div>
-              <div class="base-info-value">{{ detail?.lodging.checkinDate ?? '暂无信息' }}</div>
-            </div>
-            <div class="info-right">
-              <div class="base-info-label">短住结束时间：</div>
-              <div class="base-info-value">{{ detail?.lodging.checkoutDate ?? '暂无信息' }}</div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-left">
-              <div class="base-info-label">出发时间：</div>
-              <div class="base-info-value">{{ detail?.lodging.departureDate ?? '暂无信息' }}</div>
-            </div>
-            <div class="info-right">
-              <div class="base-info-label">离开时间:</div>
-              <div class="base-info-value">{{ detail?.lodging.returnDate ?? '暂无信息' }}</div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-fill">
-              <div class="base-info-label">短住的原因及期许</div>
-              <div class="base-info-value">
-                {{
-                  detail?.lodging.shortStayReason
-                    ? detail?.lodging.shortStayReason
-                    : '暂无评价'
-                }}
-              </div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-left">
-              <div class="base-info-label">推荐人：</div>
-              <div class="base-info-value">
-                {{ detail?.lodging.recommenderName ? detail?.lodging.recommenderName : '暂无信息' }}
-              </div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-fill">
-              <div class="base-info-label">推荐人评价:</div>
-              <div class="base-info-value">
-                {{
-                  detail?.lodging.recommenderComment
-                    ? detail?.lodging.recommenderComment
-                    : '暂无推荐人评价'
-                }}
-              </div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-fill">
-              <div class="base-info-label">特殊请求:</div>
-              <div class="base-info-value">
-                {{ detail?.lodging.specialRequest ? detail?.lodging.specialRequest : '暂无信息' }}
-              </div>
-            </div>
-          </div>
-
-        </el-tab-pane>
       </el-tabs>
     </div>
   </el-drawer>
@@ -270,9 +191,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import type { ApplicationDetailVO } from '@/views/Order/PendingOrderManagement/components/types'
-import { getApplicationById } from '@/api/application'
+import { getPersonInfoById } from '@/api/application'
 import { regionData } from 'element-china-area-data'
-
+import avatarImg from '@/assets/avatar.png'
 import type { TabsPaneContext } from 'element-plus'
 import { getGenderText } from '@/utils/index'
 import { preceptsOptions, applicationTypeOptions, departmentOptions } from '@/utils/constants'
@@ -294,10 +215,25 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const getApplicationItem = async (applicationId: number) => {
+const displayPhotoUrl = (url) => {
+  // const url = detail?.basic.photoUrl
+  if (!url) return avatarImg
+  
+  // 如果数据库里已经是完整地址 (http://...)，直接使用，不拼接
+  if (url.startsWith('http')) {
+    return url
+  }
+
+  // 如果数据库里是相对地址 (/avatar/...)
+  // 本地开发时：'http://49.232.241.94' + '/avatar/xxx.jpg' -> 成功访问远程图片
+  // 正式发布时：'' + '/avatar/xxx.jpg' -> '/avatar/xxx.jpg' (浏览器会自动请求当前域名下的图片)
+  return `${fileHost}${url.startsWith('/') ? '' : '/'}${url}`
+}
+
+const getPersonItem = async (applicationId: number) => {
   loading.value = true
   try {
-    const data = await getApplicationById(applicationId)
+    const data = await getPersonInfoById(applicationId)
     console.log(data)
     detail.value = data
     loading.value = false
@@ -312,7 +248,7 @@ watch(
   async ([modelValue, newId]) => {
     visible.value = modelValue
     if (modelValue) {
-      await getApplicationItem(newId)
+      await getPersonItem(newId)
     }
   },
   { immediate: true }
@@ -326,7 +262,6 @@ const handleClose = () => {
 
 const getFullUrl = (path) => {
   if (!path) return '';
-  console.log(path)
   // 1. 如果数据库里存的已经是完整路径(http开头)，直接返回
   if (path.startsWith('http') || path.startsWith('https')) {
     return path;
@@ -336,8 +271,6 @@ const getFullUrl = (path) => {
   // 防止出现双斜杠 (比如 baseUrl 有 /，path 也有 /)
   const baseUrl = fileBaseUrl.endsWith('/') ? fileBaseUrl.slice(0, -1) : fileBaseUrl;
   const relativePath = path.startsWith('/') ? path : '/' + path;
-  console.log(fileBaseUrl)
-  console.log(`${baseUrl}${relativePath}`)
   return `${baseUrl}${relativePath}`;
 };
 </script>

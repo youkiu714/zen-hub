@@ -108,7 +108,7 @@ import {
 } from '@/api/person-profiles'
 import PageHeader from '@/components/PageHeader.vue'
 import { departmentOptions } from '@/utils/constants'
-import ApplicationDetailDialog from '@/components/ApplicationDetailDialog.vue'
+import ApplicationDetailDialog from './components/ApplicationDetailDialog.vue'
 import PersonHistoryDialog from '@/components/PersonHistoryDialog.vue'
 import { useUserStore } from '@/store/modules/user'
 
@@ -228,6 +228,7 @@ const handleExport = async () => {
 
 // 查看详情
 const handleView = (row: PersonProfileVO) => {
+  console.log(row)
   currentAppId.value = row.personId || 0;
   detailVisible.value = true;
 };

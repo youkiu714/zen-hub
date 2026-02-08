@@ -8,7 +8,7 @@
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
       <el-form-item label="房间号" prop="roomNo">
-        <el-input v-model="form.roomNo" placeholder="例如：A101" :disabled="isEditMode" />
+        <el-input v-model="form.roomNo" placeholder="例如：A101"  /> <!-- :disabled="isEditMode" -->
       </el-form-item>
       <el-form-item label="房间分类" prop="roomType">
         <el-select v-model="form.roomType" placeholder="请选择房间分类">
@@ -160,6 +160,7 @@ const submit = async () => {
     submitting.value = true
     try {
       const payload: CreateRoomRequest = {
+        id: form.id,
         roomNo: form.roomNo,
         gender: form.gender,
         roomType: form.roomType,

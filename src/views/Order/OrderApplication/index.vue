@@ -367,6 +367,7 @@ const applyCachedDraft = async () => {
     photoUrl,
     departmentCode: user.value?.department
   })
+  console.log(photoUrl)
   Object.assign(formData.practice, draft.data.practice)
   Object.assign(formData.lodging, draft.data.lodging, { departmentCode: user.value?.department })
 
@@ -445,8 +446,11 @@ const uploadDocxAvatar = async (file: File) => {
 
   try {
     const res = await uploadAvatar(file)
-    const url = String(res.url).substring('/uploads'.length)
-    formData.basic.photoUrl = `http://49.232.241.94/${url}`
+    // const url = String(res.url).substring('/uploads'.length)
+    const url = res.url
+    console.log(url)
+    // formData.basic.photoUrl = `http://49.232.241.94/${url}`
+    formData.basic.photoUrl = url
   } catch (error) {
     ElMessage.error('上传失败，请稍后重试')
   }
