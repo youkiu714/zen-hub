@@ -36,7 +36,9 @@
           </div>
           <div class="list-header">
             <span>已上传文件（{{ wordFileList.length }}）</span>
-            <el-button link type="danger" :disabled="wordBusy" @click="handleWordClearAll">删除全部</el-button>
+            <el-button link type="danger" :disabled="wordBusy" @click="handleWordClearAll"
+              >删除全部</el-button
+            >
           </div>
           <div class="list-items">
             <div v-for="file in wordFileList" :key="file.uid" class="list-item">
@@ -50,14 +52,25 @@
                   {{ wordFileError(file.name) }}
                 </span>
               </div>
-              <el-button link type="danger" size="small" :disabled="wordBusy" @click="handleWordRemoveByUid(file.uid)">
+              <el-button
+                link
+                type="danger"
+                size="small"
+                :disabled="wordBusy"
+                @click="handleWordRemoveByUid(file.uid)"
+              >
                 删除
               </el-button>
             </div>
           </div>
         </div>
         <div v-if="wordFileList.length" class="submit-actions">
-          <el-button type="primary" :loading="wordSubmitting" :disabled="wordBusy" @click="handleSubmitWord">
+          <el-button
+            type="primary"
+            :loading="wordSubmitting"
+            :disabled="wordBusy"
+            @click="handleSubmitWord"
+          >
             确认提交
           </el-button>
         </div>
@@ -90,7 +103,11 @@
           </div>
         </el-upload>
 
-        <div v-if="archiveFileList.length" class="upload-list" :class="{ 'is-disabled': archiveBusy }">
+        <div
+          v-if="archiveFileList.length"
+          class="upload-list"
+          :class="{ 'is-disabled': archiveBusy }"
+        >
           <div v-if="isArchiveParsing" class="list-progress">
             <div class="list-progress-text">
               解析进度：{{ progressData.processed }}/{{ progressData.total }}
@@ -105,15 +122,24 @@
           </div>
           <div class="list-items">
             <div v-for="file in archiveFileList" :key="file.uid" class="list-item">
-              <div class="file-info">
+              <div class="file-info compressed-lists">
                 <span class="file-name">{{ file.name }}</span>
                 <span class="file-size">{{ formatSize(file.size) }}</span>
-                <span v-if="archiveFileStatus(file.name)" class="file-status">
-                  {{ archiveFileStatus(file.name) }}
-                </span>
-                <span v-if="archiveFileError(file.name)" class="file-error">
-                  {{ archiveFileError(file.name) }}
-                </span>
+
+                <div v-if="showArchiveResult && isProgressFinished" class="parse-result">
+                  <div class="parse-success">
+                    解析成功：{{ progressData.successCount }}/{{ progressData.total }}
+                  </div>
+                  <div v-if="progressErrors.length" class="parse-errors">
+                    <div
+                      v-for="item in progressErrors"
+                      :key="item.fileName"
+                      class="parse-error-line"
+                    >
+                      {{ item.fileName }}解析失败，失败原因：{{ item.message }}
+                    </div>
+                  </div>
+                </div>
               </div>
               <el-button
                 link
@@ -142,7 +168,6 @@
         </div>
       </el-tab-pane>
     </el-tabs>
-
   </div>
 </template>
 
@@ -187,20 +212,28 @@ const parseProgress = computed(() => {
   if (!progressData.value.total) {
     return 0
   }
-  return Math.min(
-    100,
-    Math.round((progressData.value.processed / progressData.value.total) * 100)
-  )
+  return Math.min(100, Math.round((progressData.value.processed / progressData.value.total) * 100))
 })
 
 const wordBusy = computed(() => wordSubmitting.value || wordParsing.value)
 const archiveBusy = computed(() => archiveSubmitting.value || archiveParsing.value)
 const isWordParsing = computed(() => progressMode.value === 'word' && wordParsing.value)
 const isArchiveParsing = computed(() => progressMode.value === 'archive' && archiveParsing.value)
-const showWordResult = computed(() => progressMode.value === 'word' && Boolean(progressData.value.taskId))
-const showArchiveResult = computed(() => progressMode.value === 'archive' && Boolean(progressData.value.taskId))
+const showWordResult = computed(
+  () => progressMode.value === 'word' && Boolean(progressData.value.taskId)
+)
+const showArchiveResult = computed(
+  () => progressMode.value === 'archive' && Boolean(progressData.value.taskId)
+)
+const isProgressFinished = computed(() =>
+  ['SUCCESS', 'FAILED', 'FINISHED', 'DONE'].includes(progressData.value.status)
+)
 const wordDisplayProgress = computed(() =>
-  wordSubmitting.value ? wordProgress.value : progressMode.value === 'word' ? parseProgress.value : 0
+  wordSubmitting.value
+    ? wordProgress.value
+    : progressMode.value === 'word'
+      ? parseProgress.value
+      : 0
 )
 const archiveDisplayProgress = computed(() =>
   archiveSubmitting.value
@@ -429,18 +462,15 @@ const formatSize = (size?: number) => {
 const getStatusLabel = (fileName: string) => {
   const hasError = progressErrorMap.value.has(fileName)
   if (hasError) return '解析失败'
-  if (['SUCCESS', 'FAILED', 'FINISHED', 'DONE'].includes(progressData.value.status)) {
+  if (isProgressFinished.value) {
     return '解析成功'
   }
   return '解析中'
 }
 
 const wordFileStatus = (fileName: string) => (showWordResult.value ? getStatusLabel(fileName) : '')
-const archiveFileStatus = (fileName: string) => (showArchiveResult.value ? getStatusLabel(fileName) : '')
 const wordFileError = (fileName: string) =>
   showWordResult.value ? progressErrorMap.value.get(fileName) || '' : ''
-const archiveFileError = (fileName: string) =>
-  showArchiveResult.value ? progressErrorMap.value.get(fileName) || '' : ''
 </script>
 
 <style scoped>
@@ -518,6 +548,33 @@ const archiveFileError = (fileName: string) =>
   color: #7b6a56;
 }
 
+.parse-result {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff9f0;
+  border: 1px solid #f0e2cf;
+  width: 100%;
+}
+
+.parse-success {
+  font-size: 13px;
+  color: #6f4a1f;
+  font-weight: 600;
+}
+
+.parse-errors {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.parse-error-line {
+  font-size: 12px;
+  color: #c4562b;
+}
+
 .upload-list {
   margin-top: 24px;
   border: 1px solid #efe2cf;
@@ -580,6 +637,7 @@ const archiveFileError = (fileName: string) =>
   flex-direction: column;
   gap: 4px;
   overflow: hidden;
+  margin-right: 8px;
 }
 
 .file-name {
@@ -605,5 +663,8 @@ const archiveFileError = (fileName: string) =>
 .file-error {
   font-size: 12px;
   color: #b3472f;
+}
+.compressed-lists {
+    width: 100%;
 }
 </style>
