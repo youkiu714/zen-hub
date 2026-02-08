@@ -186,22 +186,6 @@
         <el-tab-pane label="挂单信息" name="lodgingINfo">
           <div class="flex-space-between line-margin">
             <div class="info-left">
-            </div>
-            <div class="info-right">
-              <div class="base-info-label">所属部组：</div>
-              <div class="base-info-value">
-                {{
-                  detail?.lodging?.departmentCode
-                    ? departmentOptions.find(
-                      (item) => item.value == detail?.lodging?.departmentCode
-                    )?.label
-                    : '其他'
-                }}
-              </div>
-            </div>
-          </div>
-          <div class="flex-space-between line-margin">
-            <div class="info-left">
               <div class="base-info-label">短住开始时间：</div>
               <div class="base-info-value">{{ detail?.lodging.checkinDate ?? '暂无信息' }}</div>
             </div>
@@ -218,6 +202,20 @@
             <div class="info-right">
               <div class="base-info-label">离开时间:</div>
               <div class="base-info-value">{{ detail?.lodging.returnDate ?? '暂无信息' }}</div>
+            </div>
+          </div>
+           <div class="flex-space-between line-margin">
+            <div class="info-left">
+              <div class="base-info-label">所属部组：</div>
+              <div class="base-info-value">
+                {{
+                  detail?.lodging?.departmentCode
+                    ? departmentOptions.find(
+                      (item) => item.value == detail?.lodging?.departmentCode
+                    )?.label
+                    : '其他'
+                }}
+              </div>
             </div>
           </div>
           <div class="flex-space-between line-margin">
