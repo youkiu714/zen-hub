@@ -205,6 +205,12 @@ export interface ApplicationSubmitRequest {
   [property: string]: any
 }
 
+export interface PersonSubmitRequest {
+  basic: BasicInfo
+  practice: PracticeInfo
+  [property: string]: any
+}
+
 // 文件上传相关类型定义
 export interface UploadAvatarRequest {
   personId?: number;

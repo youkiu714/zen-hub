@@ -242,6 +242,16 @@ const menuList = ref([
           roles: ['MASTER','LIAISON']
         }
       },
+      {
+        path: '/person-management/management/method',
+        name: 'PersonManagementMethod',
+        component: () => import('@/views/Person/Management/EntryMethod.vue'),
+        meta: {
+          title: '人员录入',
+          icon: 'List',
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
+        }
+      },
       // {
       //   path: '/person-management/checklist',
       //   name: 'personManagementCheckList',

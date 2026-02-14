@@ -280,6 +280,26 @@ export const asyncRoutes: RouteRecordRaw[] = [
         }
       },
       {
+        path: '/person-management/management/method',
+        name: 'PersonManagementMethod',
+        component: () => import('@/views/Person/Management/EntryMethod.vue'),
+        meta: {
+          title: '人员录入',
+          hidden: true,
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
+        }
+      },
+      {
+        path: '/person/enter/form',
+        name: 'PersonEnterForm',
+        component: () => import('@/views/Person/Enter/index.vue'),
+        meta: {
+          title: '人员录入',
+          hidden: true,
+          roles: ['LIAISON', 'MASTER', 'VOLUNTEER']
+        }
+      },
+      {
         path: '/person-management/checklist',
         name: 'personManagementCheckList',
         component: () => import('@/views/Person/checklist/index.vue'),
@@ -287,7 +307,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
           title: '基础信息校验',
           icon: 'CircleCheck' // 建议使用 Element Plus 的校验类图标
         }
-      },
+      }
     ]
   },
   {

@@ -95,7 +95,7 @@
 
       <!-- 分页 -->
       <div class="pagination">
-        <el-pagination v-model:current-page="currentPage" :page-size="5" :total="total"
+        <el-pagination v-model:current-page="currentPage" :page-size="10" :total="total"
           layout="prev, pager, next, jumper, total" @current-change="handlePageChange" />
       </div>
     </div>
@@ -212,7 +212,7 @@ const fetchData = async () => {
     const params = {
       keyword: searchKeyword.value || undefined,
       pageNo: currentPage.value,
-      pageSize: 5,
+      pageSize: 10,
       status: filterStatus.value,
       type: selectedType.value,
       ...getDateRangeParams(selectedDateRange.value),
@@ -220,6 +220,7 @@ const fetchData = async () => {
     const res = await getReviews(params);
     reviewList.value = res.records || []
     console.log(res);
+    total.value = res.total || 0;
 
     // if (res.code === 80) {
     //   reviewList.value = res.data || [];
