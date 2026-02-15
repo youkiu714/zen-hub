@@ -38,6 +38,22 @@ console.log(params);
     data:params
   })
 }
+export const batchReception = (params: {
+  applicationIds: number[];
+  review: {
+    pass: boolean;
+    comment: string;
+  };
+}, operatorId?: string | number): Promise<{ code: number; message: string; data: boolean; timestamp: string; success: true }> => {
+  return request({
+    url: '/reception/reviews/batch',
+    method: 'POST',
+    headers: {
+      'X-Operator-Id': operatorId
+    },
+    data: params
+  })
+}
 
 // 提交评价接口
 export interface EvaluationSubmitRequest {
@@ -287,4 +303,3 @@ export const submitEvaluation = (
     data: params,
   });
 };
-

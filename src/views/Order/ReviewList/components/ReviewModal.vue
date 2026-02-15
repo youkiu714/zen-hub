@@ -1,6 +1,6 @@
 <template>
-  <el-dialog v-model="visible" :title="`提交审核（${props.reviewListItem?.applicantName}）`" width="800px" @close="handleClose">
-    <div class="review-container">
+  <el-dialog v-model="visible" :title="dialogTitle" width="800px" @close="handleClose">
+    <div>
       <!-- <div class="section-header">
         <el-icon>
           <Promotion />
@@ -58,7 +58,7 @@ import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Promotion } from '@element-plus/icons-vue'
 import axios from 'axios'
-import { reception } from '@/api/review';
+import { reception, batchReception } from '@/api/review';
 import { useUserStore } from '@/store/modules/user'
 const userStore = useUserStore()
 
@@ -72,8 +72,10 @@ console.log(userStore.roles);
 const props = defineProps<{
   modelValue: boolean // 控制弹窗显隐
   applicationId: number // 申请ID
+  applicationIds?: number[] // 批量申请ID
   status: number
   reviewListItem: any
+  reviewListItems?: any[]
 }>()
 
 // 定义 emits
@@ -100,6 +102,13 @@ watch(
     }
   }
 )
+
+const dialogTitle = computed(() => {
+  if (props.applicationIds && props.applicationIds.length > 1) {
+    return `提交审核（已选${props.applicationIds.length}条）`
+  }
+  return `提交审核（${props.reviewListItem?.applicantName ?? ''}）`
+})
 // 表单数据
 const formData = reactive({
   pass: true, // 默认通过
@@ -163,8 +172,22 @@ const handleSubmit = async () => {
     "comment": finalComment,
     "operatorId": currentUser.value?.id
   };
-  const res = await reception(params, props.applicationId);
-  ElMessage.success('审核提交成功')
+  const targetIds = (props.applicationIds && props.applicationIds.length)
+    ? props.applicationIds
+    : [props.applicationId]
+  if (targetIds.length > 1) {
+    await batchReception({
+      applicationIds: targetIds,
+      review: {
+        pass: formData.pass,
+        comment: finalComment
+      }
+    }, currentUser.value?.id)
+    ElMessage.success(`已提交 ${targetIds.length} 条审核`)
+  } else {
+    await reception(params, targetIds[0]);
+    ElMessage.success('审核提交成功')
+  }
   emit('submitSuccess') // 通知父组件刷新数据或关闭弹窗
   handleClose()
 
@@ -172,8 +195,7 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.review-container {
-  padding: 20px;
+. {
   background-color: #fff;
   border-radius: 8px;
 }

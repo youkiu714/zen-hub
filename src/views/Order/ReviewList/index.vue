@@ -13,24 +13,35 @@
         <div class="filter-title">审核列表</div>
         <div class="filter-controls">
           <el-input v-model="searchKeyword" placeholder="可以输入申请人姓名或身份证号" clearable prefix-icon="Search"
-            style="width: 300px" @keyup.enter="fetchData" @input="handleSearchChange" />
-          <el-select v-model="selectedType" placeholder="全部申请类型" style="width: 150px" @change="fetchData" clearable>
+            style="width: 300px" @keyup.enter="handleSearchEnter" @input="handleSearchChange" />
+          <el-select v-model="selectedType" placeholder="全部申请类型" style="width: 150px" @change="handleTypeChange" clearable>
             <el-option v-for="(item, index) in applicationTypeOptions" :key="item.value" :label="item.label"
               :value="Number(item.value)" />
           </el-select>
-          <el-select v-model="selectedDateRange" placeholder="全部日期" style="width: 150px" @change="fetchData" clearable>
+          <el-select v-model="selectedDateRange" placeholder="全部日期" style="width: 150px" @change="handleDateRangeChange" clearable>
             <el-option label="全部日期" value="" />
             <el-option label="今天" value="today" />
             <el-option label="本周" value="thisWeek" />
             <el-option label="本月" value="thisMonth" />
             <el-option label="本季度" value="thisQuarter" />
           </el-select>
+          <el-button @click="toggleBatchMode">{{ batchMode ? '退出批量审核' : '批量审核' }}</el-button>
         </div>
       </div>
 
       <!-- 表格 -->
-      <el-table :data="reviewList" :stripe="true" style="width: 100%" :row-class-name="tableRowClassName"
-        @row-dblclick="handleView" :fit="true" class="review-table" :loading="loading">
+      <div v-if="batchMode" class="batch-bar">
+        <div class="batch-info">{{ batchInfoText }}</div>
+        <div class="batch-actions">
+          <el-button type="primary" :disabled="!selectedRows.length" @click="handleBatchReview">确认审核</el-button>
+          <el-button link @click="clearSelection">取消选择</el-button>
+        </div>
+      </div>
+
+      <el-table ref="tableRef" :data="reviewList" :stripe="true" style="width: 100%" :row-class-name="tableRowClassName"
+        @row-dblclick="handleView" :fit="true" class="review-table" :loading="loading" row-key="id"
+        @selection-change="handleSelectionChange">
+        <el-table-column v-if="batchMode" type="selection" width="55" :selectable="isRowSelectable" />
         <el-table-column label="挂单人" min-width="150" >
           <template #default="{ row }">
             <div class="applicant-info">
@@ -107,7 +118,9 @@
     <ReviewPage v-model="reviewVisible" :application-id="currentReviewId" @close="onReviewClosed" />
 
     <!-- 审核 -->
-    <ReviewModal v-model="showReview" :application-id="currentAppId" :review-list-item="currentItem" :status="filterStatus" @submit-success="handleReviewSuccess" />
+    <ReviewModal v-model="showReview" :application-id="currentAppId" :application-ids="selectedIds"
+      :review-list-item="currentItem" :review-list-items="selectedRows" :status="filterStatus"
+      @submit-success="handleReviewSuccess" />
 
   </div>
 
@@ -115,9 +128,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, storeToRefs } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Search } from '@element-plus/icons-vue';
 import ReviewModal from './components/ReviewModal.vue';
 import { getReviews } from '@/api/review';
 import type { ReviewListItemVO, ReviewListResponse } from '@/types/review';
@@ -163,6 +175,16 @@ const currentPage = ref(1);
 const searchKeyword = ref('');
 const selectedType = ref<number | undefined>(undefined);
 const selectedDateRange = ref('');
+const selectedRowMap = ref(new Map<number, ReviewListItemVO>());
+const selectedRows = computed(() => Array.from(selectedRowMap.value.values()));
+const selectedIds = computed(() => Array.from(selectedRowMap.value.keys()));
+const tableRef = ref();
+const syncingSelection = ref(false);
+const batchMode = ref(false);
+const batchInfoText = computed(() => {
+  if (!selectedRows.value.length) return '暂未选择';
+  return `共 ${total.value} 条，已选 ${selectedRows.value.length} 条`;
+});
 
 const currentItem = ref<ReviewListItemVO | null>(null);
 
@@ -182,6 +204,7 @@ const showReview = ref(false)
 // ====== 筛选状态 切换 ======
 const statusChange = () => {
   currentPage.value = 1; // 切换 Tab 时重置页码
+  clearSelection();
   fetchData(); // 重新加载数据
 };
 
@@ -189,13 +212,30 @@ const statusChange = () => {
 const handleSearchChange = () => {
   // 当搜索输入框内容变化时，如果内容为空则自动刷新数据
   if (!searchKeyword.value.trim()) {
+    clearSelection();
     fetchData();
   }
+};
+
+const handleSearchEnter = () => {
+  clearSelection();
+  fetchData();
+};
+
+const handleTypeChange = () => {
+  clearSelection();
+  fetchData();
+};
+
+const handleDateRangeChange = () => {
+  clearSelection();
+  fetchData();
 };
 
 // =============== 子窗口返回的方法 ===============
 const handleReviewSuccess = () => {
   fetchData()
+  clearSelection()
 };
 
 const onDetailClosed = () => {
@@ -221,13 +261,9 @@ const fetchData = async () => {
     reviewList.value = res.records || []
     console.log(res);
     total.value = res.total || 0;
+    await nextTick();
+    syncSelectionToTable();
 
-    // if (res.code === 80) {
-    //   reviewList.value = res.data || [];
-    //   total.value = res.data?.length || 0; // 实际应为后端 total
-    // } else {
-    //   ElMessage.error(res.message || '加载失败');
-    // }
   } catch (err) {
     ElMessage.error('网络错误');
   } finally {
@@ -289,6 +325,53 @@ const tableRowClassName = ({ row }: { row: ReviewListItemVO }) => {
   return row.reviewStatus === 40 ? 'danger-row' : '';
 };
 
+const isRowSelectable = (row: ReviewListItemVO) => {
+  return canReview(row.reviewStatus) || row.reviewStatus === 40
+}
+
+const handleSelectionChange = (rows: ReviewListItemVO[]) => {
+  if (syncingSelection.value) return
+  const selectedIdSet = new Set(rows.map((item) => item.id))
+  const nextMap = new Map(selectedRowMap.value)
+  reviewList.value.forEach((row) => {
+    if (!isRowSelectable(row)) return
+    if (selectedIdSet.has(row.id)) {
+      nextMap.set(row.id, row)
+    } else {
+      nextMap.delete(row.id)
+    }
+  })
+  selectedRowMap.value = nextMap
+}
+
+const clearSelection = () => {
+  selectedRowMap.value = new Map()
+  if (tableRef.value) {
+    syncingSelection.value = true
+    tableRef.value.clearSelection()
+    syncingSelection.value = false
+  }
+}
+
+const syncSelectionToTable = () => {
+  if (!tableRef.value) return
+  syncingSelection.value = true
+  tableRef.value.clearSelection()
+  if (batchMode.value) {
+    reviewList.value.forEach((row) => {
+      if (selectedRowMap.value.has(row.id)) {
+        tableRef.value.toggleRowSelection(row, true)
+      }
+    })
+  }
+  syncingSelection.value = false
+}
+
+const toggleBatchMode = () => {
+  batchMode.value = !batchMode.value
+  clearSelection()
+}
+
 const handleView = (row: ReviewListItemVO) => {
   currentItem.value = row;
   currentAppId.value = row.id;
@@ -316,6 +399,17 @@ const handleReReview = (row: ReviewListItemVO) => {
   isViewOnly.value = false;
   showReview.value = true
 };
+
+const handleBatchReview = () => {
+  if (!selectedRows.value.length) {
+    ElMessage.warning('请选择需要审核的记录')
+    return
+  }
+  currentItem.value = selectedRows.value[0] || null
+  currentAppId.value = selectedRows.value[0]?.id || 0
+  isViewOnly.value = false;
+  showReview.value = true
+}
 
 const handlePageChange = (page: number) => {
   currentPage.value = page;
@@ -374,6 +468,28 @@ onMounted(() => {
   justify-content: flex-end;
   flex: 1;
   gap: 10px;
+}
+
+.batch-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff7e6;
+  border: 1px solid #ffe0b2;
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.batch-info {
+  color: #8b5e3c;
+  font-weight: 500;
+}
+
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* 隐藏 Webkit 浏览器的滚动条 */

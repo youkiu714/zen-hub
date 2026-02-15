@@ -142,16 +142,12 @@
         <div class="action-buttons">
           <!-- 待入住状态的操作按钮 -->
           <template v-if="status === 'pending'">
-            <el-tooltip content="查看详情" placement="top">
               <el-button type="default" size="small" @click="emit('view-application', row.applicationId)">
                 查看详情
               </el-button>
-            </el-tooltip>
-            <el-tooltip content="入住登记" placement="top">
               <el-button type="primary" size="small" @click="emit('check-in', row)">
                 入住登记
               </el-button>
-            </el-tooltip>
             <!-- <el-tooltip content="分床" placement="top">
               <el-button type="info" size="small" circle @click="emit('assign-bed', row)">
                 <el-icon><Grid /></el-icon>

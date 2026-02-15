@@ -155,6 +155,7 @@
             <el-table-column label="操作" min-width="100">
               <template #default="{ row }">
                 <el-button type="info" link @click="handleViewDetails(row)">详情</el-button>
+                <el-button type="danger" link @click="handleCancelAssign(row)">取消分配</el-button>
               </template>
             </el-table-column>
           </template>
@@ -305,7 +306,8 @@ import {
   getPendingAssignments,
   getAssignedList,
   getCheckedInList,
-  getCheckedOutList
+  getCheckedOutList,
+  cancelAssigned
 } from '@/api/assignment'
 
 import {
@@ -580,6 +582,21 @@ const handleReview = (row: any) => {
   console.log('审核流程:', row.id)
   currentReviewId.value = row.id
   reviewVisible.value = true
+}
+
+const handleCancelAssign = (row: AssignedLodgingVO) => {
+  const bedStayId = row.bedStayId
+  if (!bedStayId) {
+    ElMessage.error('数据异常：缺少床位居住ID')
+    return
+  }
+  ElMessageBox.confirm('确定取消当前分配吗？', '取消分配', { type: 'warning' })
+    .then(async () => {
+      await cancelAssigned(bedStayId)
+      ElMessage.success('已取消分配')
+      fetchData()
+    })
+    .catch(() => { })
 }
 
 

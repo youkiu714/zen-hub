@@ -42,6 +42,18 @@ export const getAssignedList = (params: AssignedRequest): Promise<AssignedRespon
 };
 
 /**
+ * 取消分配
+ * @param bedStayId 床位居住ID
+ */
+export const cancelAssigned = (bedStayId: number): Promise<any> => {
+  return request({
+    url: `/assignments/assigned/${bedStayId}/cancel`,
+    method: 'POST',
+    data: { bedStayId }
+  })
+};
+
+/**
  * 获取楼层列表
  */
 export const getFloors = (params: FloorRequest): Promise<FloorResponse> => {
@@ -118,4 +130,3 @@ export const checkout = (bedStayId: number): Promise<any> => {
     method: 'POST',
   });
 };
-

@@ -226,6 +226,10 @@ export const BED_TYPE_MAP: Record<BedType, { label: string; color: string }> = {
 
 export interface AssignedLodgingVO {
   /**
+   * 床位居住ID
+   */
+  bedStayId?: number;
+  /**
    * 申请ID
    */
   applicationId?: number;
